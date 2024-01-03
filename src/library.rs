@@ -25,6 +25,7 @@ impl LibraryEntry {
             LibraryEntry::Sound { id, .. } => *id,
         }
     }
+    #[allow(unused)]
     pub fn name(&self) -> &str {
         match self {
             LibraryEntry::Category { name, .. } => name,
@@ -42,12 +43,14 @@ impl LibraryEntry {
             children.push(entry);
         }
     }
+    #[allow(unused)]
     pub fn is_category(&self) -> bool {
         match self {
             LibraryEntry::Category { .. } => true,
             LibraryEntry::Sound { .. } => false,
         }
     }
+    #[allow(unused)]
     pub fn is_sound(&self) -> bool {
         match self {
             LibraryEntry::Category { .. } => false,
@@ -100,7 +103,7 @@ impl LibraryEntry {
             }
             if let Some(parent) = tree.parent() {
                 let current_entry = map.get(&tree.data()).unwrap().0.clone();
-                let parent_entry = map.get_mut(&parent.data()).unwrap();
+                let parent_entry = map.get_mut(parent.data()).unwrap();
                 parent_entry.0.push_entry(current_entry.clone())
             }
         }

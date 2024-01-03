@@ -3,9 +3,6 @@ mod encoding;
 mod library;
 mod gui;
 
-use std::fs;
-use std::{env, path::PathBuf};
-
 fn main() {
     gui::GdSfx::run(Default::default());
 

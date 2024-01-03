@@ -1,8 +1,6 @@
 // DISCALIMER: this file contains the worst code and mispells you've ever seen
 // make sure to contribute to fix that
 
-use std::time::Instant;
-
 use reqwest::blocking::Client;
 use reqwest::header::{USER_AGENT, CONTENT_TYPE};
 
@@ -39,6 +37,7 @@ impl GdSfx {
         }
     }
 
+    #[allow(unused)]
     pub fn get_sfx_version(&mut self, force: bool) -> Option<VersionType> {
         if !force && self.sfx_version.is_some() { return self.sfx_version }
 
