@@ -6,6 +6,7 @@ mod encoding;
 mod library;
 mod gui;
 mod util;
+mod audio;
 
 fn main() {
     hide_console_window();

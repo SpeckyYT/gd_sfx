@@ -1,10 +1,9 @@
-use std::fs;
+use std::{fs, thread::spawn};
 
-use eframe::{egui::{self, Button}, NativeOptions, epaint::ahash::HashMap};
-use egui_modal::Modal;
+use eframe::{egui::{self, Button}, NativeOptions};
 use pretty_bytes::converter::convert;
 
-use crate::library::LibraryEntry;
+use crate::{library::LibraryEntry, audio::play_ogg};
 
 pub type VersionType = usize;
 
@@ -88,25 +87,11 @@ impl eframe::App for GdSfx {
                 if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
                     sfx.delete();
                 }
-
-                let audio_modal = Modal::new(ctx, "audio_placeholder");
-                audio_modal.show(|ui| {
-                    audio_modal.title(ui, "Audio");
-                    audio_modal.frame(ui, |ui| {
-                        audio_modal.body(ui, "This is supposed to play an audio.")
-                    });
-                    audio_modal.buttons(ui, |ui| {
-                        if audio_modal.button(ui, "close").clicked() {
-                            audio_modal.close()
-                        }
-                    });
-                });
-
                 if ui.button("Play").clicked() {
                     let data = sfx.download(self.cdn_url.as_ref().unwrap());
 
-                    if let Some(_content) = data {
-                        audio_modal.open()
+                    if let Some(content) = data {
+                        spawn(|| play_ogg(content));
                     }
                 }
             });
