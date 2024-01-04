@@ -1,13 +1,13 @@
-use std::{fs, thread::spawn};
+use std::fs;
 
 use eframe::{egui::{self, Button}, NativeOptions};
 use pretty_bytes::converter::convert;
 
-use crate::{library::LibraryEntry, audio::play_ogg};
+use crate::{library::LibraryEntry, audio::{stop_audio, play_sound}, util::{RIGHT_PANEL_WIDTH, CDN_URL}};
 
 pub type VersionType = usize;
 
-#[derive(Default)]
+#[derive(Debug, Default, Clone)]
 pub struct GdSfx {
     pub cdn_url: Option<String>,
     pub sfx_version: Option<VersionType>,
@@ -20,7 +20,8 @@ impl eframe::App for GdSfx {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default()
         .show(ctx, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
+            egui::ScrollArea::vertical()
+            .show(ui, |ui| {
                 if ui.button("Force-update library").clicked() {
                     self.get_sfx_library(true);
                 }
@@ -47,8 +48,13 @@ impl eframe::App for GdSfx {
                                 }
                             },
                             LibraryEntry::Sound { name, .. } => {
-                                if ui.button(name).clicked() {
+                                let sound = ui.button(name);
+                                if sound.hovered() {
                                     gdsfx.selected_sfx = Some(entry.clone());
+                                }
+                                if sound.clicked() {
+                                    stop_audio();
+                                    play_sound(entry, CDN_URL);
                                 }
                             },
                         }
@@ -61,15 +67,18 @@ impl eframe::App for GdSfx {
         });
         if let Some(sfx) = self.selected_sfx.as_ref() {
             egui::SidePanel::right("right_panel")
-            .min_width(300.0)
+            .min_width(RIGHT_PANEL_WIDTH)
             .show(ctx, |ui| {
                 ui.heading(sfx.name());
+
+                ui.add_space(50.0);
+
                 ui.collapsing("Original code", |ui| {
                     ui.code(sfx.get_string());
                 });
                 ui.heading(format!("ID: {}", sfx.id()));
                 ui.heading(format!("Category ID: {}", sfx.parent()));
-                ui.heading(format!("Bytes: {}", convert(sfx.bytes() as f64)));
+                ui.heading(format!("Size: {}", convert(sfx.bytes() as f64)));
                 ui.heading(format!("Duration: {}s", {
                     let mut centiseconds = format!("{:>03}", sfx.duration());
                     centiseconds.insert(centiseconds.len() - 2, '.');
@@ -88,11 +97,10 @@ impl eframe::App for GdSfx {
                     sfx.delete();
                 }
                 if ui.button("Play").clicked() {
-                    let data = sfx.download(self.cdn_url.as_ref().unwrap());
-
-                    if let Some(content) = data {
-                        spawn(|| play_ogg(content));
-                    }
+                    play_sound(sfx, CDN_URL);
+                }
+                if ui.button("Stop").clicked() {
+                    stop_audio();
                 }
             });
         }

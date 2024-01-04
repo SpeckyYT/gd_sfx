@@ -1,5 +1,5 @@
-use eframe::NativeOptions;
-use util::hide_console_window;
+use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
+use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
 mod requests;
 mod encoding;
@@ -18,6 +18,8 @@ fn main() {
     gdsfx.get_sfx_library(false);
 
     gdsfx.run(NativeOptions {
+        viewport: ViewportBuilder::default()
+            .with_min_inner_size(Vec2 {x: TOTAL_WIDTH, y: TOTAL_HEIGHT}),
         ..Default::default()
     });
 }

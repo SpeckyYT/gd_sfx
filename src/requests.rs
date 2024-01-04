@@ -10,9 +10,10 @@ use crate::util::SFX_LIBRARY_FILE;
 use crate::gui::{GdSfx, VersionType};
 use crate::library::{LibraryEntry, parse_library};
 
-const GET_CUSTOM_CONTENT_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
-const ENDPOINT_SFX_VERSION: &str = "sfx/sfxlibrary_version.txt";
-const ENDPOINT_SFX_LIBRARY: &str = "sfx/sfxlibrary.dat";
+pub const GET_CUSTOM_CONTENT_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
+pub const CDN_URL: &str = "https://geometrydashfiles.b-cdn.net";
+pub const ENDPOINT_SFX_VERSION: &str = "sfx/sfxlibrary_version.txt";
+pub const ENDPOINT_SFX_LIBRARY: &str = "sfx/sfxlibrary.dat";
 
 impl GdSfx {
     pub fn get_cdn_url(&mut self, force: bool) -> Option<&String> {
