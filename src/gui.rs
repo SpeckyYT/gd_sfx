@@ -80,7 +80,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
 fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
     fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui, is_root: bool) {
-        let q = gdsfx.search_query.clone().to_ascii_lowercase();
+        let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
                 if is_root {
@@ -118,8 +118,8 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
                     recursive(gdsfx, child, ui);
                 }
             }
-            LibraryEntry::Sound { id, .. } => {
-                if has_favourite(*id) {
+            LibraryEntry::Sound { name, id, .. } => {
+                if has_favourite(*id) && name.to_ascii_lowercase().contains(&gdsfx.search_query.to_ascii_lowercase()) {
                     sfx_button(ui, gdsfx, entry)
                 }
             }
@@ -164,11 +164,12 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading(sfx.name());
 
-            ui.add_space(50.0);
+            ui.add_space(25.0);
 
-            ui.collapsing("Original code", |ui| {
-                ui.code(sfx.get_string());
-            });
+            ui.code(sfx.get_string());
+
+            ui.add_space(25.0);
+
             ui.heading(format!("ID: {}", sfx.id()));
             ui.heading(format!("Category ID: {}", sfx.parent()));
             ui.heading(format!("Size: {}", convert(sfx.bytes() as f64)));

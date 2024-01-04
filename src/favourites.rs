@@ -8,6 +8,8 @@ use crate::{util::GD_FOLDER, encoding::{zlib_decode, base64_decode, zlib_encode,
 lazy_static!{
     pub static ref FAVOURITES_FILE: PathBuf = GD_FOLDER.join("gdsfx_favourites.dat");
     pub static ref FAVOURITES_LIST: Arc<Mutex<HashSet<i64>>> = Arc::new(Mutex::new(read_file()));
+
+    pub static ref EMPTY_FAVOURITES: String = base64_encode(&zlib_encode(&[])); 
 }
 
 pub fn read_file() -> HashSet<i64> {
@@ -15,6 +17,7 @@ pub fn read_file() -> HashSet<i64> {
         let mut favourites = HashSet::default();
 
         let data = fs::read(FAVOURITES_FILE.as_path()).unwrap();
+
         let data = base64_decode(&data);
         let data = zlib_decode(&data);
 
@@ -28,7 +31,7 @@ pub fn read_file() -> HashSet<i64> {
 
         favourites
     } else {
-        fs::write(FAVOURITES_FILE.as_path(), "").unwrap();
+        fs::write(FAVOURITES_FILE.as_path(), EMPTY_FAVOURITES.as_str()).unwrap();
         HashSet::default()
     }
 }
