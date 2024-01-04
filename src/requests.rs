@@ -1,12 +1,14 @@
 // DISCALIMER: this file contains the worst code and mispells you've ever seen
 // make sure to contribute to fix that
 
+use std::fs;
+
 use reqwest::blocking::Client;
 use reqwest::header::{USER_AGENT, CONTENT_TYPE};
 
-use crate::encoding::*;
+use crate::util::SFX_LIBRARY_FILE;
 use crate::gui::{GdSfx, VersionType};
-use crate::library::LibraryEntry;
+use crate::library::{LibraryEntry, parse_library};
 
 const GET_CUSTOM_CONTENT_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
 const ENDPOINT_SFX_VERSION: &str = "sfx/sfxlibrary_version.txt";
@@ -58,24 +60,47 @@ impl GdSfx {
     }
 
     pub fn get_sfx_library(&mut self, force: bool) -> Option<&LibraryEntry> {
-        let client = Client::default();
+        let root = if !force && SFX_LIBRARY_FILE.exists() {
+            let sfx_data = fs::read(SFX_LIBRARY_FILE.as_path()).unwrap();
+            let root = parse_library(&sfx_data);
 
-        let sfx_data = client
-            .get(format!("{}/{ENDPOINT_SFX_LIBRARY}", self.get_cdn_url(force)?))
-                .send()
-                    .unwrap()
-                        .text()
-                            .unwrap();
-
-        let sfx_data_decoded = base64_decode(sfx_data.as_bytes());
-
-        let data = zlib_decoder(&sfx_data_decoded);
-
-        let string = std::str::from_utf8(&data).unwrap();
-
-        let root = LibraryEntry::from_string(string);
-
+            if self.sfx_version.map(|ver| ver.to_string() == root.name()).unwrap_or(false) {
+                self.sfx_library = Some(root);
+                return self.sfx_library.as_ref()
+            } else {
+                download_and_parse_library(self.get_cdn_url(false)?)
+            }
+        } else {
+            download_and_parse_library(self.get_cdn_url(false)?)
+        };
         self.sfx_library = Some(root);
         self.sfx_library.as_ref()
     }
+}
+
+fn download_and_parse_library(cdn_url: &str) -> LibraryEntry {
+    let client = Client::default();
+
+    let sfx_data = client
+        .get(format!("{cdn_url}/{ENDPOINT_SFX_LIBRARY}"))
+        .send()
+        .unwrap()
+        .bytes()
+        .unwrap();
+
+    fs::write(SFX_LIBRARY_FILE.as_path(), &sfx_data).unwrap();
+    parse_library(&sfx_data)
+}
+
+pub fn download_sfx(cdn_url: &str, sound: &LibraryEntry) -> Option<Vec<u8>> {
+    let url = format!("{cdn_url}/sfx/{}", sound.filename());
+
+    Some(
+        Client::default()
+        .get(url).send()
+        .ok()?
+        .bytes()
+        .ok()?
+        .to_vec()
+    )
 }

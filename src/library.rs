@@ -1,5 +1,9 @@
+use std::{fs, path::PathBuf};
+
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
+
+use crate::{encoding::{zlib_decoder, base64_decode}, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::download_sfx};
 
 #[derive(Debug, Clone)]
 pub enum LibraryEntry {
@@ -14,7 +18,7 @@ pub enum LibraryEntry {
         name: String,
         parent: i64,
         bytes: i64,
-        durations: i64, // in centiseconds
+        duration: i64, // in centiseconds
     },
 }
 
@@ -32,17 +36,6 @@ impl LibraryEntry {
             LibraryEntry::Sound { name, .. } => name,
         }
     }
-    pub fn parent(&self) -> i64 {
-        match self {
-            LibraryEntry::Category { parent, .. } => *parent,
-            LibraryEntry::Sound { parent, .. } => *parent,
-        }
-    }
-    pub fn push_entry(&mut self, entry: LibraryEntry) {
-        if let LibraryEntry::Category { children, .. } = self {
-            children.push(entry);
-        }
-    }
     #[allow(unused)]
     pub fn is_category(&self) -> bool {
         match self {
@@ -57,9 +50,51 @@ impl LibraryEntry {
             LibraryEntry::Sound { .. } => true,
         }
     }
-    pub fn from_string(string: &str) -> Self {
-        let mut entries: Vec<LibraryEntry> = string.split(";").filter_map(|line| {
-            let segments = line.split(",").collect::<Vec<&str>>();
+    pub fn parent(&self) -> i64 {
+        match self {
+            LibraryEntry::Category { parent, .. } => *parent,
+            LibraryEntry::Sound { parent, .. } => *parent,
+        }
+    }
+    pub fn bytes(&self) -> i64 {
+        match self {
+            LibraryEntry::Sound { bytes, .. } => *bytes,
+            LibraryEntry::Category { .. } => 0,
+        }
+    }
+    pub fn duration(&self) -> i64 {
+        match self {
+            LibraryEntry::Sound { duration, .. } => *duration,
+            LibraryEntry::Category { .. } => 0,
+        }
+    }
+    pub fn push_entry(&mut self, entry: LibraryEntry) {
+        if let LibraryEntry::Category { children, .. } = self {
+            children.push(entry);
+        }
+    }
+    #[allow(unused)]
+    pub fn children(&self) -> Option<&Vec<LibraryEntry>> {
+        if let LibraryEntry::Category { children, .. } = self {
+            Some(children)
+        } else {
+            None
+        }
+    }
+    pub fn get_string(&self) -> String {
+        format!(
+            "{},{},{},{},{},{}",
+            self.id(),
+            self.name(),
+            self.is_category() as u8,
+            self.parent(),
+            self.bytes(),
+            self.duration(),
+        )
+    }
+    pub fn parse_string(string: &str) -> Self {
+        let mut entries: Vec<LibraryEntry> = string.split(';').filter_map(|line| {
+            let segments = line.split(',').collect::<Vec<&str>>();
 
             if segments.len() != 6 { return None }
 
@@ -69,7 +104,7 @@ impl LibraryEntry {
                     name: segments[1].to_string(),
                     parent: segments[3].parse().unwrap(),
                     bytes: segments[4].parse().unwrap(),
-                    durations: segments[5].parse().unwrap(),
+                    duration: segments[5].parse().unwrap(),
                 }),
                 "1" => Some(LibraryEntry::Category {
                     id: segments[0].parse().unwrap(),
@@ -102,7 +137,7 @@ impl LibraryEntry {
                 recurse(&child, map);
             }
             if let Some(parent) = tree.parent() {
-                let current_entry = map.get(&tree.data()).unwrap().0.clone();
+                let current_entry = map.get(tree.data()).unwrap().0.clone();
                 let parent_entry = map.get_mut(parent.data()).unwrap();
                 parent_entry.0.push_entry(current_entry.clone())
             }
@@ -111,9 +146,51 @@ impl LibraryEntry {
         recurse(&library_tree.root().unwrap(), &mut library_map);
 
         let root = library_map.get(&root_id).unwrap();
-        
-        println!("done!");
 
         root.0.clone()
     }
+    pub fn filename(&self) -> String {
+        format!("s{}.ogg", self.id())
+    }
+    pub fn path(&self) -> PathBuf {
+        GD_FOLDER.join(self.filename())
+    }
+    pub fn download(&self, cdn_url: &str) -> Option<Vec<u8>> {
+        if self.is_category() { return None }
+
+        let path = self.path();
+
+        let mut cache_data = true;
+
+        let data =
+            if let Some(data) = LOCAL_SFX_LIBRARY.lock().get(&self.id()) {
+                cache_data = false;
+                data.clone()
+            } else if path.exists() {
+                fs::read(path).unwrap()
+            } else if let Some(data) = download_sfx(cdn_url, self) {
+                data
+            } else {
+                return None
+            };
+        
+        if cache_data {
+            LOCAL_SFX_LIBRARY.lock().insert(self.id(), data.clone());
+        }
+
+        Some(data)
+    }
+    pub fn delete(&self) {
+        let _ = fs::remove_file(self.path());
+    }
+    pub fn exists(&self) -> bool {
+        self.path().exists()
+    }
+}
+
+pub fn parse_library(data: &[u8]) -> LibraryEntry {
+    let data_decoded = base64_decode(data);
+    let data = zlib_decoder(&data_decoded);
+    let string = std::str::from_utf8(&data).unwrap();
+    LibraryEntry::parse_string(string)
 }
