@@ -1,9 +1,7 @@
-use std::fs;
-
 use eframe::{egui::{self, Button}, NativeOptions};
 use pretty_bytes::converter::convert;
 
-use crate::{library::LibraryEntry, audio::{stop_audio, play_sound}, util::{RIGHT_PANEL_WIDTH, CDN_URL}};
+use crate::{library::LibraryEntry, audio::{stop_audio, play_sound}, util::RIGHT_PANEL_WIDTH, requests::CDN_URL, favourites::{add_favourite, has_favourite, remove_favourite}};
 
 pub type VersionType = usize;
 
@@ -56,6 +54,30 @@ impl eframe::App for GdSfx {
                                     stop_audio();
                                     play_sound(entry, CDN_URL);
                                 }
+                                sound.context_menu(|ui| {
+                                    if has_favourite(entry.id()) {
+                                        if ui.button("Remove favourite").clicked() {
+                                            remove_favourite(entry.id());
+                                            ui.close_menu();
+                                        }
+                                    } else {
+                                        if ui.button("Favourite").clicked() {
+                                            add_favourite(entry.id());
+                                            ui.close_menu();
+                                        }
+                                    }
+                                    if entry.exists() {
+                                        if ui.button("Delete").clicked() {
+                                            entry.delete();
+                                            ui.close_menu();
+                                        }
+                                    } else {
+                                        if ui.button("Download").clicked() {
+                                            entry.download_and_store();
+                                            ui.close_menu();
+                                        }
+                                    }
+                                });
                             },
                         }
                     }
@@ -85,13 +107,10 @@ impl eframe::App for GdSfx {
                     centiseconds
                 }));
 
-                ui.add_space(100.0);
+                ui.add_space(50.0);
 
                 if ui.add_enabled(!sfx.exists(), Button::new("Download")).clicked() {
-                    let data = sfx.download(self.cdn_url.as_ref().unwrap());
-                    if let Some(content) = data {
-                        fs::write(sfx.path(), content).unwrap();
-                    }
+                    sfx.download_and_store();
                 }
                 if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
                     sfx.delete();

@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
-use crate::{encoding::{zlib_decoder, base64_decode}, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::download_sfx};
+use crate::{encoding::{zlib_decode, base64_decode}, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}};
 
 #[derive(Debug, Clone)]
 pub enum LibraryEntry {
@@ -180,6 +180,11 @@ impl LibraryEntry {
 
         Some(data)
     }
+    pub fn download_and_store(&self) {
+        if let Some(content) = self.download(CDN_URL) {
+            fs::write(self.path(), content).unwrap();
+        }
+    }
     pub fn delete(&self) {
         let _ = fs::remove_file(self.path());
     }
@@ -190,7 +195,7 @@ impl LibraryEntry {
 
 pub fn parse_library(data: &[u8]) -> LibraryEntry {
     let data_decoded = base64_decode(data);
-    let data = zlib_decoder(&data_decoded);
+    let data = zlib_decode(&data_decoded);
     let string = std::str::from_utf8(&data).unwrap();
     LibraryEntry::parse_string(string)
 }

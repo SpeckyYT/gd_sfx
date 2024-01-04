@@ -7,6 +7,7 @@ mod library;
 mod gui;
 mod util;
 mod audio;
+mod favourites;
 
 fn main() {
     hide_console_window();
