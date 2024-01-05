@@ -20,17 +20,15 @@ pub fn remove_file_from_stats(id: i64) {
 pub fn check_all_sfx_files() -> JoinHandle<()> {
     spawn(|| {
         if let Ok(readdir) = GD_FOLDER.read_dir() {
-            for file in readdir {
-                if let Ok(file) = file {
-                    let path = file.path();
+            for file in readdir.flatten() {
+                let path = file.path();
 
-                    let string = path.file_name().unwrap().to_str().unwrap();
+                let string = path.file_name().unwrap().to_str().unwrap();
 
-                    if string.starts_with("s") && string.ends_with(".ogg") {
-                        let sliced = &string[1..string.len()-4];
-                        let parsed = sliced.parse().unwrap();
-                        add_file_to_stats(parsed);
-                    }
+                if string.starts_with('s') && string.ends_with(".ogg") {
+                    let sliced = &string[1..string.len()-4];
+                    let parsed = sliced.parse().unwrap();
+                    add_file_to_stats(parsed);
                 }
             }
         }

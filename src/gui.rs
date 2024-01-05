@@ -111,8 +111,7 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
         let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
-                let (mut categories, sounds): (Vec<_>, Vec<_>) = children
-                    .into_iter()
+                let (mut categories, sounds): (Vec<_>, Vec<_>) = children.iter()
                     .partition(|a| a.is_category());
                 
                 let sorting = |a: &&LibraryEntry, b: &&LibraryEntry| {
@@ -195,10 +194,10 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     fn recursive(entry: &LibraryEntry) -> (u128, u128, i64) {
         match entry {
             LibraryEntry::Category { children, .. } =>
-                children.into_iter().map(|child|
-                    recursive(child))
-                    .reduce(|a,b| (a.0 + b.0, a.1 + b.1, a.2 + b.2))
-                    .unwrap_or((0,0,1)),
+                children.iter()
+                    .map(recursive)
+                    .reduce(|a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2))
+                    .unwrap_or((0, 0, 1)),
             LibraryEntry::Sound { bytes, duration, .. } => (*bytes as u128, *duration as u128, 1),
         }
     }
@@ -237,6 +236,7 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     for (name, link) in [
         ("Specky", "https://github.com/SpeckyYT"),
         ("Tags", "https://github.com/zTags"),
+        ("kr8gz", "https://github.com/kr8gz")
     ] {
         ui.hyperlink_to(name, link);
     }

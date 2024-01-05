@@ -1,4 +1,4 @@
-use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
+use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2, Theme};
 use stats::check_all_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
@@ -25,6 +25,10 @@ fn main() {
     gdsfx.run(NativeOptions {
         viewport: ViewportBuilder::default()
             .with_min_inner_size(Vec2 {x: TOTAL_WIDTH, y: TOTAL_HEIGHT}),
+            
+        follow_system_theme: false,
+        default_theme: Theme::Dark,
+
         ..Default::default()
     });
 }

@@ -235,7 +235,7 @@ impl Credit {
 
 impl Library {
     pub fn parse_string(string: &str) -> Self {
-        let (sound_effects, credits) = string.split_once("|").unwrap_or((string, ""));
+        let (sound_effects, credits) = string.split_once('|').unwrap_or((string, ""));
 
         Library {
             sound_effects: LibraryEntry::parse_string(sound_effects),
