@@ -60,15 +60,21 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
 fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
     egui::SidePanel::left("left_panel").show(ctx, |ui| {
+        /*
+        // reconsider these
         if let Some(version) = gdsfx.sfx_version {
             ui.heading(format!("Library version: {version}"));
         }
         if ui.button("Force-update library").clicked() {
             gdsfx.get_sfx_library(true);
         }
-        ui.add_space(10.0);
-        ui.text_edit_singleline(&mut gdsfx.search_query);
         ui.separator();
+        */
+
+        if let Stage::Library | Stage::Favourites = gdsfx.stage {
+            search_bar(ui, gdsfx);
+            ui.separator();
+        }
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
                 match gdsfx.stage {
@@ -150,6 +156,11 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ] {
         ui.hyperlink_to(name, link);
     }
+}
+
+fn search_bar(ui: &mut Ui, gdsfx: &mut GdSfx) {
+    ui.heading("Search");
+    ui.text_edit_singleline(&mut gdsfx.search_query);
 }
 
 fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
