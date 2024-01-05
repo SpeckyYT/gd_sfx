@@ -133,11 +133,22 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading("SFX Credits");
-
-    ui.add_space(20.0);
-
+    ui.add_space(10.0);
     for credits in &gdsfx.sfx_library.as_ref().unwrap().credits {
         ui.hyperlink_to(&credits.name, &credits.link);
+    }
+
+    ui.add_space(30.0);
+
+    ui.heading("<This project>");
+    ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
+    ui.add_space(10.0);
+    
+    for (name, link) in [
+        ("Specky", "https://github.com/SpeckyYT"),
+        ("Tags", "https://github.com/zTags"),
+    ] {
+        ui.hyperlink_to(name, link);
     }
 }
 
