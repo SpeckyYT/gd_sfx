@@ -20,8 +20,9 @@ pub struct GdSfx {
     pub sfx_library: Option<Library>,
 
     pub stage: Stage,
-    pub selected_sfx: Option<LibraryEntry>,
     pub search_query: String,
+    pub sorting: Sorting,
+    pub selected_sfx: Option<LibraryEntry>,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -30,6 +31,20 @@ pub enum Stage {
     Library,
     Favourites,
     Credits,
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum Sorting {
+    #[default]
+    Default,
+    NameInc,    // a - z
+    NameDec,    // z - a
+    LengthInc,  // 0.00 - 1.00
+    LengthDec,  // 1.00 - 0.00
+    IdInc,      // 9 - 0
+    IdDec,      // 0 - 9
+    SizeInc,    // 0kb - 9kb
+    SizeDec,    // 9kb - 0kb
 }
 
 impl eframe::App for GdSfx {
@@ -73,6 +88,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
         if let Stage::Library | Stage::Favourites = gdsfx.stage {
             search_bar(ui, gdsfx);
+            sort_menu(ui, gdsfx);
             ui.separator();
         }
         egui::ScrollArea::vertical().show(ui, |ui| {
@@ -88,27 +104,61 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 }
 
 fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
-    fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui, is_root: bool) {
+    fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui) {
         let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
-                if is_root {
-                    for child in children {
-                        recursive(gdsfx, child, ui, false);
+                let (mut categories, sounds): (Vec<_>, Vec<_>) = children
+                    .into_iter()
+                    .partition(|a| a.is_category());
+                
+                let sorting = |a: &&LibraryEntry, b: &&LibraryEntry| {
+                    match gdsfx.sorting {
+                        Sorting::Default => std::cmp::Ordering::Equal,
+                        Sorting::NameInc => a.name().cmp(b.name()),
+                        Sorting::NameDec => b.name().cmp(a.name()),
+                        Sorting::LengthInc => a.duration().cmp(&b.duration()),
+                        Sorting::LengthDec => b.duration().cmp(&a.duration()),
+                        Sorting::IdInc => b.id().cmp(&a.id()), // this is not a bug, in gd, the id sorting is reversed,
+                        Sorting::IdDec => a.id().cmp(&b.id()), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
+                        Sorting::SizeInc => a.bytes().cmp(&b.bytes()),
+                        Sorting::SizeDec => b.bytes().cmp(&a.bytes()),
+                    }
+                };
+
+                categories.sort_by(sorting);
+
+                if entry.parent() == 0 { // root
+                    for child in categories {
+                        recursive(gdsfx, child, ui);
                     }
                 } else {
-                    let filtered_children = children
-                        .iter()
-                        .filter(|x| x.name().to_ascii_lowercase().contains(&q))
-                        .collect::<Vec<_>>();
-                    if filtered_children.is_empty() {
-                        ui.set_enabled(false);
-                    }
-                    ui.collapsing(entry.name(), |sub_ui| {
-                        for child in filtered_children {
-                            recursive(gdsfx, child, sub_ui, false);
+                    let mut filtered_sounds = sounds.into_iter()
+                    .filter(|sound|
+                        if !q.is_empty() {
+                            sound.name().to_ascii_lowercase().contains(&q)
+                                || sound.id().to_string().contains(&q)
+                        } else {
+                            true
+                        }
+                    )
+                    .collect::<Vec<_>>();
+
+                    filtered_sounds.sort_by(sorting);
+
+                    let is_disabled = filtered_sounds.is_empty() && !q.is_empty();
+                    ui.set_enabled(!is_disabled);
+
+                    ui.collapsing(entry.name(), |ui| {
+                        for child in categories {
+                            recursive(gdsfx, child, ui);
+                        }
+                        for child in filtered_sounds {
+                            recursive(gdsfx, child, ui);
                         }
                     });
+
+                    ui.set_enabled(true);
                 }
             }
             LibraryEntry::Sound { .. } => {
@@ -116,7 +166,7 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
             }
         }
     }
-    recursive(gdsfx, &sfx_library, ui, true);
+    recursive(gdsfx, &sfx_library, ui);
 }
 
 fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
@@ -161,6 +211,27 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 fn search_bar(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading("Search");
     ui.text_edit_singleline(&mut gdsfx.search_query);
+}
+
+fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
+    ui.menu_button("Sorting", |ui| {
+        for (alternative, text) in [
+            (Sorting::Default, "Default"),
+            (Sorting::NameInc, "Name+"),
+            (Sorting::NameDec, "Name-"),
+            (Sorting::LengthInc, "Length+"),
+            (Sorting::LengthDec, "Length-"),
+            (Sorting::IdInc, "ID+"),
+            (Sorting::IdDec, "ID-"),
+            (Sorting::SizeInc, "Size+"),
+            (Sorting::SizeDec, "Size-"),
+        ] {
+            let response = ui.radio_value(&mut gdsfx.sorting, alternative, text);
+            if response.clicked() {
+                ui.close_menu();
+            }
+        }
+    });
 }
 
 fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
