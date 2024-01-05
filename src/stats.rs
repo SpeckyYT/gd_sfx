@@ -17,7 +17,7 @@ pub fn remove_file_from_stats(id: i64) {
     EXISTING_SOUND_FILES.lock().unwrap().remove(&id);
 }
 
-pub fn add_existing_sfx_files() -> Result<(), io::Error> {
+pub fn add_existing_sfx_files() -> io::Result<()> {
     GD_FOLDER.read_dir()?
         .flatten()
         .map(|file| file.file_name().into_string().unwrap())

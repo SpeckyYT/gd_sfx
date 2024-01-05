@@ -95,16 +95,16 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
             sort_menu(ui, gdsfx);
             ui.separator();
         }
+
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
                 match gdsfx.stage {
                     Stage::Library => {
-                        let library = gdsfx.sfx_library.clone().unwrap().sound_effects;
-                        let mut sfx =
-                            filter_sounds(&library, &gdsfx.search_query.to_ascii_lowercase());
-                        if !sfx.is_empty() {
-                            remove_empty_category_nodes(&mut sfx[0]);
-                            library_list(ui, gdsfx, &sfx[0]);
+                        let library = sfx_library.sound_effects.clone();
+                        let filter_str = &gdsfx.search_query.to_ascii_lowercase();
+                        if let Some(mut sfx) = filter_sounds(library, filter_str) {
+                            remove_empty_category_nodes(&mut sfx);
+                            library_list(ui, gdsfx, &sfx);
                         }
                     }
                     Stage::Favourites => {
@@ -120,7 +120,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
 fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
     fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui) {
-        let q = gdsfx.search_query.to_ascii_lowercase();
+        // let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
                 let (mut categories, mut sounds): (Vec<_>, Vec<_>) =
@@ -170,7 +170,7 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
             }
         }
     }
-    recursive(gdsfx, &sfx_library, ui);
+    recursive(gdsfx, sfx_library, ui);
 }
 
 fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
@@ -357,66 +357,31 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
     }
 }
 
-// chatgpt (tm)
-fn remove_empty_category_nodes(node: &mut LibraryEntry) {
+fn remove_empty_category_nodes(node: &mut LibraryEntry) -> bool {
     match node {
-        LibraryEntry::Sound { .. } => {}
-        LibraryEntry::Category {
-            children, parent, ..
-        } => {
-            // Recursively remove empty Category nodes from children
-            children.retain(|child| {
-                if let LibraryEntry::Category { children, .. } = child {
-                    !children.is_empty()
-                        || children
-                            .iter()
-                            .any(|c| matches!(c, LibraryEntry::Sound { .. }))
-                        || *parent == 1
-                } else {
-                    true
-                }
-            });
-
-            // Recursively apply to children
-            for child in children {
-                remove_empty_category_nodes(child);
-            }
+        LibraryEntry::Sound { .. } => true,
+        LibraryEntry::Category { children, .. } => {
+            // Recursively check for any sounds
+            children.iter_mut().any(remove_empty_category_nodes)
         }
     }
 }
 
-fn filter_sounds(tree: &LibraryEntry, filter_str: &str) -> Vec<LibraryEntry> {
-    match tree {
-        LibraryEntry::Sound { name, .. } => {
-            if name.to_ascii_lowercase().contains(filter_str) {
-                vec![tree.clone()] // Keep the sound if it contains the filter string
-            } else {
-                vec![] // Filter out the sound if it doesn't contain the filter string
-            }
+fn filter_sounds(entry: LibraryEntry, filter_str: &str) -> Option<LibraryEntry> {
+    match entry {
+        LibraryEntry::Sound { ref name, .. } => {
+            name.to_ascii_lowercase().contains(filter_str).then_some(entry)
         }
-        LibraryEntry::Category {
-            id,
-            name,
-            parent,
-            children,
-        } => {
+        LibraryEntry::Category { id, name, parent, children } => {
             // Recursively filter sounds in subcategories
             let filtered_sounds: Vec<LibraryEntry> = children
-                .iter()
+                .into_iter()
                 .flat_map(|node| filter_sounds(node, filter_str))
                 .collect();
 
             // Only keep the category if it contains any filtered sounds
-            if !filtered_sounds.is_empty() {
-                vec![LibraryEntry::Category {
-                    name: name.clone(),
-                    parent: *parent,
-                    id: *id,
-                    children: filtered_sounds,
-                }]
-            } else {
-                vec![] // Filter out the category if it doesn't contain any filtered sounds
-            }
+            let has_children = !filtered_sounds.is_empty();
+            has_children.then_some(LibraryEntry::Category { id, name, parent, children: filtered_sounds })
         }
     }
 }
