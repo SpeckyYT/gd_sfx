@@ -7,7 +7,7 @@ use reqwest::blocking::Client;
 use reqwest::header::{CONTENT_TYPE, USER_AGENT};
 
 use crate::gui::{GdSfx, VersionType};
-use crate::library::{parse_library, LibraryEntry};
+use crate::library::{parse_library, LibraryEntry, Library};
 use crate::util::SFX_LIBRARY_FILE;
 
 pub const GET_CUSTOM_CONTENT_URL: &str =
@@ -65,14 +65,14 @@ impl GdSfx {
         output
     }
 
-    pub fn get_sfx_library(&mut self, force: bool) -> Option<&LibraryEntry> {
+    pub fn get_sfx_library(&mut self, force: bool) -> Option<&Library> {
         let root = if !force && SFX_LIBRARY_FILE.exists() {
             let sfx_data = fs::read(SFX_LIBRARY_FILE.as_path()).unwrap();
             let root = parse_library(&sfx_data);
 
             if self
                 .sfx_version
-                .map(|ver| ver.to_string() == root.name())
+                .map(|ver| ver.to_string() == root.sound_effects.name())
                 .unwrap_or(false)
             {
                 self.sfx_library = Some(root);
@@ -88,7 +88,7 @@ impl GdSfx {
     }
 }
 
-fn download_and_parse_library(cdn_url: &str) -> LibraryEntry {
+fn download_and_parse_library(cdn_url: &str) -> Library {
     let client = Client::default();
 
     let sfx_data = client

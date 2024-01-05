@@ -24,3 +24,13 @@ pub fn zlib_encode(data: &[u8]) -> Vec<u8> {
     drop(encoder);
     output
 }
+
+pub fn full_decode(data: &[u8]) -> Vec<u8> {
+    let data = base64_decode(data);
+    zlib_decode(&data)
+}
+
+pub fn full_encode(data: &[u8]) -> String {
+    let data = zlib_encode(data);
+    base64_encode(&data)
+}

@@ -7,7 +7,7 @@ use pretty_bytes::converter::convert;
 use crate::{
     audio::{play_sound, stop_audio},
     favourites::{add_favourite, has_favourite, remove_favourite},
-    library::LibraryEntry,
+    library::{LibraryEntry, Library},
     requests::CDN_URL,
 };
 
@@ -17,7 +17,7 @@ pub type VersionType = usize;
 pub struct GdSfx {
     pub cdn_url: Option<String>,
     pub sfx_version: Option<VersionType>,
-    pub sfx_library: Option<LibraryEntry>,
+    pub sfx_library: Option<Library>,
 
     pub stage: Stage,
     pub selected_sfx: Option<LibraryEntry>,
@@ -29,6 +29,7 @@ pub enum Stage {
     #[default]
     Library,
     Favourites,
+    Credits,
 }
 
 impl eframe::App for GdSfx {
@@ -51,6 +52,7 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut gdsfx.stage, Stage::Library, "Library");
             ui.selectable_value(&mut gdsfx.stage, Stage::Favourites, "Favourites");
+            ui.selectable_value(&mut gdsfx.stage, Stage::Credits, "Credits");
         });
         ui.add_space(2.0);
     });
@@ -70,8 +72,9 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
                 match gdsfx.stage {
-                    Stage::Library => library_list(ui, gdsfx, sfx_library.clone()),
-                    Stage::Favourites => favourites_list(ui, gdsfx, sfx_library.clone()),
+                    Stage::Library => library_list(ui, gdsfx, sfx_library.sound_effects.clone()),
+                    Stage::Favourites => favourites_list(ui, gdsfx, sfx_library.sound_effects.clone()),
+                    Stage::Credits => credits_list(ui, gdsfx),
                 }
             }
         });
@@ -128,8 +131,18 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
     recursive(gdsfx, &sfx_library, ui);
 }
 
+fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
+    ui.heading("SFX Credits");
+
+    ui.add_space(20.0);
+
+    for credits in &gdsfx.sfx_library.as_ref().unwrap().credits {
+        ui.hyperlink_to(&credits.name, &credits.link);
+    }
+}
+
 fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
-    let sound = ui.button(entry.name());
+    let sound = ui.button(entry.pretty_name());
     if sound.hovered() {
         gdsfx.selected_sfx = Some(entry.clone());
     }
@@ -181,16 +194,10 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
 
             ui.add_space(50.0);
 
-            if ui
-                .add_enabled(!sfx.exists(), Button::new("Download"))
-                .clicked()
-            {
+            if ui.add_enabled(!sfx.exists(), Button::new("Download")).clicked() {
                 sfx.download_and_store();
             }
-            if ui
-                .add_enabled(sfx.exists(), Button::new("Delete"))
-                .clicked()
-            {
+            if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
                 sfx.delete();
             }
             if ui.button("Play").clicked() {

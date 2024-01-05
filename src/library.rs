@@ -3,7 +3,13 @@ use std::{fs, path::PathBuf};
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
-use crate::{encoding::{zlib_decode, base64_decode}, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}};
+use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, favourites::{has_favourite, FAVOURITES_CHARACTER}};
+
+#[derive(Debug, Clone)]
+pub struct Library {
+    pub sound_effects: LibraryEntry,
+    pub credits: Vec<Credit>,
+}
 
 #[derive(Debug, Clone)]
 pub enum LibraryEntry {
@@ -22,6 +28,12 @@ pub enum LibraryEntry {
     },
 }
 
+#[derive(Debug, Clone)]
+pub struct Credit {
+    pub name: String,
+    pub link: String,
+}
+
 impl LibraryEntry {
     pub fn id(&self) -> i64 {
         match self {
@@ -29,14 +41,19 @@ impl LibraryEntry {
             LibraryEntry::Sound { id, .. } => *id,
         }
     }
-    #[allow(unused)]
     pub fn name(&self) -> &str {
         match self {
             LibraryEntry::Category { name, .. } => name,
             LibraryEntry::Sound { name, .. } => name,
         }
     }
-    #[allow(unused)]
+    pub fn pretty_name(&self) -> String {
+        if self.is_favourite() {
+            format!("{FAVOURITES_CHARACTER} {}", self.name())
+        } else {
+            self.name().to_string()
+        }
+    }
     pub fn is_category(&self) -> bool {
         match self {
             LibraryEntry::Category { .. } => true,
@@ -191,11 +208,42 @@ impl LibraryEntry {
     pub fn exists(&self) -> bool {
         self.path().exists()
     }
+    pub fn is_favourite(&self) -> bool {
+        has_favourite(self.id())
+    }
 }
 
-pub fn parse_library(data: &[u8]) -> LibraryEntry {
-    let data_decoded = base64_decode(data);
-    let data = zlib_decode(&data_decoded);
+impl Credit {
+    pub fn parse_string(string: &str) -> Vec<Self> {
+        string.split(';')
+        .filter_map(|c| {
+            let data = c.split(',').collect::<Vec<&str>>();
+            if data.len() == 2 {
+                Some(Credit {
+                    name: data[0].to_string(),
+                    link: data[1].to_string(),
+                })
+            } else {
+                None
+            }
+        })
+        .collect()
+    }
+}
+
+impl Library {
+    pub fn parse_string(string: &str) -> Self {
+        let (sound_effects, credits) = string.split_once("|").unwrap_or((string, ""));
+
+        Library {
+            sound_effects: LibraryEntry::parse_string(sound_effects),
+            credits: Credit::parse_string(credits),
+        }
+    }
+}
+
+pub fn parse_library(data: &[u8]) -> Library {
+    let data: Vec<u8> = full_decode(data);
     let string = std::str::from_utf8(&data).unwrap();
-    LibraryEntry::parse_string(string)
+    Library::parse_string(string)
 }
