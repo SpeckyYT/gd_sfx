@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
-use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, favourites::{has_favourite, FAVOURITES_CHARACTER}};
+use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, favourites::{has_favourite, FAVOURITES_CHARACTER}, stats::{add_file_to_stats, remove_file_from_stats}};
 
 #[derive(Debug, Clone)]
 pub struct Library {
@@ -200,10 +200,12 @@ impl LibraryEntry {
     pub fn download_and_store(&self) {
         if let Some(content) = self.download(CDN_URL) {
             fs::write(self.path(), content).unwrap();
+            add_file_to_stats(self.id());
         }
     }
     pub fn delete(&self) {
         let _ = fs::remove_file(self.path());
+        remove_file_from_stats(self.id());
     }
     pub fn exists(&self) -> bool {
         self.path().exists()

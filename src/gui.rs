@@ -3,12 +3,13 @@ use eframe::{
     NativeOptions,
 };
 use pretty_bytes::converter::convert;
+use strum::{EnumIter, IntoEnumIterator};
 
 use crate::{
     audio::{play_sound, stop_audio},
     favourites::{add_favourite, has_favourite, remove_favourite},
     library::{LibraryEntry, Library},
-    requests::CDN_URL,
+    requests::CDN_URL, stats::EXISTING_SOUND_FILES,
 };
 
 pub type VersionType = usize;
@@ -25,11 +26,12 @@ pub struct GdSfx {
     pub selected_sfx: Option<LibraryEntry>,
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Stage {
     #[default]
     Library,
     Favourites,
+    Stats,
     Credits,
 }
 
@@ -65,9 +67,9 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            ui.selectable_value(&mut gdsfx.stage, Stage::Library, "Library");
-            ui.selectable_value(&mut gdsfx.stage, Stage::Favourites, "Favourites");
-            ui.selectable_value(&mut gdsfx.stage, Stage::Credits, "Credits");
+            Stage::iter().for_each(|stage| {               
+                ui.selectable_value(&mut gdsfx.stage, stage, format!("{:?}", stage));
+            });
         });
         ui.add_space(2.0);
     });
@@ -96,6 +98,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
                 match gdsfx.stage {
                     Stage::Library => library_list(ui, gdsfx, sfx_library.sound_effects.clone()),
                     Stage::Favourites => favourites_list(ui, gdsfx, sfx_library.sound_effects.clone()),
+                    Stage::Stats => stats_list(ui, gdsfx),
                     Stage::Credits => credits_list(ui, gdsfx),
                 }
             }
@@ -185,6 +188,10 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
         }
     }
     recursive(gdsfx, &sfx_library, ui);
+}
+
+fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
+    ui.label(format!("{} sfx files on your local machine", EXISTING_SOUND_FILES.lock().unwrap().len()));
 }
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {

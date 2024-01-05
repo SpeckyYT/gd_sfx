@@ -16,3 +16,4 @@ GD SFX is a Geometry Dash SFX Library explorer.
 - [ ] Mass download and mass delete
 - [ ] Sort by name / duration / id / size
 - [ ] Change speed and pitch
+- [ ] Change volume

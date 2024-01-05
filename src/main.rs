@@ -1,4 +1,5 @@
 use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
+use stats::check_all_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
 mod requests;
@@ -8,9 +9,12 @@ mod gui;
 mod util;
 mod audio;
 mod favourites;
+mod stats;
 
 fn main() {
     hide_console_window();
+
+    check_all_sfx_files();
 
     let mut gdsfx = gui::GdSfx::default();
 
