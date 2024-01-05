@@ -40,8 +40,6 @@ pub fn hide_console_window() {
     }
 }
 
-pub fn stringify_duration(duration: i64) -> String {
-    let mut centiseconds = format!("{:>03}", duration);
-    centiseconds.insert(centiseconds.len() - 2, '.');
-    centiseconds
+pub fn stringify_duration(centiseconds: i64) -> String {
+    format!("{:.2}", centiseconds as f64 / 100.0)
 }
