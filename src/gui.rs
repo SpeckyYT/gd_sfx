@@ -8,8 +8,10 @@ use strum::{EnumIter, IntoEnumIterator};
 use crate::{
     audio::{play_sound, stop_audio},
     favourites::{add_favourite, has_favourite, remove_favourite},
-    library::{LibraryEntry, Library},
-    requests::CDN_URL, stats::EXISTING_SOUND_FILES, util::stringify_duration,
+    library::{Library, LibraryEntry},
+    requests::CDN_URL,
+    stats::EXISTING_SOUND_FILES,
+    util::stringify_duration,
 };
 
 pub type VersionType = usize;
@@ -39,14 +41,14 @@ pub enum Stage {
 pub enum Sorting {
     #[default]
     Default,
-    NameInc,    // a - z
-    NameDec,    // z - a
-    LengthInc,  // 0.00 - 1.00
-    LengthDec,  // 1.00 - 0.00
-    IdInc,      // 9 - 0
-    IdDec,      // 0 - 9
-    SizeInc,    // 0kb - 9kb
-    SizeDec,    // 9kb - 0kb
+    NameInc,   // a - z
+    NameDec,   // z - a
+    LengthInc, // 0.00 - 1.00
+    LengthDec, // 1.00 - 0.00
+    IdInc,     // 9 - 0
+    IdDec,     // 0 - 9
+    SizeInc,   // 0kb - 9kb
+    SizeDec,   // 9kb - 0kb
 }
 
 impl eframe::App for GdSfx {
@@ -67,7 +69,7 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            Stage::iter().for_each(|stage| {               
+            Stage::iter().for_each(|stage| {
                 ui.selectable_value(&mut gdsfx.stage, stage, format!("{:?}", stage));
             });
         });
@@ -96,8 +98,18 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
                 match gdsfx.stage {
-                    Stage::Library => library_list(ui, gdsfx, sfx_library.sound_effects.clone()),
-                    Stage::Favourites => favourites_list(ui, gdsfx, sfx_library.sound_effects.clone()),
+                    Stage::Library => {
+                        let library = gdsfx.sfx_library.clone().unwrap().sound_effects;
+                        let mut sfx =
+                            filter_sounds(&library, &gdsfx.search_query.to_ascii_lowercase());
+                        if !sfx.is_empty() {
+                            remove_empty_category_nodes(&mut sfx[0]);
+                            library_list(ui, gdsfx, &sfx[0]);
+                        }
+                    }
+                    Stage::Favourites => {
+                        favourites_list(ui, gdsfx, sfx_library.sound_effects.clone())
+                    }
                     Stage::Stats => stats_list(ui, gdsfx),
                     Stage::Credits => credits_list(ui, gdsfx),
                 }
@@ -106,14 +118,14 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
     });
 }
 
-fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
+fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
     fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui) {
         let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
-                let (mut categories, sounds): (Vec<_>, Vec<_>) = children.iter()
-                    .partition(|a| a.is_category());
-                
+                let (mut categories, mut sounds): (Vec<_>, Vec<_>) =
+                    children.iter().partition(|a| a.is_category());
+
                 let sorting = |a: &&LibraryEntry, b: &&LibraryEntry| {
                     match gdsfx.sorting {
                         Sorting::Default => std::cmp::Ordering::Equal,
@@ -130,32 +142,22 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
 
                 categories.sort_by(sorting);
 
-                if entry.parent() == 0 { // root
+                if entry.parent() == 0 {
+                    // root
                     for child in categories {
                         recursive(gdsfx, child, ui);
                     }
                 } else {
-                    let mut filtered_sounds = sounds.into_iter()
-                    .filter(|sound|
-                        if !q.is_empty() {
-                            sound.name().to_ascii_lowercase().contains(&q)
-                                || sound.id().to_string().contains(&q)
-                        } else {
-                            true
-                        }
-                    )
-                    .collect::<Vec<_>>();
+                    sounds.sort_by(sorting);
 
-                    filtered_sounds.sort_by(sorting);
-
-                    let is_disabled = filtered_sounds.is_empty() && !q.is_empty();
-                    ui.set_enabled(!is_disabled);
+                    // let is_disabled = sounds.is_empty() && !q.is_empty();
+                    // ui.set_enabled(!is_disabled);
 
                     ui.collapsing(entry.name(), |ui| {
                         for child in categories {
                             recursive(gdsfx, child, ui);
                         }
-                        for child in filtered_sounds {
+                        for child in sounds {
                             recursive(gdsfx, child, ui);
                         }
                     });
@@ -180,7 +182,11 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
                 }
             }
             LibraryEntry::Sound { name, id, .. } => {
-                if has_favourite(*id) && name.to_ascii_lowercase().contains(&gdsfx.search_query.to_ascii_lowercase()) {
+                if has_favourite(*id)
+                    && name
+                        .to_ascii_lowercase()
+                        .contains(&gdsfx.search_query.to_ascii_lowercase())
+                {
                     sfx_button(ui, gdsfx, entry)
                 }
             }
@@ -193,23 +199,32 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     // (bytes, duration, files)
     fn recursive(entry: &LibraryEntry) -> (u128, u128, i64) {
         match entry {
-            LibraryEntry::Category { children, .. } =>
-                children.iter()
-                    .map(recursive)
-                    .reduce(|a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2))
-                    .unwrap_or((0, 0, 1)),
-            LibraryEntry::Sound { bytes, duration, .. } => (*bytes as u128, *duration as u128, 1),
+            LibraryEntry::Category { children, .. } => children
+                .iter()
+                .map(recursive)
+                .reduce(|a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2))
+                .unwrap_or((0, 0, 1)),
+            LibraryEntry::Sound {
+                bytes, duration, ..
+            } => (*bytes as u128, *duration as u128, 1),
         }
     }
-    let (total_bytes, total_duration, total_files) = recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
+    let (total_bytes, total_duration, total_files) =
+        recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
 
     ui.heading("SFX Library");
 
     ui.add_space(10.0);
 
     ui.label(format!("Total files: {}", total_files));
-    ui.label(format!("Total size: {}", pretty_bytes::converter::convert(total_bytes as f64)));
-    ui.label(format!("Total duration: {}s", stringify_duration(total_duration as i64)));
+    ui.label(format!(
+        "Total size: {}",
+        pretty_bytes::converter::convert(total_bytes as f64)
+    ));
+    ui.label(format!(
+        "Total duration: {}s",
+        stringify_duration(total_duration as i64)
+    ));
 
     ui.add_space(30.0);
 
@@ -217,7 +232,10 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.add_space(10.0);
 
-    ui.label(format!("Downloaded sfx files: {}", EXISTING_SOUND_FILES.lock().unwrap().len()));
+    ui.label(format!(
+        "Downloaded sfx files: {}",
+        EXISTING_SOUND_FILES.lock().unwrap().len()
+    ));
 }
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
@@ -232,11 +250,11 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading("<This project>");
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
     ui.add_space(10.0);
-    
+
     for (name, link) in [
         ("Specky", "https://github.com/SpeckyYT"),
-        ("Tags", "https://github.com/zTags"),
-        ("kr8gz", "https://github.com/kr8gz")
+        ("tags", "https://github.com/zTags"),
+        ("kr8gz", "https://github.com/kr8gz"),
     ] {
         ui.hyperlink_to(name, link);
     }
@@ -317,10 +335,16 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
 
             ui.add_space(50.0);
 
-            if ui.add_enabled(!sfx.exists(), Button::new("Download")).clicked() {
+            if ui
+                .add_enabled(!sfx.exists(), Button::new("Download"))
+                .clicked()
+            {
                 sfx.download_and_store();
             }
-            if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
+            if ui
+                .add_enabled(sfx.exists(), Button::new("Delete"))
+                .clicked()
+            {
                 sfx.delete();
             }
             if ui.button("Play").clicked() {
@@ -330,5 +354,69 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
                 stop_audio();
             }
         });
+    }
+}
+
+// chatgpt (tm)
+fn remove_empty_category_nodes(node: &mut LibraryEntry) {
+    match node {
+        LibraryEntry::Sound { .. } => {}
+        LibraryEntry::Category {
+            children, parent, ..
+        } => {
+            // Recursively remove empty Category nodes from children
+            children.retain(|child| {
+                if let LibraryEntry::Category { children, .. } = child {
+                    !children.is_empty()
+                        || children
+                            .iter()
+                            .any(|c| matches!(c, LibraryEntry::Sound { .. }))
+                        || *parent == 1
+                } else {
+                    true
+                }
+            });
+
+            // Recursively apply to children
+            for child in children {
+                remove_empty_category_nodes(child);
+            }
+        }
+    }
+}
+
+fn filter_sounds(tree: &LibraryEntry, filter_str: &str) -> Vec<LibraryEntry> {
+    match tree {
+        LibraryEntry::Sound { name, .. } => {
+            if name.to_ascii_lowercase().contains(filter_str) {
+                vec![tree.clone()] // Keep the sound if it contains the filter string
+            } else {
+                vec![] // Filter out the sound if it doesn't contain the filter string
+            }
+        }
+        LibraryEntry::Category {
+            id,
+            name,
+            parent,
+            children,
+        } => {
+            // Recursively filter sounds in subcategories
+            let filtered_sounds: Vec<LibraryEntry> = children
+                .iter()
+                .flat_map(|node| filter_sounds(node, filter_str))
+                .collect();
+
+            // Only keep the category if it contains any filtered sounds
+            if !filtered_sounds.is_empty() {
+                vec![LibraryEntry::Category {
+                    name: name.clone(),
+                    parent: *parent,
+                    id: *id,
+                    children: filtered_sounds,
+                }]
+            } else {
+                vec![] // Filter out the category if it doesn't contain any filtered sounds
+            }
+        }
     }
 }
