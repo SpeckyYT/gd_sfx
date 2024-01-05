@@ -39,3 +39,9 @@ pub fn hide_console_window() {
         unsafe { winapi::um::wincon::FreeConsole() };
     }
 }
+
+pub fn stringify_duration(duration: i64) -> String {
+    let mut centiseconds = format!("{:>03}", duration);
+    centiseconds.insert(centiseconds.len() - 2, '.');
+    centiseconds
+}
