@@ -20,7 +20,9 @@ mod stats;
 #[cfg(test)]
 mod test;
 
-i18n!("lang", fallback = "en_US");
+// build.rs rerusn every time a file in the lang folder is changed
+// and writes the i18n!(...) macro invocation to this file
+include!(concat!(env!("OUT_DIR"), "/i18n.rs"));
 
 fn main() {
     hide_console_window();
