@@ -1,4 +1,9 @@
-use std::{io::Cursor, thread::{spawn, JoinHandle}, time::Instant, sync::Arc};
+use std::{
+    io::Cursor,
+    thread::{JoinHandle, self},
+    time::Instant,
+    sync::Arc
+};
 
 use crossbeam_channel::{unbounded, Sender, Receiver};
 use eframe::epaint::mutex::Mutex;
@@ -12,15 +17,15 @@ lazy_static!{
     pub static ref AUDIO_MESSAGES: (Sender<Instant>, Receiver<Instant>) = unbounded();
 }
 
-pub fn play_sound(sfx: &LibraryEntry, cdn_url: &str) {
-    let data = sfx.download(cdn_url);
+pub fn play_sound(sfx: &LibraryEntry) {
+    let data = sfx.download();
     if let Some(content) = data {
         play_ogg(content);
     }
 }
 
 pub fn play_ogg(ogg: Vec<u8>) -> JoinHandle<()> {
-    spawn(|| {
+    thread::spawn(|| {
         *PLAYERS.lock() += 1;
         let start_time = Instant::now();
         let cursor = Cursor::new(ogg);

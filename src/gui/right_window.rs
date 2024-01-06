@@ -1,10 +1,12 @@
 use eframe::egui::{Context, CentralPanel, Button};
 use pretty_bytes::converter::convert;
 
-use crate::{library::LibraryEntry, requests::CDN_URL, audio, util::stringify_duration};
+use crate::{audio, util::stringify_duration};
 
-pub fn right_window(ctx: &Context, sfx: Option<&LibraryEntry>) {
-    if let Some(sfx) = sfx {
+use super::GdSfx;
+
+pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
+    if let Some(sfx) = &gdsfx.selected_sfx {
         CentralPanel::default().show(ctx, |ui| {
             ui.heading(sfx.name());
 
@@ -19,7 +21,7 @@ pub fn right_window(ctx: &Context, sfx: Option<&LibraryEntry>) {
             ui.heading(t!("sound.info.size", size = convert(sfx.bytes() as f64)));
             ui.heading(t!("sound.info.duration", duration = stringify_duration(sfx.duration())));
 
-            ui.add_space(50.0);
+            ui.add_space(25.0);
 
             let download_button = Button::new(t!("sound.button.download"));
             if ui.add_enabled(!sfx.exists(), download_button).clicked() {
@@ -31,13 +33,8 @@ pub fn right_window(ctx: &Context, sfx: Option<&LibraryEntry>) {
                 sfx.delete();
             }
 
-            if ui.button(t!("sound.button.play")).clicked() {
-                audio::play_sound(sfx, CDN_URL);
-            }
-
-            if ui.button(t!("sound.button.stop")).clicked() {
-                audio::stop_audio();
-            }
+            if ui.button(t!("sound.button.play")).clicked() { audio::play_sound(sfx); }
+            if ui.button(t!("sound.button.stop")).clicked() { audio::stop_audio(); }
         });
     }
 }

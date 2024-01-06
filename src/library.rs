@@ -3,7 +3,13 @@ use std::{fs, path::PathBuf};
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
-use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, settings::{has_favourite, FAVOURITES_CHARACTER}, stats::{add_file_to_stats, remove_file_from_stats}};
+use crate::{
+    encoding::full_decode,
+    util::{GD_FOLDER, LOCAL_SFX_LIBRARY},
+    requests::{download_sfx, CDN_URL},
+    settings::{has_favourite, FAVOURITES_CHARACTER},
+    stats::{add_file_to_stats, remove_file_from_stats}
+};
 
 #[derive(Debug, Clone)]
 pub struct Library {
@@ -181,34 +187,32 @@ impl LibraryEntry {
     pub fn path(&self) -> PathBuf {
         GD_FOLDER.join(self.filename())
     }
-    pub fn download(&self, cdn_url: &str) -> Option<Vec<u8>> {
+    pub fn download(&self) -> Option<Vec<u8>> {
         if self.is_category() { return None }
 
         let path = self.path();
 
-        let mut cache_data = true;
-
-        let data =
-            if let Some(data) = LOCAL_SFX_LIBRARY.lock().get(&self.id()) {
-                cache_data = false;
-                data.clone()
-            } else if path.exists() {
-                fs::read(path).unwrap()
-            } else if let Some(data) = download_sfx(cdn_url, self) {
-                data
-            } else {
-                return None
-            };
+        let sfx_data;
         
-        if cache_data {
-            LOCAL_SFX_LIBRARY.lock().insert(self.id(), data.clone());
+        if let Some(data) = LOCAL_SFX_LIBRARY.lock().get(&self.id()) {
+            return Some(data.clone())
         }
-
-        Some(data)
+        else if path.exists() {
+            sfx_data = fs::read(path).unwrap();
+        }
+        else if let Some(data) = download_sfx(CDN_URL, self) {
+            sfx_data = data;
+        }
+        else {
+            return None
+        }
+        
+        LOCAL_SFX_LIBRARY.lock().insert(self.id(), sfx_data.clone());
+        Some(sfx_data)
     }
     pub fn download_and_store(&self) {
         if self.exists() { return }
-        if let Some(content) = self.download(CDN_URL) {
+        if let Some(content) = self.download() {
             fs::write(self.path(), content).unwrap();
             add_file_to_stats(self.id());
         }
@@ -228,18 +232,14 @@ impl LibraryEntry {
 impl Credit {
     pub fn parse_string(string: &str) -> Vec<Self> {
         string.split(';')
-        .filter_map(|c| {
-            let data = c.split(',').collect::<Vec<&str>>();
-            if data.len() == 2 {
-                Some(Credit {
+            .filter_map(|c| {
+                let data = c.split(',').collect::<Vec<&str>>();
+                (data.len() == 2).then(|| Credit {
                     name: data[0].to_string(),
                     link: data[1].to_string(),
                 })
-            } else {
-                None
-            }
-        })
-        .collect()
+            })
+            .collect()
     }
 }
 

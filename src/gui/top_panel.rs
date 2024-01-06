@@ -1,34 +1,9 @@
 use eframe::egui::{Context, TopBottomPanel};
-use strum::{IntoEnumIterator, EnumIter};
+use strum::IntoEnumIterator;
 
-use super::GdSfx;
+use super::{GdSfx, Tab};
 
-
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
-pub enum Tab {
-    #[default]
-    Library,
-    Favourites,
-    Tools,
-    Settings,
-    Stats,
-    Credits,
-}
-
-impl Tab {
-    pub fn get_localized_name(&self) -> String {
-        t!(match self {
-            Tab::Library => "tab.library",
-            Tab::Favourites => "tab.favorites",
-            Tab::Tools => "tab.tools",
-            Tab::Settings => "tab.settings",
-            Tab::Stats => "tab.stats",
-            Tab::Credits => "tab.credits",
-        })
-    }
-}
-
-pub fn top_panel(ctx: &Context, gdsfx: &mut GdSfx) {
+pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
     TopBottomPanel::top("top_panel").show(ctx, |ui| {
         ui.add_space(4.0);
         ui.horizontal(|ui| {

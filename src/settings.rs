@@ -9,7 +9,7 @@ use crate::{util::GD_FOLDER, encoding::{zlib_encode, base64_encode, full_decode,
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Settings {
-    pub filter_search: bool,
+    pub hide_empty_categories: bool,
 }
 
 lazy_static!{
@@ -45,7 +45,7 @@ pub fn read_settings_file() -> (HashSet<i64>, Settings) {
                             }
                         })
                     }
-                    1 => settings.filter_search = s == "true",
+                    1 => settings.hide_empty_categories = s == "true",
                     2 => rust_i18n::set_locale(s),
                     _ => (),
                 }
@@ -68,7 +68,7 @@ pub fn generate_save_string() -> String {
 
     let strings = [
         favourites_string,
-        settings.filter_search.to_string(),
+        settings.hide_empty_categories.to_string(),
         rust_i18n::locale(),
     ];
     strings.join("|")

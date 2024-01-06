@@ -46,52 +46,40 @@ impl GdSfx {
 
         let cdn_url = self.get_cdn_url(force)?;
 
-        let output = Client::default()
+        self.sfx_version = Client::default()
             .get(format!("{cdn_url}/{ENDPOINT_SFX_VERSION}"))
-            .send()
-            .ok()?
-            .text()
-            .ok()?
-            .parse()
-            .ok();
+            .send().ok()?
+            .text().ok()?
+            .parse().ok();
 
-        self.sfx_version = output;
-
-        output
+        self.sfx_version
     }
 
     pub fn get_sfx_library(&mut self, force: bool) -> Option<&Library> {
-        let root = if !force && SFX_LIBRARY_FILE.exists() {
+        if !force && SFX_LIBRARY_FILE.exists() {
             let sfx_data = fs::read(SFX_LIBRARY_FILE.as_path()).unwrap();
             let root = parse_library(&sfx_data);
 
-            if self
-                .sfx_version
+            if self.sfx_version
                 .map(|ver| ver.to_string() == root.sound_effects.name())
                 .unwrap_or(false)
             {
                 self.sfx_library = Some(root);
                 return self.sfx_library.as_ref();
-            } else {
-                download_and_parse_library(self.get_cdn_url(false)?)
             }
-        } else {
-            download_and_parse_library(self.get_cdn_url(false)?)
-        };
+        }
+
+        let root = download_and_parse_library(self.get_cdn_url(force)?);
         self.sfx_library = Some(root);
         self.sfx_library.as_ref()
     }
 }
 
 fn download_and_parse_library(cdn_url: &str) -> Library {
-    let client = Client::default();
-
-    let sfx_data = client
+    let sfx_data = Client::default()
         .get(format!("{cdn_url}/{ENDPOINT_SFX_LIBRARY}"))
-        .send()
-        .unwrap()
-        .bytes()
-        .unwrap();
+        .send().unwrap()
+        .bytes().unwrap();
 
     fs::write(SFX_LIBRARY_FILE.as_path(), &sfx_data).unwrap();
     parse_library(&sfx_data)
@@ -99,14 +87,11 @@ fn download_and_parse_library(cdn_url: &str) -> Library {
 
 pub fn download_sfx(cdn_url: &str, sound: &LibraryEntry) -> Option<Vec<u8>> {
     let url = format!("{cdn_url}/sfx/{}", sound.filename());
+    let data = Client::default()
+        .get(url)
+        .send().ok()?
+        .bytes().ok()?
+        .to_vec();
 
-    Some(
-        Client::default()
-            .get(url)
-            .send()
-            .ok()?
-            .bytes()
-            .ok()?
-            .to_vec(),
-    )
+    Some(data)
 }

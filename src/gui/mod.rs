@@ -1,14 +1,12 @@
-pub mod top_panel;
+mod top_panel;
 pub mod left_window;
-pub mod right_window;
-use top_panel::*;
-use left_window::*;
-use right_window::*;
+mod right_window;
 
 use eframe::{
     egui::Context,
     NativeOptions,
 };
+use strum::EnumIter;
 
 use crate::library::{Library, LibraryEntry};
 
@@ -26,11 +24,49 @@ pub struct GdSfx {
     pub selected_sfx: Option<LibraryEntry>,
 }
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
+pub enum Tab {
+    #[default]
+    Library,
+    Favourites,
+    Tools,
+    Settings,
+    Stats,
+    Credits,
+}
+
+impl Tab {
+    pub fn get_localized_name(&self) -> String {
+        t!(match self {
+            Tab::Library => "tab.library",
+            Tab::Favourites => "tab.favorites",
+            Tab::Tools => "tab.tools",
+            Tab::Settings => "tab.settings",
+            Tab::Stats => "tab.stats",
+            Tab::Credits => "tab.credits",
+        })
+    }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
+pub enum Sorting {
+    #[default]
+    Default,
+    NameInc,   // a - z
+    NameDec,   // z - a
+    LengthInc, // 0.00 - 1.00
+    LengthDec, // 1.00 - 0.00
+    IdInc,     // 0 - 9
+    IdDec,     // 9 - 0
+    SizeInc,   // 0kb - 9kb
+    SizeDec,   // 9kb - 0kb
+}
+
 impl eframe::App for GdSfx {
     fn update(&mut self, ctx: &Context, _frame: &mut eframe::Frame) {
-        top_panel(ctx, self);
-        left_window(ctx, self);
-        right_window(ctx, self.selected_sfx.as_ref());
+        top_panel::render(self, ctx);
+        left_window::render(self, ctx);
+        right_window::render(self, ctx);
     }
 }
 
