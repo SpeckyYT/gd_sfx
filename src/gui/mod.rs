@@ -257,8 +257,8 @@ fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
     let delete_modal = modal_generator(t!("tools.delete_all_sfx.title"), "delete");
     
     ui.heading(t!("tools"));
-
-    ui.add_space(20.0);
+    
+    ui.add_space(10.0);
 
     ui.colored_label(Color32::RED, t!("tools.warning.long_time"));
     ui.colored_label(Color32::RED, t!("tools.warning.program_not_usable"));
@@ -283,8 +283,8 @@ fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
 
 fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {
     ui.heading(t!("settings"));
-
-    ui.add_space(20.0);
+    
+    ui.add_space(10.0);
 
     let mut settings = SETTINGS.lock().unwrap();
     let initial_settings = *settings;
@@ -346,10 +346,10 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.label(t!("stats.library.size", size = pretty_bytes::converter::convert(bytes as f64)));
     ui.label(t!("stats.library.duration", duration = stringify_duration(duration as i64)));
 
-    ui.add_space(30.0);
+    ui.add_space(20.0);
 
     ui.heading(t!("stats.files"));
-
+    
     ui.add_space(10.0);
 
     ui.label(t!("stats.files.downloaded", files = EXISTING_SOUND_FILES.lock().unwrap().len()));
@@ -357,7 +357,9 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading(t!("credits.sfx"));
+
     ui.add_space(10.0);
+
     for credits in &gdsfx.sfx_library.as_ref().unwrap().credits {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
@@ -368,7 +370,8 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
 
     ui.add_space(10.0);
-    ui.heading(t!("credits.this_project.developers"));
+
+    ui.label(t!("credits.this_project.developers"));
 
     for (name, link) in [
         ("Specky", "https://github.com/SpeckyYT"),
@@ -379,6 +382,7 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
     }
 
     ui.add_space(10.0);
+
     ui.label(t!("credits.this_project.translations", lang = format_locale(&rust_i18n::locale())));
 
     match rust_i18n::locale().as_str() {
@@ -392,7 +396,7 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
             ui.hyperlink_to("tags", "https://github.com/zTags");
         }
         "ua_UA" => {
-            ui.label("Eldyj");
+            ui.hyperlink_to("eldyj", "https://github.com/eldyj");
         }
         _ => {}
     }

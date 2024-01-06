@@ -29,18 +29,13 @@ impl GdSfx {
             .send()
             .ok()?;
 
-        let cdn_url = if request.status().is_success() {
-            request.text().ok()
-        } else {
-            None
-        };
-
-        if let Some(cdn_url) = cdn_url {
-            self.cdn_url = Some(cdn_url);
-            self.cdn_url.as_ref()
-        } else {
-            None
+        if request.status().is_success() {
+            if let Ok(cdn_url) = request.text() {
+                self.cdn_url = Some(cdn_url);
+                return self.cdn_url.as_ref()
+            }
         }
+        None
     }
 
     #[allow(unused)]
