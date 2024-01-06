@@ -18,6 +18,7 @@ pub enum LibraryEntry {
         name: String,
         parent: i64,
         children: Vec<LibraryEntry>,
+        enabled: bool,
     },
     Sound { // 10728,Background Ambience Loop 01,0,10642,96677,699;
         id: i64,
@@ -25,6 +26,7 @@ pub enum LibraryEntry {
         parent: i64,
         bytes: i64,
         duration: i64, // in centiseconds
+        enabled: bool,
     },
 }
 
@@ -37,14 +39,14 @@ pub struct Credit {
 impl LibraryEntry {
     pub fn id(&self) -> i64 {
         match self {
-            LibraryEntry::Category { id, .. } => *id,
-            LibraryEntry::Sound { id, .. } => *id,
+            | LibraryEntry::Category { id, .. }
+            | LibraryEntry::Sound { id, .. } => *id,
         }
     }
     pub fn name(&self) -> &str {
         match self {
-            LibraryEntry::Category { name, .. } => name,
-            LibraryEntry::Sound { name, .. } => name,
+            | LibraryEntry::Category { name, .. }
+            | LibraryEntry::Sound { name, .. } => name,
         }
     }
     pub fn pretty_name(&self) -> String {
@@ -55,22 +57,16 @@ impl LibraryEntry {
         }
     }
     pub fn is_category(&self) -> bool {
-        match self {
-            LibraryEntry::Category { .. } => true,
-            LibraryEntry::Sound { .. } => false,
-        }
+        matches!(self, LibraryEntry::Category { .. })
     }
     #[allow(unused)]
     pub fn is_sound(&self) -> bool {
-        match self {
-            LibraryEntry::Category { .. } => false,
-            LibraryEntry::Sound { .. } => true,
-        }
+        matches!(self, LibraryEntry::Sound { .. })
     }
     pub fn parent(&self) -> i64 {
         match self {
-            LibraryEntry::Category { parent, .. } => *parent,
-            LibraryEntry::Sound { parent, .. } => *parent,
+            | LibraryEntry::Category { parent, .. }
+            | LibraryEntry::Sound { parent, .. } => *parent,
         }
     }
     pub fn bytes(&self) -> i64 {
@@ -98,6 +94,17 @@ impl LibraryEntry {
             None
         }
     }
+    pub fn is_enabled(&self) -> bool {
+        match self {
+            | LibraryEntry::Category { enabled, .. }
+            | LibraryEntry::Sound { enabled, .. } => *enabled,
+        }
+    }
+    pub fn set_enabled(&mut self, new_enabled: bool) {
+        let ( LibraryEntry::Category { ref mut enabled, .. }
+            | LibraryEntry::Sound { ref mut enabled, .. }) = self;
+        *enabled = new_enabled;
+    }
     pub fn get_string(&self) -> String {
         format!(
             "{},{},{},{},{},{}",
@@ -122,12 +129,14 @@ impl LibraryEntry {
                     parent: segments[3].parse().unwrap(),
                     bytes: segments[4].parse().unwrap(),
                     duration: segments[5].parse().unwrap(),
+                    enabled: true,
                 }),
                 "1" => Some(LibraryEntry::Category {
                     id: segments[0].parse().unwrap(),
                     name: segments[1].to_string(),
                     parent: segments[3].parse().unwrap(),
                     children: vec![],
+                    enabled: true,
                 }),
                 _ => None
             }

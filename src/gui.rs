@@ -6,8 +6,8 @@ use pretty_bytes::converter::convert;
 use strum::{EnumIter, IntoEnumIterator};
 
 use crate::{
-    audio::{play_sound, stop_audio},
-    favourites::{add_favourite, has_favourite, remove_favourite},
+    audio,
+    favourites,
     library::{Library, LibraryEntry},
     requests::CDN_URL,
     stats::EXISTING_SOUND_FILES,
@@ -63,6 +63,10 @@ impl GdSfx {
     pub fn run(self, options: NativeOptions) {
         eframe::run_native("GDSFX", options, Box::new(|_cc| Box::new(self))).unwrap()
     }
+
+    pub fn matches_query(&self, string: &str) -> bool {
+        string.to_ascii_lowercase().contains(&self.search_query)
+    }
 }
 
 fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
@@ -99,16 +103,16 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
                 match gdsfx.stage {
+                    // TODO this can be simplified
                     Stage::Library => {
-                        let library = sfx_library.sound_effects.clone();
-                        let filter_str = &gdsfx.search_query.to_ascii_lowercase();
-                        if let Some(mut sfx) = filter_sounds(library, filter_str) {
-                            remove_empty_category_nodes(&mut sfx);
-                            library_list(ui, gdsfx, &sfx);
-                        }
+                        let mut library = sfx_library.sound_effects.clone();
+                        filter_sounds(gdsfx, &mut library);
+                        library_list(ui, gdsfx, &library);
                     }
                     Stage::Favourites => {
-                        favourites_list(ui, gdsfx, sfx_library.sound_effects.clone())
+                        let mut library = sfx_library.sound_effects.clone();
+                        filter_sounds(gdsfx, &mut library);
+                        favourites_list(ui, gdsfx, library);
                     }
                     Stage::Stats => stats_list(ui, gdsfx),
                     Stage::Credits => credits_list(ui, gdsfx),
@@ -120,7 +124,6 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
 fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
     fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui) {
-        // let q = gdsfx.search_query.to_ascii_lowercase();
         match entry {
             LibraryEntry::Category { children, .. } => {
                 let (mut categories, mut sounds): (Vec<_>, Vec<_>) =
@@ -150,19 +153,23 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
                 } else {
                     sounds.sort_by(sorting);
 
-                    // let is_disabled = sounds.is_empty() && !q.is_empty();
-                    // ui.set_enabled(!is_disabled);
+                    let enabled = entry.is_enabled();
 
-                    ui.collapsing(entry.name(), |ui| {
-                        for child in categories {
-                            recursive(gdsfx, child, ui);
-                        }
-                        for child in sounds {
-                            recursive(gdsfx, child, ui);
-                        }
-                    });
+                    let should_add = true;
 
-                    ui.set_enabled(true);
+                    /// uncomment this if you want to hide disabled subcategories
+                    /// intentional doc comment so you read this
+                    // let should_add = enabled || entry.parent() == 1;
+
+                    if should_add {
+                        ui.add_enabled_ui(enabled, |ui| {
+                            ui.collapsing(entry.name(), |ui| {
+                                for child in children {
+                                    recursive(gdsfx, child, ui);
+                                }
+                            });
+                        });
+                    }
                 }
             }
             LibraryEntry::Sound { .. } => {
@@ -174,57 +181,63 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
 }
 
 fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
-    fn recursive(gdsfx: &mut GdSfx, entry: &LibraryEntry, ui: &mut egui::Ui) {
+    fn recursive(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
         match entry {
             LibraryEntry::Category { children, .. } => {
                 for child in children {
-                    recursive(gdsfx, child, ui);
+                    recursive(ui, gdsfx, child);
                 }
             }
-            LibraryEntry::Sound { name, id, .. } => {
-                if has_favourite(*id)
-                    && name
-                        .to_ascii_lowercase()
-                        .contains(&gdsfx.search_query.to_ascii_lowercase())
-                {
+            LibraryEntry::Sound { id, .. } => {
+                if favourites::has_favourite(*id) {
                     sfx_button(ui, gdsfx, entry)
                 }
             }
         }
     }
-    recursive(gdsfx, &sfx_library, ui);
+    recursive(ui, gdsfx, &sfx_library);
 }
 
 fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    // (bytes, duration, files)
-    fn recursive(entry: &LibraryEntry) -> (u128, u128, i64) {
+    struct Stats {
+        bytes: u128,
+        duration: u128,
+        files: i64,
+    }
+
+    fn recursive(entry: &LibraryEntry) -> Stats {
         match entry {
             LibraryEntry::Category { children, .. } => children
                 .iter()
                 .map(recursive)
-                .reduce(|a, b| (a.0 + b.0, a.1 + b.1, a.2 + b.2))
-                .unwrap_or((0, 0, 1)),
-            LibraryEntry::Sound {
-                bytes, duration, ..
-            } => (*bytes as u128, *duration as u128, 1),
+                .reduce(|a, b| Stats {
+                    bytes: a.bytes + b.bytes,
+                    duration: a.duration + b.duration,
+                    files: a.files + b.files
+                })
+                .unwrap_or(Stats { bytes: 0, duration: 0, files: 1 }),
+
+            LibraryEntry::Sound { bytes, duration, .. } => Stats {
+                bytes: *bytes as u128,
+                duration: *duration as u128,
+                files: 1
+            }
         }
     }
-    let (total_bytes, total_duration, total_files) =
-        recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
+
+    let Stats {
+        bytes: total_bytes,
+        duration: total_duration,
+        files: total_files
+    } = recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
 
     ui.heading("SFX Library");
 
     ui.add_space(10.0);
 
-    ui.label(format!("Total files: {}", total_files));
-    ui.label(format!(
-        "Total size: {}",
-        pretty_bytes::converter::convert(total_bytes as f64)
-    ));
-    ui.label(format!(
-        "Total duration: {}s",
-        stringify_duration(total_duration as i64)
-    ));
+    ui.label(format!("Total files: {total_files}"));
+    ui.label(format!("Total size: {}", pretty_bytes::converter::convert(total_bytes as f64)));
+    ui.label(format!("Total duration: {}s", stringify_duration(total_duration as i64)));
 
     ui.add_space(30.0);
 
@@ -232,10 +245,7 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.add_space(10.0);
 
-    ui.label(format!(
-        "Downloaded sfx files: {}",
-        EXISTING_SOUND_FILES.lock().unwrap().len()
-    ));
+    ui.label(format!("Downloaded sfx files: {}", EXISTING_SOUND_FILES.lock().unwrap().len()));
 }
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
@@ -247,7 +257,7 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.add_space(30.0);
 
-    ui.heading("<This project>");
+    ui.heading("This project");
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
     ui.add_space(10.0);
 
@@ -269,14 +279,14 @@ fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.menu_button("Sorting", |ui| {
         for (alternative, text) in [
             (Sorting::Default, "Default"),
-            (Sorting::NameInc, "Name+"),
-            (Sorting::NameDec, "Name-"),
-            (Sorting::LengthInc, "Length+"),
-            (Sorting::LengthDec, "Length-"),
-            (Sorting::IdInc, "ID+"),
-            (Sorting::IdDec, "ID-"),
-            (Sorting::SizeInc, "Size+"),
-            (Sorting::SizeDec, "Size-"),
+            (Sorting::NameInc, "Name A-Z"),
+            (Sorting::NameDec, "Name Z-A"),
+            (Sorting::LengthInc, "Length +"),
+            (Sorting::LengthDec, "Length -"),
+            (Sorting::IdInc, "ID +"),
+            (Sorting::IdDec, "ID -"),
+            (Sorting::SizeInc, "Size +"),
+            (Sorting::SizeDec, "Size -"),
         ] {
             let response = ui.radio_value(&mut gdsfx.sorting, alternative, text);
             if response.clicked() {
@@ -287,24 +297,30 @@ fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
+    if !entry.is_enabled() { return }
+
     let sound = ui.button(entry.pretty_name());
+
     if sound.hovered() {
         gdsfx.selected_sfx = Some(entry.clone());
     }
+
     if sound.clicked() {
-        stop_audio();
-        play_sound(entry, CDN_URL);
+        audio::stop_audio();
+        audio::play_sound(entry, CDN_URL);
     }
+
     sound.context_menu(|ui| {
-        if has_favourite(entry.id()) {
+        if favourites::has_favourite(entry.id()) {
             if ui.button("Remove favourite").clicked() {
-                remove_favourite(entry.id());
+                favourites::remove_favourite(entry.id());
                 ui.close_menu();
             }
         } else if ui.button("Favourite").clicked() {
-            add_favourite(entry.id());
+            favourites::add_favourite(entry.id());
             ui.close_menu();
         }
+
         if entry.exists() {
             if ui.button("Delete").clicked() {
                 entry.delete();
@@ -335,53 +351,33 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
 
             ui.add_space(50.0);
 
-            if ui
-                .add_enabled(!sfx.exists(), Button::new("Download"))
-                .clicked()
-            {
+            if ui.add_enabled(!sfx.exists(), Button::new("Download")).clicked() {
                 sfx.download_and_store();
             }
-            if ui
-                .add_enabled(sfx.exists(), Button::new("Delete"))
-                .clicked()
-            {
+            if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
                 sfx.delete();
             }
             if ui.button("Play").clicked() {
-                play_sound(sfx, CDN_URL);
+                audio::play_sound(sfx, CDN_URL);
             }
             if ui.button("Stop").clicked() {
-                stop_audio();
+                audio::stop_audio();
             }
         });
     }
 }
 
-fn remove_empty_category_nodes(node: &mut LibraryEntry) -> bool {
+fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
     match node {
-        LibraryEntry::Sound { .. } => true,
-        LibraryEntry::Category { children, .. } => {
-            // Recursively check for any sounds
-            children.iter_mut().any(remove_empty_category_nodes)
-        }
-    }
-}
-
-fn filter_sounds(entry: LibraryEntry, filter_str: &str) -> Option<LibraryEntry> {
-    match entry {
         LibraryEntry::Sound { ref name, .. } => {
-            name.to_ascii_lowercase().contains(filter_str).then_some(entry)
+            node.set_enabled(gdsfx.matches_query(name));
         }
-        LibraryEntry::Category { id, name, parent, children } => {
+        LibraryEntry::Category { children, .. } => {
             // Recursively filter sounds in subcategories
-            let filtered_sounds: Vec<LibraryEntry> = children
-                .into_iter()
-                .flat_map(|node| filter_sounds(node, filter_str))
-                .collect();
+            children.iter_mut().for_each(|child| filter_sounds(gdsfx, child));
 
-            // Only keep the category if it contains any filtered sounds
-            let has_children = !filtered_sounds.is_empty();
-            has_children.then_some(LibraryEntry::Category { id, name, parent, children: filtered_sounds })
+            let any_enabled = children.iter().any(LibraryEntry::is_enabled);
+            node.set_enabled(any_enabled);
         }
     }
 }
