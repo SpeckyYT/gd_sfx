@@ -362,11 +362,13 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 
-    ui.add_space(30.0);
+    ui.add_space(20.0);
 
     ui.heading(t!("credits.this_project"));
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
+
     ui.add_space(10.0);
+    ui.heading(t!("credits.this_project.developers"));
 
     for (name, link) in [
         ("Specky", "https://github.com/SpeckyYT"),
@@ -374,6 +376,25 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
         ("kr8gz", "https://github.com/kr8gz"),
     ] {
         ui.hyperlink_to(name, link);
+    }
+
+    ui.add_space(10.0);
+    ui.label(t!("credits.this_project.translations", lang = format_locale(&rust_i18n::locale())));
+
+    match rust_i18n::locale().as_str() {
+        "de_AT" => {
+            ui.hyperlink_to("kr8gz", "https://github.com/kr8gz");
+        }
+        "it_IT" | "lld_BAD" | "tok_MP" => {
+            ui.hyperlink_to("Specky", "https://github.com/SpeckyYT");
+        }
+        "nl_NL" => {
+            ui.hyperlink_to("tags", "https://github.com/zTags");
+        }
+        "ua_UA" => {
+            ui.label("Eldyj");
+        }
+        _ => {}
     }
 }
 

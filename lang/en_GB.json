@@ -1,9 +1,60 @@
 {
-    "language.name": "English",
-    "language.region": "United Kingdom",
+	"language.name": "English",
+	"language.region": "United Kingdom",
 
+	"tab.library": "Library",
 	"tab.favorites": "Favourites",
+	"tab.tools": "Tools",
+	"tab.settings": "Settings",
+	"tab.stats": "Stats",
+	"tab.credits": "Credits",
 
-    "sound.button.favorite.add": "Favourite",
-    "sound.button.favorite.remove": "Remove favourite"
+	"credits.sfx": "SFX Credits",
+	"credits.this_project": "This project",
+
+	"search": "Search",
+
+	"settings": "Settings",
+	"settings.hide_empty_categories": "Hide empty categories",
+    "settings.language": "Language",
+
+	"tools": "Tools",
+	"tools.warning.long_time": "Warning: these functions take a long time to process.",
+	"tools.warning.program_not_usable": "You will not be able to use this program while they are running.",
+	"tools.instruction": "Triple click the buttons to run",
+	"tools.download_all_sfx": "Download all SFX",
+	"tools.download_all_sfx.title": "Downloading...",
+	"tools.delete_all_sfx": "Delete all SFX",
+	"tools.delete_all_sfx.title": "Deleting...",
+	"tools.progress": "Progress",
+
+	"sort.button": "Sorting",
+	"sort.default": "Default",
+	"sort.name.ascending": "Name A-Z",
+	"sort.name.descending": "Name Z-A",
+	"sort.length.ascending": "Length +",
+	"sort.length.descending": "Length -",
+	"sort.id.ascending": "ID +",
+	"sort.id.descending": "ID -",
+	"sort.size.ascending": "Size +",
+	"sort.size.descending": "Size -",
+
+	"sound.button.delete": "Delete",
+	"sound.button.download": "Download",
+	"sound.button.favorite.add": "Favourite",
+	"sound.button.favorite.remove": "Remove favourite",
+	"sound.button.play": "Play",
+	"sound.button.stop": "Stop",
+
+	"sound.info.id": "ID: %{id}",
+	"sound.info.category.id": "Category: %{id}",
+	"sound.info.size": "Size: %{size}",
+	"sound.info.duration": "Duration: %{duration}s",
+    
+	"stats.library": "SFX Library",
+	"stats.library.duration": "Total duration: %{duration}s",
+	"stats.library.files": "Total files: %{files}",
+	"stats.library.size": "Total size: %{size}",
+	"stats.files": "SFX Files",
+	"stats.files.downloaded": "Downloaded SFX files: %{files}"
 }

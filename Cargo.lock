@@ -562,6 +562,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "build_script"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "163ca3c07a6939838dfa322e1e36cd434cc2b625dacb051b8e8b893bbbb8aa62"
+dependencies = [
+ "once_cell",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1308,6 +1317,7 @@ name = "gd_sfx"
 version = "0.1.0"
 dependencies = [
  "base64",
+ "build_script",
  "crossbeam-channel",
  "eframe",
  "egui-modal",
@@ -1318,6 +1328,7 @@ dependencies = [
  "reqwest",
  "rodio",
  "rust-i18n",
+ "serde_json",
  "slab_tree",
  "strum",
  "winapi",
@@ -2867,9 +2878,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.110"
+version = "1.0.111"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6fbd975230bada99c8bb618e0c365c2eefa219158d5c6c29610fd09ff1833257"
+checksum = "176e46fa42316f18edd598015a5166857fc835ec732f5215eac6b7bdbf0a84f4"
 dependencies = [
  "itoa",
  "ryu",
