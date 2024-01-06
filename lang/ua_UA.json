@@ -11,6 +11,8 @@
 
 	"credits.sfx": "SFX Автори",
 	"credits.this_project": "Цей проєкт",
+	"credits.this_project.developers": "Розробники",
+	"credits.this_project.translations": "Перекладачі для %{lang}",
 
 	"search": "Пошук",
 
