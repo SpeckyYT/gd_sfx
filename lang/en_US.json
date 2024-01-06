@@ -2,12 +2,12 @@
 	"language.name": "English",
 	"language.region": "United States",
 
-	"stage.library": "Library",
-	"stage.favorites": "Favorites",
-	"stage.tools": "Tools",
-	"stage.settings": "Settings",
-	"stage.stats": "Stats",
-	"stage.credits": "Credits",
+	"tab.library": "Library",
+	"tab.favorites": "Favorites",
+	"tab.tools": "Tools",
+	"tab.settings": "Settings",
+	"tab.stats": "Stats",
+	"tab.credits": "Credits",
 
 	"credits.sfx": "SFX Credits",
 	"credits.this_project": "This project",

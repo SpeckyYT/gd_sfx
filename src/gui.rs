@@ -26,14 +26,14 @@ pub struct GdSfx {
     pub sfx_version: Option<VersionType>,
     pub sfx_library: Option<Library>,
 
-    pub stage: Stage,
+    pub tab: Tab,
     pub search_query: String,
     pub sorting: Sorting,
     pub selected_sfx: Option<LibraryEntry>,
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
-pub enum Stage {
+pub enum Tab {
     #[default]
     Library,
     Favourites,
@@ -43,15 +43,15 @@ pub enum Stage {
     Credits,
 }
 
-impl Stage {
+impl Tab {
     pub fn get_localized_name(&self) -> String {
         t!(match self {
-            Stage::Library => "stage.library",
-            Stage::Favourites => "stage.favorites",
-            Stage::Tools => "stage.tools",
-            Stage::Settings => "stage.settings",
-            Stage::Stats => "stage.stats",
-            Stage::Credits => "stage.credits",
+            Tab::Library => "tab.library",
+            Tab::Favourites => "tab.favorites",
+            Tab::Tools => "tab.tools",
+            Tab::Settings => "tab.settings",
+            Tab::Stats => "tab.stats",
+            Tab::Credits => "tab.credits",
         })
     }
 }
@@ -93,8 +93,8 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
     egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
         ui.add_space(4.0);
         ui.horizontal(|ui| {
-            Stage::iter().for_each(|stage| {
-                ui.selectable_value(&mut gdsfx.stage, stage, stage.get_localized_name());
+            Tab::iter().for_each(|tab| {
+                ui.selectable_value(&mut gdsfx.tab, tab, tab.get_localized_name());
             });
         });
         ui.add_space(2.0);
@@ -114,7 +114,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         ui.separator();
         */
 
-        if let Stage::Library | Stage::Favourites = gdsfx.stage {
+        if let Tab::Library | Tab::Favourites = gdsfx.tab {
             search_bar(ui, gdsfx);
             sort_menu(ui, gdsfx);
             ui.separator();
@@ -122,22 +122,22 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
 
         egui::ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = gdsfx.sfx_library.as_ref() {
-                match gdsfx.stage {
+                match gdsfx.tab {
                     // TODO this can be simplified
-                    Stage::Library => {
+                    Tab::Library => {
                         let mut library = sfx_library.sound_effects.clone();
                         filter_sounds(gdsfx, &mut library);
                         library_list(ui, gdsfx, &library);
                     }
-                    Stage::Favourites => {
+                    Tab::Favourites => {
                         let mut library = sfx_library.sound_effects.clone();
                         filter_sounds(gdsfx, &mut library);
                         favourites_list(ui, gdsfx, library);
                     }
-                    Stage::Tools => tools_list(ui, gdsfx, ctx),
-                    Stage::Settings => settings_list(ui, gdsfx),
-                    Stage::Stats => stats_list(ui, gdsfx),
-                    Stage::Credits => credits_list(ui, gdsfx),
+                    Tab::Tools => tools_list(ui, gdsfx, ctx),
+                    Tab::Settings => settings_list(ui, gdsfx),
+                    Tab::Stats => stats_list(ui, gdsfx),
+                    Tab::Credits => credits_list(ui, gdsfx),
                 }
             }
         });
