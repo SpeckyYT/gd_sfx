@@ -15,7 +15,7 @@ pub struct Settings {
 lazy_static!{
     pub static ref FAVOURITES_FILE: PathBuf = GD_FOLDER.join("gdsfx_favourites.dat");
 
-    pub static ref FIRST_READ: (HashSet<i64>, Settings) = read_file();
+    pub static ref FIRST_READ: (HashSet<i64>, Settings) = read_settings_file();
     pub static ref FAVOURITES_LIST: Arc<Mutex<HashSet<i64>>> = Arc::new(Mutex::new(FIRST_READ.0.clone()));
     pub static ref SETTINGS: Arc<Mutex<Settings>> = Arc::new(Mutex::new(FIRST_READ.1));
 
@@ -24,7 +24,7 @@ lazy_static!{
 
 pub const FAVOURITES_CHARACTER: char = '⭐';
 
-pub fn read_file() -> (HashSet<i64>, Settings) {
+pub fn read_settings_file() -> (HashSet<i64>, Settings) {
     if FAVOURITES_FILE.exists() {
         let mut favourites = HashSet::default();
 

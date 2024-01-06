@@ -223,8 +223,8 @@ lazy_static! {
 }
 
 fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
-    let modal_generator = |title| -> Modal {
-        let modal = Modal::new(ctx, format!("{}_modal", title));
+    let modal_generator = |title, id_source| -> Modal {
+        let modal = Modal::new(ctx, format!("{}_modal", id_source));
 
         modal.show(|ui| {
             let mut download_handle = DOWNLOAD_HANDLE.lock().unwrap();
@@ -253,8 +253,8 @@ fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
         modal
     };
 
-    let download_modal = modal_generator(t!("tools.download_all_sfx.title"));
-    let delete_modal = modal_generator(t!("tools.delete_all_sfx.title"));
+    let download_modal = modal_generator(t!("tools.download_all_sfx.title"), "download");
+    let delete_modal = modal_generator(t!("tools.delete_all_sfx.title"), "delete");
     
     ui.heading(t!("tools"));
 

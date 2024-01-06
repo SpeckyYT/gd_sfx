@@ -1,6 +1,7 @@
-use std::thread;
+use std::{thread, hint::black_box};
 
 use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2, Theme};
+use settings::FIRST_READ;
 use stats::add_existing_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
@@ -31,6 +32,8 @@ fn main() {
     gdsfx.get_cdn_url(false);
     gdsfx.get_sfx_version(false);
     gdsfx.get_sfx_library(false);
+
+    black_box(&FIRST_READ);
 
     gdsfx.run(NativeOptions {
         viewport: ViewportBuilder::default()
