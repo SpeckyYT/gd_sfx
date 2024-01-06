@@ -1,18 +1,23 @@
 {
 	"language.name": "Nederlands",
 	"language.region": "Nederland",
+
 	"tab.library": "Bibliotheek",
 	"tab.favorites": "Favorites",
 	"tab.tools": "Gereedschappen",
 	"tab.settings": "Instellingen",
 	"tab.stats": "Statistieken",
 	"tab.credits": "Credits",
+
 	"credits.sfx": "SFX Credits",
 	"credits.this_project": "Dit project",
+
 	"search": "Zoeken",
+
 	"settings": "Instellingen",
 	"settings.hide_empty_categories": "Laat lege categorieën niet zien",
 	"settings.language": "Taal",
+
 	"tools": "Gereedschappen",
 	"tools.warning.long_time": "Waarschuwing: deze acties kunnen lang duren.",
 	"tools.warning.program_not_usable": "Het programma zal niet reageren terwijl deze aan het uitvoeren zijn.",
@@ -21,6 +26,7 @@
 	"tools.download_all_sfx.title": "Downloaden...",
 	"tools.delete_all_sfx": "Verwijder alle SFX",
 	"tools.delete_all_sfx.title": "Verwijderen...",
+
 	"sort.button": "Ordening",
 	"tools.progress": "Vooruitgang",
 	"sort.default": "Standaard",
@@ -32,16 +38,19 @@
 	"sort.id.descending": "ID (afnemend)",
 	"sort.size.ascending": "Grootte (toenemend)",
 	"sort.size.descending": "Grootte (afnemend)",
+
 	"sound.button.delete": "Verwijder",
 	"sound.button.download": "Download",
 	"sound.button.favorite.add": "Voeg toe aan favorieten",
 	"sound.button.favorite.remove": "Verwijder van favorieten",
 	"sound.button.play": "Speel af",
 	"sound.button.stop": "Stop",
+
 	"sound.info.id": "ID: %{id}",
 	"sound.info.category.id": "Categorie: %{id}",
 	"sound.info.size": "Grootte: %{size}",
 	"sound.info.duration": "Lengte: %{duration}s",
+	
 	"stats.library": "SFX Bibliotheek",
 	"stats.library.duration": "Totale lengte: %{duration}s",
 	"stats.library.files": "Totaal aantal bestanden: %{files}",
