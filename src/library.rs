@@ -3,7 +3,7 @@ use std::{fs, path::PathBuf};
 use eframe::epaint::ahash::{HashMap, HashMapExt};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
-use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, favourites::{has_favourite, FAVOURITES_CHARACTER}, stats::{add_file_to_stats, remove_file_from_stats}};
+use crate::{encoding::full_decode, util::{GD_FOLDER, LOCAL_SFX_LIBRARY}, requests::{download_sfx, CDN_URL}, settings::{has_favourite, FAVOURITES_CHARACTER}, stats::{add_file_to_stats, remove_file_from_stats}};
 
 #[derive(Debug, Clone)]
 pub struct Library {

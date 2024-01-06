@@ -10,7 +10,7 @@ mod library;
 mod gui;
 mod util;
 mod audio;
-mod favourites;
+mod settings;
 mod stats;
 
 #[cfg(test)]

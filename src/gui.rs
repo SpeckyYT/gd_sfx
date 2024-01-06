@@ -7,7 +7,7 @@ use strum::{EnumIter, IntoEnumIterator};
 
 use crate::{
     audio,
-    favourites,
+    settings::{self, SETTINGS, save},
     library::{Library, LibraryEntry},
     requests::CDN_URL,
     stats::EXISTING_SOUND_FILES,
@@ -33,6 +33,7 @@ pub enum Stage {
     #[default]
     Library,
     Favourites,
+    Settings,
     Stats,
     Credits,
 }
@@ -45,8 +46,8 @@ pub enum Sorting {
     NameDec,   // z - a
     LengthInc, // 0.00 - 1.00
     LengthDec, // 1.00 - 0.00
-    IdInc,     // 9 - 0
-    IdDec,     // 0 - 9
+    IdInc,     // 0 - 9
+    IdDec,     // 9 - 0
     SizeInc,   // 0kb - 9kb
     SizeDec,   // 9kb - 0kb
 }
@@ -114,6 +115,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
                         filter_sounds(gdsfx, &mut library);
                         favourites_list(ui, gdsfx, library);
                     }
+                    Stage::Settings => settings_list(ui, gdsfx),
                     Stage::Stats => stats_list(ui, gdsfx),
                     Stage::Credits => credits_list(ui, gdsfx),
                 }
@@ -136,8 +138,8 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
                         Sorting::NameDec => b.name().cmp(a.name()),
                         Sorting::LengthInc => a.duration().cmp(&b.duration()),
                         Sorting::LengthDec => b.duration().cmp(&a.duration()),
-                        Sorting::IdInc => b.id().cmp(&a.id()), // this is not a bug, in gd, the id sorting is reversed,
-                        Sorting::IdDec => a.id().cmp(&b.id()), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
+                        Sorting::IdInc => a.id().cmp(&b.id()),
+                        Sorting::IdDec => b.id().cmp(&a.id()),
                         Sorting::SizeInc => a.bytes().cmp(&b.bytes()),
                         Sorting::SizeDec => b.bytes().cmp(&a.bytes()),
                     }
@@ -155,11 +157,7 @@ fn library_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: &LibraryEntry) {
 
                     let enabled = entry.is_enabled();
 
-                    let should_add = true;
-
-                    /// uncomment this if you want to hide disabled subcategories
-                    /// intentional doc comment so you read this
-                    // let should_add = enabled || entry.parent() == 1;
+                    let should_add = enabled || !SETTINGS.lock().unwrap().filter_search;
 
                     if should_add {
                         ui.add_enabled_ui(enabled, |ui| {
@@ -189,13 +187,29 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
                 }
             }
             LibraryEntry::Sound { id, .. } => {
-                if favourites::has_favourite(*id) {
+                if settings::has_favourite(*id) {
                     sfx_button(ui, gdsfx, entry)
                 }
             }
         }
     }
     recursive(ui, gdsfx, &sfx_library);
+}
+
+fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {
+    ui.heading("Settings");
+
+    ui.add_space(20.0);
+
+    let mut settings = SETTINGS.lock().unwrap();
+    let initial_settings = *settings;
+
+    ui.checkbox(&mut settings.filter_search, "Hide empty categories");
+
+    if *settings != initial_settings {
+        drop(settings); // fixes deadlock (geometry dash reference)
+        save();
+    }
 }
 
 fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
@@ -283,8 +297,8 @@ fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
             (Sorting::NameDec, "Name Z-A"),
             (Sorting::LengthInc, "Length +"),
             (Sorting::LengthDec, "Length -"),
-            (Sorting::IdInc, "ID +"),
-            (Sorting::IdDec, "ID -"),
+            (Sorting::IdDec, "ID +"), // this is not a bug, in gd, the id sorting is reversed,
+            (Sorting::IdInc, "ID -"), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
             (Sorting::SizeInc, "Size +"),
             (Sorting::SizeDec, "Size -"),
         ] {
@@ -311,13 +325,13 @@ fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
     }
 
     sound.context_menu(|ui| {
-        if favourites::has_favourite(entry.id()) {
+        if settings::has_favourite(entry.id()) {
             if ui.button("Remove favourite").clicked() {
-                favourites::remove_favourite(entry.id());
+                settings::remove_favourite(entry.id());
                 ui.close_menu();
             }
         } else if ui.button("Favourite").clicked() {
-            favourites::add_favourite(entry.id());
+            settings::add_favourite(entry.id());
             ui.close_menu();
         }
 
