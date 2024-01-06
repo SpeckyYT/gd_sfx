@@ -1,0 +1,60 @@
+{
+	"language.name": "Українська",
+	"language.region": "Україна",
+
+	"tab.library": "Бібліотека",
+	"tab.favorites": "Улюблені",
+	"tab.tools": "Інструменти",
+	"tab.settings": "Налаштування",
+	"tab.stats": "Статистика",
+	"tab.credits": "Автори",
+
+	"credits.sfx": "SFX Автори",
+	"credits.this_project": "Цей проєкт",
+
+	"search": "Пошук",
+
+	"settings": "Налаштування",
+	"settings.hide_empty_categories": "Сховати пусті категорії",
+	"settings.language": "Мова",
+
+	"tools": "Інструменти",
+	"tools.warning.long_time": "Попередження: ці функції займають багато часу на обробку.",
+	"tools.warning.program_not_usable": "Ви не будете спроможні використовувати цю программу під час їх роботи.",
+	"tools.instruction": "Тричі натисніть кнопку для запуску",
+	"tools.download_all_sfx": "Завантажити всі SFX",
+	"tools.download_all_sfx.title": "Завантаження...",
+	"tools.delete_all_sfx": "Видалити всі SFX",
+	"tools.delete_all_sfx.title": "Видалення...",
+	"tools.progress": "Прогресс",
+
+	"sort.button": "Сортування",
+	"sort.default": "За замовчуванням",
+	"sort.name.ascending": "Ім’я A-Z",
+	"sort.name.descending": "Ім’я Z-A",
+	"sort.length.ascending": "Тривалість +",
+	"sort.length.descending": "Тривалість -",
+	"sort.id.ascending": "ID +",
+	"sort.id.descending": "ID -",
+	"sort.size.ascending": "Розмір +",
+	"sort.size.descending": "Розмір -",
+
+	"sound.button.delete": "Видалити",
+	"sound.button.download": "Завантажити",
+	"sound.button.favorite.add": "В улюблене",
+	"sound.button.favorite.remove": "Видалити з улюбленого",
+	"sound.button.play": "Грати",
+	"sound.button.stop": "Зупинити",
+
+	"sound.info.id": "ID: %{id}",
+	"sound.info.category.id": "Категорія: %{id}",
+	"sound.info.size": "Розмір: %{size}",
+	"sound.info.duration": "Тривалість: %{duration}s",
+    
+	"stats.library": "SFX Бібліотека",
+	"stats.library.duration": "Загальна тривалість: %{duration}s",
+	"stats.library.files": "Усього файлів: %{files}",
+	"stats.library.size": "Загальний розмір: %{size}",
+	"stats.files": "SFX файли",
+	"stats.files.downloaded": "Завантажено SFX файлів: %{files}"
+}
