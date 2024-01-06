@@ -4,6 +4,9 @@ use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2, Theme};
 use stats::add_existing_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
+#[macro_use]
+extern crate rust_i18n;
+
 mod requests;
 mod encoding;
 mod library;
@@ -15,6 +18,8 @@ mod stats;
 
 #[cfg(test)]
 mod test;
+
+i18n!("lang", fallback = "en_US");
 
 fn main() {
     hide_console_window();

@@ -198,14 +198,14 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
 }
 
 fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {
-    ui.heading("Settings");
+    ui.heading(t!("settings"));
 
     ui.add_space(20.0);
 
     let mut settings = SETTINGS.lock().unwrap();
     let initial_settings = *settings;
 
-    ui.checkbox(&mut settings.filter_search, "Hide empty categories");
+    ui.checkbox(&mut settings.filter_search, t!("settings.hide_empty"));
 
     if *settings != initial_settings {
         drop(settings); // fixes deadlock (geometry dash reference)
@@ -240,31 +240,27 @@ fn stats_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
         }
     }
 
-    let Stats {
-        bytes: total_bytes,
-        duration: total_duration,
-        files: total_files
-    } = recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
+    let Stats { bytes, duration, files } = recursive(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
 
-    ui.heading("SFX Library");
+    ui.heading(t!("stats.library"));
 
     ui.add_space(10.0);
 
-    ui.label(format!("Total files: {total_files}"));
-    ui.label(format!("Total size: {}", pretty_bytes::converter::convert(total_bytes as f64)));
-    ui.label(format!("Total duration: {}s", stringify_duration(total_duration as i64)));
+    ui.label(t!("stats.library.files", files = files));
+    ui.label(t!("stats.library.size", size = pretty_bytes::converter::convert(bytes as f64)));
+    ui.label(t!("stats.library.duration", duration = stringify_duration(duration as i64)));
 
     ui.add_space(30.0);
 
-    ui.heading("SFX Files");
+    ui.heading(t!("stats.files"));
 
     ui.add_space(10.0);
 
-    ui.label(format!("Downloaded sfx files: {}", EXISTING_SOUND_FILES.lock().unwrap().len()));
+    ui.label(t!("stats.files.downloaded", files = EXISTING_SOUND_FILES.lock().unwrap().len()));
 }
 
 fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    ui.heading("SFX Credits");
+    ui.heading(t!("credits.sfx"));
     ui.add_space(10.0);
     for credits in &gdsfx.sfx_library.as_ref().unwrap().credits {
         ui.hyperlink_to(&credits.name, &credits.link);
@@ -272,7 +268,7 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.add_space(30.0);
 
-    ui.heading("This project");
+    ui.heading(t!("credits.this_project"));
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
     ui.add_space(10.0);
 
@@ -286,22 +282,22 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 fn search_bar(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    ui.heading("Search");
+    ui.heading(t!("search"));
     ui.text_edit_singleline(&mut gdsfx.search_query);
 }
 
 fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.menu_button("Sorting", |ui| {
         for (alternative, text) in [
-            (Sorting::Default, "Default"),
-            (Sorting::NameInc, "Name A-Z"),
-            (Sorting::NameDec, "Name Z-A"),
-            (Sorting::LengthInc, "Length +"),
-            (Sorting::LengthDec, "Length -"),
-            (Sorting::IdDec, "ID +"), // this is not a bug, in gd, the id sorting is reversed,
-            (Sorting::IdInc, "ID -"), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
-            (Sorting::SizeInc, "Size +"),
-            (Sorting::SizeDec, "Size -"),
+            (Sorting::Default,   t!("sort.default")),
+            (Sorting::NameInc,   t!("sort.name.ascending")),
+            (Sorting::NameDec,   t!("sort.name.descending")),
+            (Sorting::LengthInc, t!("sort.length.ascending")),
+            (Sorting::LengthDec, t!("sort.length.descending")),
+            (Sorting::IdDec,     t!("sort.id.ascending")),  // this is not a bug, in gd, the id sorting is reversed,
+            (Sorting::IdInc,     t!("sort.id.descending")), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
+            (Sorting::SizeInc,   t!("sort.size.ascending")),
+            (Sorting::SizeDec,   t!("sort.size.descending")),
         ] {
             let response = ui.radio_value(&mut gdsfx.sorting, alternative, text);
             if response.clicked() {
@@ -327,21 +323,21 @@ fn sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: &LibraryEntry) {
 
     sound.context_menu(|ui| {
         if settings::has_favourite(entry.id()) {
-            if ui.button("Remove favourite").clicked() {
+            if ui.button(t!("sound.button.favorite.remove")).clicked() {
                 settings::remove_favourite(entry.id());
                 ui.close_menu();
             }
-        } else if ui.button("Favourite").clicked() {
+        } else if ui.button(t!("sound.button.favorite.add")).clicked() {
             settings::add_favourite(entry.id());
             ui.close_menu();
         }
 
         if entry.exists() {
-            if ui.button("Delete").clicked() {
+            if ui.button(t!("sound.button.delete")).clicked() {
                 entry.delete();
                 ui.close_menu();
             }
-        } else if ui.button("Download").clicked() {
+        } else if ui.button(t!("sound.button.download")).clicked() {
             entry.download_and_store();
             ui.close_menu();
         }
@@ -359,23 +355,28 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
 
             ui.add_space(25.0);
 
-            ui.heading(format!("ID: {}", sfx.id()));
-            ui.heading(format!("Category ID: {}", sfx.parent()));
-            ui.heading(format!("Size: {}", convert(sfx.bytes() as f64)));
-            ui.heading(format!("Duration: {}s", stringify_duration(sfx.duration())));
+            ui.heading(t!("sound.info.id", id = sfx.id()));
+            ui.heading(t!("sound.info.category.id", id = sfx.parent()));
+            ui.heading(t!("sound.info.size", size = convert(sfx.bytes() as f64)));
+            ui.heading(t!("sound.info.duration", duration = stringify_duration(sfx.duration())));
 
             ui.add_space(50.0);
 
-            if ui.add_enabled(!sfx.exists(), Button::new("Download")).clicked() {
+            let download_button = Button::new(t!("sound.button.download"));
+            if ui.add_enabled(!sfx.exists(), download_button).clicked() {
                 sfx.download_and_store();
             }
-            if ui.add_enabled(sfx.exists(), Button::new("Delete")).clicked() {
+            
+            let delete_button = Button::new(t!("sound.button.delete"));
+            if ui.add_enabled(sfx.exists(), delete_button).clicked() {
                 sfx.delete();
             }
-            if ui.button("Play").clicked() {
+
+            if ui.button(t!("sound.button.play")).clicked() {
                 audio::play_sound(sfx, CDN_URL);
             }
-            if ui.button("Stop").clicked() {
+
+            if ui.button(t!("sound.button.stop")).clicked() {
                 audio::stop_audio();
             }
         });

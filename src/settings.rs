@@ -43,13 +43,16 @@ pub fn read_file() -> (HashSet<i64>, Settings) {
         });
 
         let mut settings = Settings::default();
-        settings_string.split(";")
-        .enumerate().for_each(|(i, s)| {
-            match i {
-                0 => settings.filter_search = s == "true",
-                _ => (),
-            }
-        });
+        settings_string
+            .split(';')
+            .enumerate()
+            .for_each(|(i, s)| {
+                #[allow(clippy::single_match)] // more settings in future
+                match i {
+                    0 => settings.filter_search = s == "true",
+                    _ => (),
+                }
+            });
         (favourites, settings)
     } else {
         fs::write(FAVOURITES_FILE.as_path(), EMPTY_FAVOURITES.as_str()).unwrap();
