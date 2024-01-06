@@ -7,7 +7,7 @@ use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 
-use crate::gui::DOWNLOAD_PROGRESS;
+use crate::gui::left_window::DOWNLOAD_PROGRESS;
 use crate::library::LibraryEntry;
 use crate::stats::{add_existing_sfx_files, EXISTING_SOUND_FILES};
 
