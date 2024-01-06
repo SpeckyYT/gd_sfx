@@ -65,8 +65,9 @@ impl GdSfx {
         eframe::run_native("GDSFX", options, Box::new(|_cc| Box::new(self))).unwrap()
     }
 
-    pub fn matches_query(&self, string: &str) -> bool {
-        string.to_ascii_lowercase().contains(&self.search_query)
+    pub fn matches_query(&self, entry: &LibraryEntry) -> bool {
+        entry.name().to_ascii_lowercase().contains(&self.search_query.to_ascii_lowercase())
+            || entry.id().to_string() == self.search_query
     }
 }
 
@@ -383,8 +384,8 @@ fn side_bar_sfx(ctx: &egui::Context, sfx: Option<&LibraryEntry>) {
 
 fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
     match node {
-        LibraryEntry::Sound { ref name, .. } => {
-            node.set_enabled(gdsfx.matches_query(name));
+        LibraryEntry::Sound { .. } => {
+            node.set_enabled(gdsfx.matches_query(node));
         }
         LibraryEntry::Category { children, .. } => {
             // Recursively filter sounds in subcategories
