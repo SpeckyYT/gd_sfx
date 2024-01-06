@@ -1,0 +1,62 @@
+{
+	"language.name": "Polski",
+	"language.region": "Polska",
+
+	"tab.library": "Biblioteka",
+	"tab.favorites": "Ulubione",
+	"tab.tools": "Narzędzia",
+	"tab.settings": "Ustawienia",
+	"tab.stats": "Statystyki",
+	"tab.credits": "Podziękowania",
+
+	"credits.sfx": "Autorzy efektów dźwiękowych",
+	"credits.this_project": "Ten projekt",
+	"credits.this_project.developers": "Deweloperzy",
+	"credits.this_project.translations": "Tłumaczenie na %{lang}",
+
+	"search": "Szukaj",
+
+	"settings": "Ustawienia",
+	"settings.hide_empty_categories": "Ukryj puste kategorie",
+    "settings.language": "Język",
+
+	"tools": "Ustawienia",
+	"tools.warning.long_time": "Uwaga: te funkcje mogą zająć dużo czasu.",
+	"tools.warning.program_not_usable": "Nie będziesz mógł używać tego programu kiedy będą działać.",
+	"tools.instruction": "Naciśnij przycisk trzy razy aby uruchomić",
+	"tools.download_all_sfx": "Pobierz wszystkie efekty dźwiękowe",
+	"tools.download_all_sfx.title": "Pobieranie...",
+	"tools.delete_all_sfx": "Usuń wszystkie efekty dźwiękowe",
+	"tools.delete_all_sfx.title": "Usuwanie...",
+	"tools.progress": "Postęp",
+
+	"sort.button": "Sortowanie",
+	"sort.default": "Domyślne",
+	"sort.name.ascending": "Nazwa A-Z",
+	"sort.name.descending": "Nazwa Z-A",
+	"sort.length.ascending": "Długość +",
+	"sort.length.descending": "Długość -",
+	"sort.id.ascending": "ID +",
+	"sort.id.descending": "ID -",
+	"sort.size.ascending": "Rozmiar +",
+	"sort.size.descending": "Rozmiar -",
+
+	"sound.button.delete": "Usuń",
+	"sound.button.download": "Pobierz",
+	"sound.button.favorite.add": "Dodaj do ulubionych",
+	"sound.button.favorite.remove": "Usuń z ulubionych",
+	"sound.button.play": "Zagraj",
+	"sound.button.stop": "Zatrzymaj",
+
+	"sound.info.id": "ID: %{id}",
+	"sound.info.category.id": "Kategoria: %{id}",
+	"sound.info.size": "Rozmiar: %{size}",
+	"sound.info.duration": "Długość: %{duration}s",
+    
+	"stats.library": "Biblioteka SFX",
+	"stats.library.duration": "Całkowita długość: %{duration}s",
+	"stats.library.files": "Ilość plików: %{files}",
+	"stats.library.size": "Całkowity rozmiar: %{size}",
+	"stats.files": "Efekty dźwiękowe",
+	"stats.files.downloaded": "Pobrane efekty dźwiękowe: %{files}"
+}

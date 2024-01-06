@@ -398,6 +398,9 @@ fn credits_list(ui: &mut Ui, gdsfx: &mut GdSfx) {
         "ua_UA" => {
             ui.hyperlink_to("eldyj", "https://github.com/eldyj");
         }
+        "pl_PL" => {
+            ui.hyperlink_to("ggod", "https://github.com/GGodPL");
+        }
         _ => {}
     }
 }
