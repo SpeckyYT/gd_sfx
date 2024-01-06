@@ -1,9 +1,15 @@
 use std::path::PathBuf;
-use std::env;
+use std::{env, fs};
 use std::sync::Arc;
+use std::thread::{spawn, JoinHandle};
 use eframe::epaint::ahash::HashMap;
 use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
+use rayon::prelude::*;
+
+use crate::gui::DOWNLOAD_PROGRESS;
+use crate::library::LibraryEntry;
+use crate::stats::{add_existing_sfx_files, EXISTING_SOUND_FILES};
 
 pub const LIBRARY_WIDTH: f32 = 200.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
@@ -50,4 +56,48 @@ pub fn format_locale(locale: &str) -> String {
         t!("language.name", locale = locale),
         t!("language.region", locale = locale)
     )
+}
+
+pub fn download_everything(library: LibraryEntry) -> JoinHandle<()> {
+    spawn(|| {
+        fn recursive(library: LibraryEntry) -> Vec<LibraryEntry> {
+            match library {
+                LibraryEntry::Category { children, .. } =>
+                    children.into_iter().map(|child| recursive(child)).flatten().collect(),
+                LibraryEntry::Sound { .. } =>
+                    vec![library],
+            }
+        }
+        let all_sfx = recursive(library);
+
+        DOWNLOAD_PROGRESS.lock().unwrap().1 = all_sfx.len();
+
+        all_sfx.into_par_iter()
+        .for_each(|entry| {
+            entry.download_and_store();
+            DOWNLOAD_PROGRESS.lock().unwrap().0 += 1;
+        });
+    })
+}
+
+pub fn delete_everything() -> JoinHandle<()> {
+    spawn(|| {
+        let _ = add_existing_sfx_files();
+        let existing_sound_file = EXISTING_SOUND_FILES.lock().unwrap();
+        
+        DOWNLOAD_PROGRESS.lock().unwrap().1 = existing_sound_file.len();
+        
+        existing_sound_file.iter()
+        .for_each(|id| {
+            let filename = format!("s{id}.ogg");
+            let filepath = GD_FOLDER.join(filename);
+
+            if filepath.exists() {
+                let _ = fs::remove_file(filepath);
+            }
+
+            DOWNLOAD_PROGRESS.lock().unwrap().0 += 1;    
+        });
+
+    })
 }

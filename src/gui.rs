@@ -1,7 +1,11 @@
+use std::{sync::{Arc, Mutex}, thread::JoinHandle};
+
 use eframe::{
-    egui::{self, Button, Ui, ComboBox},
-    NativeOptions,
+    egui::{self, Button, Ui, Context, ComboBox},
+    NativeOptions, epaint::Color32,
 };
+use egui_modal::Modal;
+use lazy_static::lazy_static;
 use pretty_bytes::converter::convert;
 use strum::{EnumIter, IntoEnumIterator};
 
@@ -11,7 +15,7 @@ use crate::{
     library::{Library, LibraryEntry},
     requests::CDN_URL,
     stats::EXISTING_SOUND_FILES,
-    util::{stringify_duration, format_locale},
+    util::{stringify_duration, format_locale, delete_everything, download_everything},
 };
 
 pub type VersionType = usize;
@@ -33,6 +37,7 @@ pub enum Stage {
     #[default]
     Library,
     Favourites,
+    Tools,
     Settings,
     Stats,
     Credits,
@@ -43,6 +48,7 @@ impl Stage {
         t!(match self {
             Stage::Library => "stage.library",
             Stage::Favourites => "stage.favorites",
+            Stage::Tools => "stage.tools",
             Stage::Settings => "stage.settings",
             Stage::Stats => "stage.stats",
             Stage::Credits => "stage.credits",
@@ -128,6 +134,7 @@ fn main_scroll_area(ctx: &egui::Context, gdsfx: &mut GdSfx) {
                         filter_sounds(gdsfx, &mut library);
                         favourites_list(ui, gdsfx, library);
                     }
+                    Stage::Tools => tools_list(ui, gdsfx, ctx),
                     Stage::Settings => settings_list(ui, gdsfx),
                     Stage::Stats => stats_list(ui, gdsfx),
                     Stage::Credits => credits_list(ui, gdsfx),
@@ -207,6 +214,71 @@ fn favourites_list(ui: &mut Ui, gdsfx: &mut GdSfx, sfx_library: LibraryEntry) {
         }
     }
     recursive(ui, gdsfx, &sfx_library);
+}
+
+lazy_static! {
+    // (done, to_do)
+    pub static ref DOWNLOAD_PROGRESS: Arc<Mutex<(usize, usize)>> = Default::default();
+    pub static ref DOWNLOAD_HANDLE: Arc<Mutex<Option<JoinHandle<()>>>> = Arc::new(Mutex::new(None));
+}
+
+fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
+    let modal_generator = |title| -> Modal {
+        let modal = Modal::new(ctx, format!("{}_modal", title));
+
+        modal.show(|ui| {
+            let mut download_handle = DOWNLOAD_HANDLE.lock().unwrap();
+
+            if let Some(handle) = download_handle.as_ref() {
+                if handle.is_finished() {
+                    *download_handle = None;
+                    modal.close();
+                }
+            }
+            drop(download_handle);
+
+            modal.title(ui, title);
+    
+            let (done, todo) = *DOWNLOAD_PROGRESS.lock().unwrap();
+
+            let progress_bar = egui::ProgressBar::new(if todo == 0 { 0.0 } else { done as f32 / todo as f32 })
+            .animate(true)
+            .text(format!("{done} / {todo}"));
+
+            ui.heading(t!("tools.progress"));
+
+            ui.add(progress_bar);
+        });
+
+        modal
+    };
+
+    let download_modal = modal_generator(t!("tools.download_all_sfx.title"));
+    let delete_modal = modal_generator(t!("tools.delete_all_sfx.title"));
+    
+    ui.heading(t!("tools"));
+
+    ui.add_space(20.0);
+
+    ui.colored_label(Color32::RED, t!("tools.warning1"));
+    ui.colored_label(Color32::RED, t!("tools.warning2"));
+
+    ui.add_space(10.0);
+
+    ui.label(t!("tools.instruction"));
+
+    ui.add_space(10.0);
+
+    if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
+        *DOWNLOAD_PROGRESS.lock().unwrap() = (0,0);
+        download_modal.open();
+        *DOWNLOAD_HANDLE.lock().unwrap() = Some(download_everything(gdsfx.sfx_library.as_ref().unwrap().sound_effects.clone()));
+    }
+    if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
+        *DOWNLOAD_PROGRESS.lock().unwrap() = (0,0);
+        delete_modal.open();
+        *DOWNLOAD_HANDLE.lock().unwrap() = Some(delete_everything());
+    }
 }
 
 fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {

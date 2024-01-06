@@ -207,6 +207,7 @@ impl LibraryEntry {
         Some(data)
     }
     pub fn download_and_store(&self) {
+        if self.exists() { return }
         if let Some(content) = self.download(CDN_URL) {
             fs::write(self.path(), content).unwrap();
             add_file_to_stats(self.id());
