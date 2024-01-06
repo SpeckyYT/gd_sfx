@@ -1,0 +1,10 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "lang/*.json"
+            ],
+            "url": "./lang_schema.json"
+        }
+    ]
+}

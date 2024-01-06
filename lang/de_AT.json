@@ -1,0 +1,60 @@
+{
+	"language.name": "Deutsch",
+	"language.region": "Österreich",
+
+	"tab.library": "Bibliothek",
+	"tab.favorites": "Favoriten",
+	"tab.tools": "Tools",
+	"tab.settings": "Einstellungen",
+	"tab.stats": "Statistiken",
+	"tab.credits": "Credits",
+
+	"credits.sfx": "SFX Credits",
+	"credits.this_project": "Dieses Projekt",
+
+	"search": "Suche",
+
+	"settings": "Einstellungen",
+	"settings.hide_empty_categories": "Leere Kategorien ausblenden",
+    "settings.language": "Sprache",
+
+	"tools": "Tools",
+	"tools.warning.long_time": "Achtung: Die Verarbeitung dieser Funktionen kann sehr lange dauern.",
+	"tools.warning.program_not_usable": "Das Programm ist während ihrer Ausführung nicht verwendbar.",
+	"tools.instruction": "Schaltflächen zum Ausführen dreimal klicken",
+	"tools.download_all_sfx": "Alle SFX herunterladen",
+	"tools.download_all_sfx.title": "SFX werden heruntergeladen...",
+	"tools.delete_all_sfx": "Alle SFX löschen",
+	"tools.delete_all_sfx.title": "SFX werden gelöscht...",
+	"tools.progress": "Fortschritt",
+
+	"sort.button": "Sortierung",
+	"sort.default": "Standard",
+	"sort.name.ascending": "Name A-Z",
+	"sort.name.descending": "Name Z-A",
+	"sort.length.ascending": "Länge +",
+	"sort.length.descending": "Länge -",
+	"sort.id.ascending": "ID +",
+	"sort.id.descending": "ID -",
+	"sort.size.ascending": "Größe +",
+	"sort.size.descending": "Größe -",
+
+	"sound.button.delete": "Löschen",
+	"sound.button.download": "Herunterladen",
+	"sound.button.favorite.add": "Zu Favoriten hinzufügen",
+	"sound.button.favorite.remove": "Aus Favoriten entfernen",
+	"sound.button.play": "Abspielen",
+	"sound.button.stop": "Stopp",
+
+	"sound.info.id": "ID: %{id}",
+	"sound.info.category.id": "Kategorie: %{id}",
+	"sound.info.size": "Größe: %{size}",
+	"sound.info.duration": "Länge: %{duration}s",
+    
+	"stats.library": "SFX-Bibliothek",
+	"stats.library.duration": "Gesamtlänge: %{duration}s",
+	"stats.library.files": "Dateianzahl: %{files}",
+	"stats.library.size": "Gesamtgröße: %{size}",
+	"stats.files": "SFX-Dateien",
+	"stats.files.downloaded": "Heruntergeladene SFX-Dateien: %{files}"
+}

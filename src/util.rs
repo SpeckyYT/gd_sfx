@@ -51,11 +51,14 @@ pub fn stringify_duration(centiseconds: i64) -> String {
 }
 
 pub fn format_locale(locale: &str) -> String {
-    format!(
-        "{} ({})",
-        t!("language.name", locale = locale),
-        t!("language.region", locale = locale)
-    )
+    let name = t!("language.name", locale = locale);
+    let region = t!("language.region", locale = locale);
+    
+    if region.is_empty() {
+        name
+    } else {
+        format!("{name} ({region})")
+    }
 }
 
 pub fn download_everything(library: LibraryEntry) -> JoinHandle<()> {
@@ -63,7 +66,7 @@ pub fn download_everything(library: LibraryEntry) -> JoinHandle<()> {
         fn recursive(library: LibraryEntry) -> Vec<LibraryEntry> {
             match library {
                 LibraryEntry::Category { children, .. } =>
-                    children.into_iter().map(|child| recursive(child)).flatten().collect(),
+                    children.into_iter().flat_map(recursive).collect(),
                 LibraryEntry::Sound { .. } =>
                     vec![library],
             }

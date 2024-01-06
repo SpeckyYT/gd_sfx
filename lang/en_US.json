@@ -15,12 +15,12 @@
 	"search": "Search",
 
 	"settings": "Settings",
-	"settings.hide_empty": "Hide empty categories",
+	"settings.hide_empty_categories": "Hide empty categories",
     "settings.language": "Language",
 
 	"tools": "Tools",
-	"tools.warning1": "Warning: these functions take a long time to process.",
-	"tools.warning2": "You will not be able to use this program while they are running.",
+	"tools.warning.long_time": "Warning: these functions take a long time to process.",
+	"tools.warning.program_not_usable": "You will not be able to use this program while they are running.",
 	"tools.instruction": "Triple click the buttons to run",
 	"tools.download_all_sfx": "Download all SFX",
 	"tools.download_all_sfx.title": "Downloading...",
@@ -28,6 +28,7 @@
 	"tools.delete_all_sfx.title": "Deleting...",
 	"tools.progress": "Progress",
 
+	"sort.button": "Sorting",
 	"sort.default": "Default",
 	"sort.name.ascending": "Name A-Z",
 	"sort.name.descending": "Name Z-A",

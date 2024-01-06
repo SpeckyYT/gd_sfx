@@ -13,10 +13,19 @@ fn stringify_duration() {
 }
 
 #[test]
-fn localization() {
+fn localization_fallback() {
     assert_eq!("Favorite", t!("sound.button.favorite.add"));
     assert_eq!("Favourite", t!("sound.button.favorite.add", locale = "en_GB"));
+}
 
+#[test]
+fn localization_placeholders() {
     assert_eq!("Total files: 123", t!("stats.library.files", files = 123));
     assert_eq!("Total files: 123", t!("stats.library.files", locale = "en_GB", files = 123));
+}
+
+#[test]
+fn format_locale() {
+    assert_eq!("English (United States)", util::format_locale("en_US"));
+    assert_eq!("Deutsch (Österreich)", util::format_locale("de_AT"));
 }

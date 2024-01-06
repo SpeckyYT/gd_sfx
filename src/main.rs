@@ -1,4 +1,4 @@
-use std::{thread, hint::black_box};
+use std::thread;
 
 use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2, Theme};
 use settings::FIRST_READ;
@@ -33,7 +33,7 @@ fn main() {
     gdsfx.get_sfx_version(false);
     gdsfx.get_sfx_library(false);
 
-    black_box(&FIRST_READ);
+    lazy_static::initialize(&FIRST_READ);
 
     gdsfx.run(NativeOptions {
         viewport: ViewportBuilder::default()

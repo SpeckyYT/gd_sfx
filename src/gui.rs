@@ -260,8 +260,8 @@ fn tools_list(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
 
     ui.add_space(20.0);
 
-    ui.colored_label(Color32::RED, t!("tools.warning1"));
-    ui.colored_label(Color32::RED, t!("tools.warning2"));
+    ui.colored_label(Color32::RED, t!("tools.warning.long_time"));
+    ui.colored_label(Color32::RED, t!("tools.warning.program_not_usable"));
 
     ui.add_space(10.0);
 
@@ -289,7 +289,7 @@ fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {
     let mut settings = SETTINGS.lock().unwrap();
     let initial_settings = *settings;
 
-    ui.checkbox(&mut settings.filter_search, t!("settings.hide_empty"));
+    ui.checkbox(&mut settings.filter_search, t!("settings.hide_empty_categories"));
 
     let mut current_locale = rust_i18n::locale();
     let initial_locale = current_locale.clone();
@@ -383,7 +383,7 @@ fn search_bar(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 fn sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    ui.menu_button("Sorting", |ui| {
+    ui.menu_button(t!("sort.button"), |ui| {
         for (alternative, text) in [
             (Sorting::Default,   t!("sort.default")),
             (Sorting::NameInc,   t!("sort.name.ascending")),
