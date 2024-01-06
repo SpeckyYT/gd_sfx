@@ -43,3 +43,11 @@ pub fn hide_console_window() {
 pub fn stringify_duration(centiseconds: i64) -> String {
     format!("{:.2}", centiseconds as f64 / 100.0)
 }
+
+pub fn format_locale(locale: &str) -> String {
+    format!(
+        "{} ({})",
+        t!("language.name", locale = locale),
+        t!("language.region", locale = locale)
+    )
+}

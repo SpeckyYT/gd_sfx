@@ -29,27 +29,24 @@ pub fn read_file() -> (HashSet<i64>, Settings) {
         let mut favourites = HashSet::default();
 
         let data = fs::read(FAVOURITES_FILE.as_path()).unwrap();
-
         let data = full_decode(&data);
 
         let string = std::str::from_utf8(&data).unwrap_or("");
 
-        let (favourites_string, settings_string) = string.split_once('|').unwrap_or((string, ""));
-
-        favourites_string.split(',').for_each(|line| {
-            if let Ok(int) = line.parse() {
-                favourites.insert(int);
-            }
-        });
-
         let mut settings = Settings::default();
-        settings_string
-            .split(';')
+        string.split('|')
             .enumerate()
             .for_each(|(i, s)| {
-                #[allow(clippy::single_match)] // more settings in future
                 match i {
-                    0 => settings.filter_search = s == "true",
+                    0 => { // favorites
+                        s.split(',').for_each(|line| {
+                            if let Ok(int) = line.parse() {
+                                favourites.insert(int);
+                            }
+                        })
+                    }
+                    1 => settings.filter_search = s == "true",
+                    2 => rust_i18n::set_locale(s),
                     _ => (),
                 }
             });
@@ -61,19 +58,20 @@ pub fn read_file() -> (HashSet<i64>, Settings) {
 }
 
 pub fn generate_save_string() -> String {
-    let favourites_string = FAVOURITES_LIST.lock().unwrap().iter().map(|s| s.to_string()).collect::<Vec<String>>().join(",");
+    let favourites_string = FAVOURITES_LIST.lock().unwrap()
+        .iter()
+        .map(|s| s.to_string())
+        .collect::<Vec<String>>()
+        .join(",");
     
     let settings = SETTINGS.lock().unwrap();
-    let settings_string = format!(
-        "{}",
-        settings.filter_search,
-    );
 
-    format!(
-        "{}|{}",
+    let strings = [
         favourites_string,
-        settings_string,
-    )
+        settings.filter_search.to_string(),
+        rust_i18n::locale(),
+    ];
+    strings.join("|")
 }
 
 pub fn save() {

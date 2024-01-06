@@ -1,5 +1,5 @@
 use eframe::{
-    egui::{self, Button, Ui},
+    egui::{self, Button, Ui, ComboBox},
     NativeOptions,
 };
 use pretty_bytes::converter::convert;
@@ -11,7 +11,7 @@ use crate::{
     library::{Library, LibraryEntry},
     requests::CDN_URL,
     stats::EXISTING_SOUND_FILES,
-    util::stringify_duration,
+    util::{stringify_duration, format_locale},
 };
 
 pub type VersionType = usize;
@@ -36,6 +36,18 @@ pub enum Stage {
     Settings,
     Stats,
     Credits,
+}
+
+impl Stage {
+    pub fn get_localized_name(&self) -> String {
+        t!(match self {
+            Stage::Library => "stage.library",
+            Stage::Favourites => "stage.favorites",
+            Stage::Settings => "stage.settings",
+            Stage::Stats => "stage.stats",
+            Stage::Credits => "stage.credits",
+        })
+    }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
@@ -76,7 +88,7 @@ fn top_panel(ctx: &egui::Context, gdsfx: &mut GdSfx) {
         ui.add_space(4.0);
         ui.horizontal(|ui| {
             Stage::iter().for_each(|stage| {
-                ui.selectable_value(&mut gdsfx.stage, stage, format!("{:?}", stage));
+                ui.selectable_value(&mut gdsfx.stage, stage, stage.get_localized_name());
             });
         });
         ui.add_space(2.0);
@@ -207,7 +219,19 @@ fn settings_list(ui: &mut Ui, _gdsfx: &mut GdSfx) {
 
     ui.checkbox(&mut settings.filter_search, t!("settings.hide_empty"));
 
-    if *settings != initial_settings {
+    let mut current_locale = rust_i18n::locale();
+    let initial_locale = current_locale.clone();
+    ComboBox::from_label(t!("settings.language"))
+        .selected_text(format_locale(&current_locale))
+        .show_ui(ui, |ui| {
+            for locale in rust_i18n::available_locales!() {
+                ui.selectable_value(&mut current_locale, locale.to_string(), format_locale(locale));
+            }
+        });
+
+    rust_i18n::set_locale(&current_locale);
+
+    if *settings != initial_settings || current_locale != initial_locale {
         drop(settings); // fixes deadlock (geometry dash reference)
         save();
     }
