@@ -38,8 +38,8 @@
 	"sort.length.descending": "Длугосц -",
 	"sort.id.ascending": "ID +",
 	"sort.id.descending": "ID -",
-	"sort.size.ascending": "Час +",
-	"sort.size.descending": "Час -",
+	"sort.size.ascending": "Велькосц +",
+	"sort.size.descending": "Велькосц -",
 
 	"sound.button.delete": "Оддалїц",
 	"sound.button.download": "Додац",
@@ -51,7 +51,7 @@
 	"sound.info.id": "ID: %{id}",
 	"sound.info.category.id": "Катеґорія: %{id}",
 	"sound.info.size": "Велькосц: %{size}",
-	"sound.info.duration": "Час: %{duration}s",
+	"sound.info.duration": "Длугосц: %{duration}s",
     
 	"stats.library": "SFX Бібліотека",
 	"stats.library.duration": "Вкупни час: %{duration}s",
