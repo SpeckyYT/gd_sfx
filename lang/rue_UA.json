@@ -57,6 +57,6 @@
 	"stats.library.duration": "Вкупни час: %{duration}s",
 	"stats.library.files": "Вкупни файлaв: %{files}",
 	"stats.library.size": "Вкупни велькосц: %{size}",
-	"stats.files": "SFX файла",
+	"stats.files": "SFX файли",
 	"stats.files.downloaded": "Додани SFX файлав: %{files}"
 }
