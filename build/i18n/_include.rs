@@ -1,0 +1,1 @@
+i18n!("lang", fallback = "en_US");

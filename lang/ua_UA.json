@@ -1,6 +1,11 @@
 {
-    "language.name": "Українська",
-    "language.region": "Україна",
+    "language.name": "Українська (Україна)",
+    "language.translators": [
+        {
+            "name": "eldyj",
+            "link": "https://github.com/eldyj"
+        }
+    ],
 
     "tab.library": "Бібліотека",
     "tab.favorites": "Улюблені",

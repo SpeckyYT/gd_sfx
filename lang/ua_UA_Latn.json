@@ -1,6 +1,11 @@
 {
-	"language.name": "Ukrajinśka (latin)",
-	"language.region": "Ukrajina",
+	"language.name": "Ukrajinśka (Latin, Ukrajina)",
+    "language.translators": [
+        {
+            "name": "eldyj",
+            "link": "https://github.com/eldyj"
+        }
+    ],
 
 	"tab.library": "Biblioteka",
 	"tab.favorites": "Uľubleni",

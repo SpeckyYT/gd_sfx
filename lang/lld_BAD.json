@@ -1,6 +1,11 @@
 {
-    "language.name": "Ladin",
-    "language.region": "Val Badia",
+    "language.name": "Ladin (Val Badia)",
+    "language.translators": [
+        {
+            "name": "Specky",
+            "link": "https://github.com/SpeckyYT"
+        }
+    ],
 
     "tab.library": "Libraria",
     "tab.favorites": "Favorit",

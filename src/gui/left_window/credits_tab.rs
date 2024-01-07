@@ -2,7 +2,7 @@ use eframe::egui::Ui;
 use std::collections::HashMap;
 use lazy_static::lazy_static;
 
-use crate::{gui::GdSfx, util};
+use crate::gui::GdSfx;
 
 type Credit = (&'static str, &'static str);
 
@@ -61,7 +61,7 @@ credits!(
         "nl_NL"
     ELDYJ
         "ua_UA"
-        "ua_UA_latin"
+        "ua_UA_Latn"
         "rue_UA"
         "ru_RU"
     GGOD
@@ -102,7 +102,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     let current_locale = rust_i18n::locale();
 
     if let Some(translators) = TRANSLATIONS.get(&current_locale) {
-        ui.label(t!("credits.this_project.translations", lang = util::format_locale(&current_locale)));
+        ui.label(t!("credits.this_project.translations", lang = t!("language.name")));
         for (name, link) in translators {
             ui.hyperlink_to(*name, *link);
         }

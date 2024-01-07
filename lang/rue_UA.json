@@ -1,6 +1,11 @@
 {
-	"language.name": "Русин",
-	"language.region": "Україна",
+	"language.name": "Русин (Україна)",
+    "language.translators": [
+        {
+            "name": "eldyj",
+            "link": "https://github.com/eldyj"
+        }
+    ],
 
 	"tab.library": "Библиотекаковицки",
 	"tab.favorites": "Любимицы",

@@ -1,6 +1,6 @@
 use eframe::egui::{Ui, ComboBox};
 
-use crate::{gui::GdSfx, util, settings::{SETTINGS, self}};
+use crate::{gui::GdSfx, settings::{SETTINGS, self}};
 
 pub fn render(ui: &mut Ui, _gdsfx: &mut GdSfx) {
     ui.heading(t!("settings"));
@@ -16,10 +16,10 @@ pub fn render(ui: &mut Ui, _gdsfx: &mut GdSfx) {
     let initial_locale = current_locale.clone();
 
     ComboBox::from_label(t!("settings.language"))
-        .selected_text(util::format_locale(&current_locale))
+        .selected_text(t!("language.name"))
         .show_ui(ui, |ui| {
             for locale in rust_i18n::available_locales!() {
-                ui.selectable_value(&mut current_locale, locale.to_string(), util::format_locale(locale));
+                ui.selectable_value(&mut current_locale, locale.to_string(), t!("language.name", locale = locale));
             }
         });
 

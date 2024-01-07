@@ -1,6 +1,11 @@
 {
-    "language.name": "toki pona",
-    "language.region": "ma pona",
+    "language.name": "toki pona (ma pona)",
+    "language.translators": [
+        {
+            "name": "Specky",
+            "link": "https://github.com/SpeckyYT"
+        }
+    ],
 
     "tab.library": "poki kalama",
     "tab.favorites": "poki pi kalama pona",

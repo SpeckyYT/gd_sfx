@@ -1,6 +1,11 @@
 {
-    "language.name": "Italiano",
-    "language.region": "Italia",
+    "language.name": "Italiano (Italia)",
+    "language.translators": [
+        {
+            "name": "Specky",
+            "link": "https://github.com/SpeckyYT"
+        }
+    ],
 
     "tab.library": "Libreria",
     "tab.favorites": "Favoriti",

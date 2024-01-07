@@ -1,6 +1,11 @@
 {
-    "language.name": "Nederlands",
-    "language.region": "Nederland",
+    "language.name": "Nederlands (Nederland)",
+    "language.translators": [
+        {
+            "name": "tags",
+            "link": "https://github.com/zTags"
+        }
+    ],
 
     "tab.library": "Bibliotheek",
     "tab.favorites": "Favorites",

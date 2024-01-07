@@ -1,6 +1,11 @@
 {
-    "language.name": "Polski",
-    "language.region": "Polska",
+    "language.name": "Polski (Polska)",
+    "language.translators": [
+        {
+            "name": "ggod",
+            "link": "https://github.com/GGodPL"
+        }
+    ],
 
     "tab.library": "Biblioteka",
     "tab.favorites": "Ulubione",

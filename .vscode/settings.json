@@ -1,10 +1,10 @@
 {
     "json.schemas": [
         {
-            "fileMatch": [
-                "lang/*.json"
-            ],
-            "url": "./lang_schema.json"
+            "id": "lang",
+            "fileMatch": ["lang/*.json"],
+            "url": ".vscode/lang_schema.json",
+            "source": "lang/en_US.json"
         }
     ]
 }

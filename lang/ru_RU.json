@@ -1,6 +1,11 @@
 {
-    "language.name": "Русский",
-    "language.region": "Россия",
+    "language.name": "Русский (Россия)",
+    "language.translators": [
+        {
+            "name": "eldyj",
+            "link": "https://github.com/eldyj"
+        }
+    ],
 
     "tab.library": "Библиотека",
     "tab.favorites": "Избранные",

@@ -43,14 +43,3 @@ pub fn hide_console_window() {
 pub fn stringify_duration(centiseconds: i64) -> String {
     format!("{:.2}", centiseconds as f64 / 100.0)
 }
-
-pub fn format_locale(locale: &str) -> String {
-    let name = t!("language.name", locale = locale);
-    let region = t!("language.region", locale = locale);
-    
-    if region.is_empty() {
-        name
-    } else {
-        format!("{name} ({region})")
-    }
-}
