@@ -25,6 +25,13 @@ fn localization_placeholders() {
 }
 
 #[test]
+fn nonexistent_translation_keys() {
+    rust_i18n::set_locale("en_US"); // default is "en"
+    assert_eq!("en_US.nonexistent.key", t!("nonexistent.key"));
+    assert_eq!("nl_NL.nonexistent.key", t!("nonexistent.key", locale = "nl_NL"));
+}
+
+#[test]
 fn format_locale() {
     assert_eq!("English (United States)", util::format_locale("en_US"));
     assert_eq!("Deutsch (Österreich)", util::format_locale("de_AT"));

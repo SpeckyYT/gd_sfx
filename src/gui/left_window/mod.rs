@@ -14,11 +14,9 @@ use super::{GdSfx, Tab, Sorting};
 pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
     SidePanel::left("left_panel").show(ctx, |ui| {
         if let Tab::Library | Tab::Favourites = gdsfx.tab {
-            add_search_bar(ui, gdsfx);
-            add_sort_menu(ui, gdsfx);
-            ui.separator();
+            add_search_area(ui, gdsfx);
         }
-
+        
         ScrollArea::vertical().show(ui, |ui| {
             if let Some(sfx_library) = &gdsfx.sfx_library {
                 let mut library = sfx_library.sound_effects.clone();
@@ -36,12 +34,10 @@ pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
     });
 }
 
-fn add_search_bar(ui: &mut Ui, gdsfx: &mut GdSfx) {
+fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading(t!("search"));
     ui.text_edit_singleline(&mut gdsfx.search_query);
-}
 
-fn add_sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.menu_button(t!("sort.button"), |ui| {
         for (alternative, text) in [
             (Sorting::Default,   t!("sort.default")),
@@ -60,6 +56,8 @@ fn add_sort_menu(ui: &mut Ui, gdsfx: &mut GdSfx) {
             }
         }
     });
+
+    ui.separator();
 }
 
 fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
@@ -68,8 +66,9 @@ fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
             node.set_enabled(gdsfx.matches_query(node));
         }
         LibraryEntry::Category { children, .. } => {
-            // Recursively filter sounds in subcategories
-            children.iter_mut().for_each(|child| filter_sounds(gdsfx, child));
+            for child in children.iter_mut() {
+                filter_sounds(gdsfx, child);
+            }
 
             let any_enabled = children.iter().any(LibraryEntry::is_enabled);
             node.set_enabled(any_enabled);

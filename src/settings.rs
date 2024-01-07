@@ -5,7 +5,7 @@ use std::{path::PathBuf, sync::{Arc, Mutex}, fs};
 use eframe::epaint::ahash::HashSet;
 use lazy_static::lazy_static;
 
-use crate::{util::GD_FOLDER, encoding::{zlib_encode, base64_encode, full_decode, full_encode}};
+use crate::{util::GD_FOLDER, encoding::*};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Settings {
@@ -19,7 +19,7 @@ lazy_static!{
     pub static ref FAVOURITES_LIST: Arc<Mutex<HashSet<i64>>> = Arc::new(Mutex::new(FIRST_READ.0.clone()));
     pub static ref SETTINGS: Arc<Mutex<Settings>> = Arc::new(Mutex::new(FIRST_READ.1));
 
-    pub static ref EMPTY_FAVOURITES: String = base64_encode(&zlib_encode(&[])); 
+    pub static ref EMPTY_FAVOURITES: String = full_encode(&[]); 
 }
 
 pub const FAVOURITES_CHARACTER: char = '⭐';

@@ -36,6 +36,8 @@ fn main() {
     gdsfx.get_sfx_version(false);
     gdsfx.get_sfx_library(false);
 
+    // set default locale, will be overwritten by reading settings
+    rust_i18n::set_locale("en_US");
     lazy_static::initialize(&FIRST_READ);
 
     gdsfx.run(NativeOptions {
