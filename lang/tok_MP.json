@@ -11,6 +11,8 @@
 
     "credits.sfx": "jan kalama",
     "credits.this_project": "ilo ni",
+    "credits.this_project.developers": "jan pali",
+    "credits.this_project.translations": "jan pali pi %{lang}",
 
     "search": "lukin",
 

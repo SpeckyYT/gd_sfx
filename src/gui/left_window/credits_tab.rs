@@ -19,15 +19,9 @@ macro_rules! credits {
         lazy_static!{
             pub static ref TRANSLATIONS: HashMap<String, Vec<Credit>> = {
                 let mut map = HashMap::new();
-
                 // despite looking inefficient, this only takes around 25µs
                 // so I don't think it's an issue
-                $(
-                    $(
-                        map.entry($language.to_string()).or_insert(vec![]).push($person);
-                    )+
-                )*
-
+                $($( map.entry($language.to_string()).or_insert(vec![]).push($person); )+)*
                 map
             };
         }
@@ -97,4 +91,20 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     }
 
     ui.add_space(10.0);
+
+    // person 1:
+    // TODO "translators": [{"name": string, "link": string}] in lang jsons (add what i had to schema)
+    // insert code for getting translation credits with OUT_DIR/i18n.rs when generating lang_schema
+
+    // person 2:
+    // are you sure? is my macro above not good enough? 😭
+
+    let current_locale = rust_i18n::locale();
+
+    if let Some(translators) = TRANSLATIONS.get(&current_locale) {
+        ui.label(t!("credits.this_project.translations", lang = util::format_locale(&current_locale)));
+        for (name, link) in translators {
+            ui.hyperlink_to(*name, *link);
+        }
+    }
 }

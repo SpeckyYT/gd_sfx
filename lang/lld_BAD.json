@@ -11,6 +11,8 @@
 
     "credits.sfx": "Credic di SFX",
     "credits.this_project": "Chësc proiet",
+    "credits.this_project.developers": "Svilupadus",
+    "credits.this_project.translations": "Traslaziuns pur %{lang}",
 
     "search": "Chira",
 

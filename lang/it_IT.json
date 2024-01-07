@@ -11,6 +11,8 @@
 
     "credits.sfx": "Crediti SFX",
     "credits.this_project": "Questo progetto",
+    "credits.this_project.developers": "Sviluppatori",
+    "credits.this_project.translations": "Traduzioni per %{lang}",
 
     "search": "Cerca",
 
