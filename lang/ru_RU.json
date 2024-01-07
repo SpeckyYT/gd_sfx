@@ -1,0 +1,62 @@
+{
+    "language.name": "Русский",
+    "language.region": "Россия",
+
+    "tab.library": "Библиотека",
+    "tab.favorites": "Избранные",
+    "tab.tools": "Инструменты",
+    "tab.settings": "Настройки",
+    "tab.stats": "Статистика",
+    "tab.credits": "Авторы",
+
+    "credits.sfx": "SFX Авторы",
+    "credits.this_project": "Этот проект",
+    "credits.this_project.developers": "Розработчики",
+    "credits.this_project.translations": "Переводчики для %{lang}",
+
+    "search": "Поиск",
+
+    "settings": "Настройки",
+    "settings.hide_empty_categories": "Скрыть пустые категории",
+    "settings.language": "Язык",
+
+    "tools": "Инструменты",
+    "tools.warning.long_time": "Предупреждение: эти функции занимают много времени на обробаботку.",
+    "tools.warning.program_not_usable": "Вы не сможете использовать это программу во время их роботы.",
+    "tools.instruction": "Трижды нажмите кнопку для запуска",
+    "tools.download_all_sfx": "Скачать все SFX",
+    "tools.download_all_sfx.title": "Скачивание...",
+    "tools.delete_all_sfx": "Удалить все SFX",
+    "tools.delete_all_sfx.title": "Удаление...",
+    "tools.progress": "Прогресс",
+
+    "sort.button": "Сортировка",
+    "sort.default": "По умолчанию",
+    "sort.name.ascending": "Название A-Z",
+    "sort.name.descending": "Название Z-A",
+    "sort.length.ascending": "Длительность +",
+    "sort.length.descending": "Длительность -",
+    "sort.id.ascending": "ID +",
+    "sort.id.descending": "ID -",
+    "sort.size.ascending": "Размер +",
+    "sort.size.descending": "Размер -",
+
+    "sound.button.delete": "Удалить",
+    "sound.button.download": "Скачать",
+    "sound.button.favorite.add": "В избранное",
+    "sound.button.favorite.remove": "Удалить из избранного",
+    "sound.button.play": "Играть",
+    "sound.button.stop": "Остановить",
+
+    "sound.info.id": "ID: %{id}",
+    "sound.info.category.id": "Категория: %{id}",
+    "sound.info.size": "Размер: %{size}",
+    "sound.info.duration": "Длительность: %{duration}s",
+    
+    "stats.library": "SFX Библиотека",
+    "stats.library.duration": "Общая длительность: %{duration}s",
+    "stats.library.files": "Всего файлов: %{files}",
+    "stats.library.size": "Общий размер: %{size}",
+    "stats.files": "SFX файлы",
+    "stats.files.downloaded": "Скачано SFX файлов: %{files}"
+}

@@ -54,8 +54,8 @@
 	"sound.info.duration": "Длугосц: %{duration}s",
     
 	"stats.library": "SFX Бібліотека",
-	"stats.library.duration": "Вкупни час: %{duration}s",
-	"stats.library.files": "Вкупни файлa: %{files}",
+	"stats.library.duration": "Вкупни длугосц: %{duration}s",
+	"stats.library.files": "Вкупни файлaв: %{files}",
 	"stats.library.size": "Вкупни велькосц: %{size}",
 	"stats.files": "SFX файли",
 	"stats.files.downloaded": "Додани SFX файлав: %{files}"
