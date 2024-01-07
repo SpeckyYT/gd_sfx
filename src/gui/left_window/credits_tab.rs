@@ -45,7 +45,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
         "nl_NL" => {
             ui.hyperlink_to("tags", "https://github.com/zTags");
         }
-        "ua_UA"|"rue_UA" => {
+        "ua_UA"|"rue_UA"|"ru_RU" => {
             ui.hyperlink_to("eldyj", "https://github.com/eldyj");
         }
         "pl_PL" => {

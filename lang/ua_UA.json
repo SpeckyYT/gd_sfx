@@ -32,8 +32,8 @@
 
     "sort.button": "Сортування",
     "sort.default": "За замовчуванням",
-    "sort.name.ascending": "Ім’я A-Z",
-    "sort.name.descending": "Ім’я Z-A",
+    "sort.name.ascending": "Назва A-Z",
+    "sort.name.descending": "Назва Z-A",
     "sort.length.ascending": "Тривалість +",
     "sort.length.descending": "Тривалість -",
     "sort.id.ascending": "ID +",
