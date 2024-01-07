@@ -26,6 +26,8 @@
     "tools.instruction": "Premi tre volte per eseguire",
     "tools.download_all_sfx": "Scarica tutti gli effetti sonori",
     "tools.download_all_sfx.title": "Scaricando...",
+    "tools.bruteforce_all_sfx": "Scarica tutti gli effetti sonori utilizzando brute force",
+    "tools.bruteforce_all_sfx.title": "Brute forcing...",
     "tools.delete_all_sfx": "Cancella tutti gli effetti sonori",
     "tools.delete_all_sfx.title": "Cancellando...",
     "tools.progress": "Progresso",

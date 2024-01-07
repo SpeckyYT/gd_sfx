@@ -26,6 +26,8 @@
     "tools.instruction": "Drüca trëi iadi pur l fá jí",
     "tools.download_all_sfx": "Dejciaria düc i SFX",
     "tools.download_all_sfx.title": "I sun drio a dejciarié...",
+    "tools.bruteforce_all_sfx": "Brute-forcëia düc i SFX",
+    "tools.bruteforce_all_sfx.title": "Brute-forcing...",
     "tools.delete_all_sfx": "Tola demez düc i SFX",
     "tools.delete_all_sfx.title": "I sun drio a tó y jí...",
     "tools.progress": "Progres",

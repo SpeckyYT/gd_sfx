@@ -26,6 +26,8 @@
     "tools.instruction": "Triple click the buttons to run",
     "tools.download_all_sfx": "Download all SFX",
     "tools.download_all_sfx.title": "Downloading...",
+    "tools.bruteforce_all_sfx": "Bruteforce all SFX",
+    "tools.bruteforce_all_sfx.title": "Bruteforcing...",
     "tools.delete_all_sfx": "Delete all SFX",
     "tools.delete_all_sfx.title": "Deleting...",
     "tools.progress": "Progress",

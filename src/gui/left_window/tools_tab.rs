@@ -36,6 +36,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
     };
 
     let download_modal = modal_generator(t!("tools.download_all_sfx.title"), "download");
+    let bruteforce_modal = modal_generator(t!("tools.bruteforce_all_sfx.title"), "bruteforce");
     let delete_modal = modal_generator(t!("tools.delete_all_sfx.title"), "delete");
     
     ui.heading(t!("tools"));
@@ -55,6 +56,10 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
         download_modal.open();
         let library = gdsfx.sfx_library.as_ref().unwrap().sound_effects.clone();
         tools::download_everything(library);
+    }
+    if ui.button(t!("tools.bruteforce_all_sfx")).triple_clicked() {
+        bruteforce_modal.open();
+        tools::bruteforce_everything();
     }
     if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
         delete_modal.open();

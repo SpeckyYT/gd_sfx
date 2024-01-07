@@ -5,6 +5,10 @@ use rayon::prelude::*;
 
 use crate::{library::LibraryEntry, stats, util::GD_FOLDER};
 
+const BRUTEFORCE_MIN: usize = 0;
+const BRUTEFORCE_MAX: usize = 14500;
+const BRUTEFORCE_COUNT: usize = BRUTEFORCE_MAX - BRUTEFORCE_MIN;
+
 #[derive(Default)]
 pub struct DownloadProgress {
     pub handle: Option<JoinHandle<()>>,
@@ -37,6 +41,34 @@ pub fn download_everything(library: LibraryEntry) {
                 entry.download_and_store();
                 DOWNLOAD_PROGRESS.lock().unwrap().done += 1;
             });
+    });
+}
+
+pub fn bruteforce_everything() {
+    start_process(|| {
+        let range = BRUTEFORCE_MIN..BRUTEFORCE_MAX;
+
+        DOWNLOAD_PROGRESS.lock().unwrap().remaining = BRUTEFORCE_COUNT;
+
+        range.into_par_iter()
+            .for_each(|id| {
+                let filename = format!("s{id}.ogg");
+                let filepath = GD_FOLDER.join(filename);
+
+                if !filepath.exists() {
+                    let sfx = LibraryEntry::Sound {
+                        id: id as i64,
+                        bytes: 0,
+                        duration: 0,
+                        enabled: false,
+                        name: "".to_string(),
+                        parent: 0,
+                    };
+                    sfx.download_and_store();
+                }
+
+                DOWNLOAD_PROGRESS.lock().unwrap().done += 1;
+            })
     });
 }
 

@@ -87,11 +87,17 @@ fn download_and_parse_library(cdn_url: &str) -> Library {
 
 pub fn download_sfx(cdn_url: &str, sound: &LibraryEntry) -> Option<Vec<u8>> {
     let url = format!("{cdn_url}/sfx/{}", sound.filename());
-    let data = Client::default()
+    let response = Client::default()
         .get(url)
-        .send().ok()?
-        .bytes().ok()?
-        .to_vec();
+        .send().ok()?;
 
-    Some(data)
+    if response.status().is_success() {
+        Some(
+            response.bytes()
+            .ok()?
+            .to_vec()
+        )
+    } else {
+        None
+    }
 }
