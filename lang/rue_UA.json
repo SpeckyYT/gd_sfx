@@ -1,5 +1,5 @@
 {
-	"language.name": "Руськи",
+	"language.name": "Русин",
 	"language.region": "Україна",
 
 	"tab.library": "Библиотекаковицки",
@@ -38,8 +38,8 @@
 	"sort.length.descending": "Длугосц -",
 	"sort.id.ascending": "ID +",
 	"sort.id.descending": "ID -",
-	"sort.size.ascending": "Час +",
-	"sort.size.descending": "Час -",
+	"sort.size.ascending": "Велькосц +",
+	"sort.size.descending": "Велькосц -",
 
 	"sound.button.delete": "Оддалїц",
 	"sound.button.download": "Додац",
@@ -51,12 +51,12 @@
 	"sound.info.id": "ID: %{id}",
 	"sound.info.category.id": "Катеґорія: %{id}",
 	"sound.info.size": "Велькосц: %{size}",
-	"sound.info.duration": "Час: %{duration}s",
+	"sound.info.duration": "Длугосц: %{duration}s",
     
 	"stats.library": "SFX Бібліотека",
 	"stats.library.duration": "Вкупни час: %{duration}s",
 	"stats.library.files": "Вкупни файлa: %{files}",
 	"stats.library.size": "Вкупни велькосц: %{size}",
-	"stats.files": "SFX файла",
+	"stats.files": "SFX файли",
 	"stats.files.downloaded": "Додани SFX файлав: %{files}"
 }
