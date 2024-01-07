@@ -67,6 +67,7 @@ credits!(
         "nl_NL"
     ELDYJ
         "ua_UA"
+        "ua_UA_latin"
         "rue_UA"
         "ru_RU"
     GGOD
@@ -96,17 +97,4 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     }
 
     ui.add_space(10.0);
-
-
-    // TODO "translators": [{"name": string, "link": string}] in lang jsons (add what i had to schema)
-    // insert code for getting translation credits with OUT_DIR/i18n.rs when generating lang_schema
-
-    let current_locale = rust_i18n::locale();
-
-    if let Some(translators) = TRANSLATIONS.get(&current_locale) {
-        ui.label(t!("credits.this_project.translations", lang = util::format_locale(&current_locale)));
-        for (name, link) in translators {
-            ui.hyperlink_to(*name, *link);
-        }
-    }
 }
