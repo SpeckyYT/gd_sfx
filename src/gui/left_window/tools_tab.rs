@@ -17,10 +17,15 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
 
             modal.title(ui, title);
     
-            let progress = if remaining == 0 { 0.0 } else { done as f32 / remaining as f32 };
+            let progress = if remaining == 0 {
+                0.0
+            } else {
+                (done as f32 / remaining as f32).clamp(0.0, 1.0)
+            };
+
             let progress_bar = ProgressBar::new(progress)
                 .animate(true)
-                .text(format!("{done} / {remaining} ({:.2}%)", progress));
+                .text(format!("{done} / {remaining} ({:.2}%)", progress * 100.0));
 
             ui.heading(t!("tools.progress"));
 

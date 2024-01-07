@@ -36,10 +36,10 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     // insert code for getting translation credits with OUT_DIR/i18n.rs when generating lang_schema
 
     match rust_i18n::locale().as_str() {
-        "de_AT" => {
+        "en_GB" | "de_AT" => {
             ui.hyperlink_to("kr8gz", "https://github.com/kr8gz");
         }
-        "it_IT" | "lld_BAD" | "tok_MP" => {
+        "en_US" | "it_IT" | "lld_BAD" | "tok_MP" => {
             ui.hyperlink_to("Specky", "https://github.com/SpeckyYT");
         }
         "nl_NL" => {
