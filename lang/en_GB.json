@@ -11,6 +11,8 @@
 
     "credits.sfx": "SFX Credits",
     "credits.this_project": "This project",
+    "credits.this_project.developers": "Developers",
+    "credits.this_project.translations": "Translations for %{lang}",
 
     "search": "Search",
 

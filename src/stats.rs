@@ -3,7 +3,13 @@ use std::sync::{Arc, Mutex};
 use eframe::epaint::ahash::HashSet;
 use lazy_static::lazy_static;
 
-use crate::util::GD_FOLDER;
+use crate::{util::GD_FOLDER, library::LibraryEntry};
+
+pub struct Stats {
+    pub bytes: u128,
+    pub duration: u128,
+    pub files: i64,
+}
 
 lazy_static!{
     pub static ref EXISTING_SOUND_FILES: Arc<Mutex<HashSet<i64>>> = Default::default();
@@ -24,5 +30,25 @@ pub fn add_existing_sfx_files() {
             .filter(|s| s.starts_with('s') && s.ends_with(".ogg"))
             .map(|s| s[1..s.len()-4].parse::<i64>().unwrap())
             .for_each(add_file_to_stats);
+    }
+}
+
+pub fn get_sound_stats(entry: &LibraryEntry) -> Stats {
+    match entry {
+        LibraryEntry::Category { children, .. } => children
+            .iter()
+            .map(get_sound_stats)
+            .reduce(|a, b| Stats {
+                bytes: a.bytes + b.bytes,
+                duration: a.duration + b.duration,
+                files: a.files + b.files
+            })
+            .unwrap_or(Stats { bytes: 0, duration: 0, files: 1 }),
+
+        LibraryEntry::Sound { bytes, duration, .. } => Stats {
+            bytes: *bytes as u128,
+            duration: *duration as u128,
+            files: 1
+        }
     }
 }

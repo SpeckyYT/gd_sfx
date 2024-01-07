@@ -1,36 +1,10 @@
 use eframe::egui::Ui;
 
-use crate::{gui::GdSfx, util, library::LibraryEntry, stats::EXISTING_SOUND_FILES};
-
-struct Stats {
-    bytes: u128,
-    duration: u128,
-    files: i64,
-}
+use crate::{gui::GdSfx, util, stats::{self, *}};
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    fn get_sound_stats(entry: &LibraryEntry) -> Stats {
-        match entry {
-            LibraryEntry::Category { children, .. } => children
-                .iter()
-                .map(get_sound_stats)
-                .reduce(|a, b| Stats {
-                    bytes: a.bytes + b.bytes,
-                    duration: a.duration + b.duration,
-                    files: a.files + b.files
-                })
-                .unwrap_or(Stats { bytes: 0, duration: 0, files: 1 }),
-
-            LibraryEntry::Sound { bytes, duration, .. } => Stats {
-                bytes: *bytes as u128,
-                duration: *duration as u128,
-                files: 1
-            }
-        }
-    }
-
     let library = &gdsfx.sfx_library.as_ref().unwrap().sound_effects;
-    let Stats { bytes, duration, files } = get_sound_stats(library);
+    let Stats { bytes, duration, files } = stats::get_sound_stats(library);
 
     ui.heading(t!("stats.library"));
 

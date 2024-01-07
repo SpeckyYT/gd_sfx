@@ -1,5 +1,5 @@
 mod top_panel;
-pub mod left_window;
+mod left_window;
 mod right_window;
 
 use eframe::{
