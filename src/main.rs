@@ -1,6 +1,6 @@
 use std::thread;
 
-use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2, Theme};
+use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
 use settings::FIRST_READ;
 use stats::add_existing_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
@@ -40,11 +40,10 @@ fn main() {
 
     gdsfx.run(NativeOptions {
         viewport: ViewportBuilder::default()
-            .with_min_inner_size(Vec2 {x: TOTAL_WIDTH, y: TOTAL_HEIGHT}),
+            .with_inner_size(Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT })
+            .with_min_inner_size(Vec2 { x: TOTAL_WIDTH * 0.7, y: TOTAL_HEIGHT * 0.7 }),
 
         follow_system_theme: false,
-        default_theme: Theme::Dark,
-
         ..Default::default()
     });
 }

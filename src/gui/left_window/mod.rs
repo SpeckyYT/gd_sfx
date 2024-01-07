@@ -77,7 +77,7 @@ fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
     }
 }
 
-pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
+fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
     if !entry.is_enabled() { return }
 
     let sound = ui.button(entry.pretty_name());

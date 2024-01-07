@@ -32,6 +32,9 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.label(t!("credits.this_project.translations", lang = util::format_locale(&rust_i18n::locale())));
 
+    // TODO "translators": [{"name": string, "link": string}] in lang jsons (add what i had to schema)
+    // insert code for getting translation credits with OUT_DIR/i18n.rs when generating lang_schema
+
     match rust_i18n::locale().as_str() {
         "de_AT" => {
             ui.hyperlink_to("kr8gz", "https://github.com/kr8gz");
