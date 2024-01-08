@@ -5,9 +5,10 @@ use eframe::epaint::ahash::HashMap;
 use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
 
-pub const LIBRARY_WIDTH: f32 = 200.0;
+pub const MIN_LIBRARY_WIDTH: f32 = 200.0;
+pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
-pub const TOTAL_WIDTH: f32 = LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
+pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
 
 pub const TOTAL_HEIGHT: f32 = 600.0;
 

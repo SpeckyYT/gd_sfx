@@ -7,12 +7,16 @@ mod credits_tab;
 
 use eframe::egui::{Ui, Context, SidePanel, ScrollArea};
 
-use crate::{library::LibraryEntry, settings, audio};
+use crate::{library::LibraryEntry, settings, audio, util::{RIGHT_PANEL_WIDTH, MIN_LIBRARY_WIDTH, DEFAULT_LIBRARY_WIDTH}};
 
 use super::{GdSfx, Tab, Sorting};
 
 pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
-    SidePanel::left("left_panel").show(ctx, |ui| {
+    SidePanel::left("left_panel")
+    .min_width(MIN_LIBRARY_WIDTH)
+    .max_width(RIGHT_PANEL_WIDTH)
+    .default_width(DEFAULT_LIBRARY_WIDTH)
+    .show(ctx, |ui| {
         if let Tab::Library | Tab::Favourites = gdsfx.tab {
             add_search_area(ui, gdsfx);
         }
