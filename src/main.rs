@@ -5,9 +5,6 @@ use settings::FIRST_READ;
 use stats::add_existing_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
-#[macro_use]
-extern crate rust_i18n;
-
 mod requests;
 mod encoding;
 mod library;

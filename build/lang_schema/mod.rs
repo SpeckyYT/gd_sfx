@@ -11,14 +11,18 @@ pub fn build() {
     // read project settings
     let project_settings = util::read_json(PROJECT_SETTINGS_PATH);
     
-    // find matching json schema
+    // find json schema with {"id": "lang"}
     let lang_schema_settings = project_settings["json.schemas"]
         .as_array().unwrap()
         .iter()
-        .find(|schema| schema["id"].as_str().unwrap() == "lang")
+        .find(|schema| {
+            schema.get("id")
+                .and_then(Value::as_str)
+                .map_or(false, |id| id == "lang")
+        })
         .unwrap_or_else(|| panic!("No language file JSON schema found.\nAdd {{\"id\": \"lang\"}} to a JSON schema in '{PROJECT_SETTINGS_PATH}' to designate it as a language file JSON schema"));
 
-    // read schema template for json files in the lang folder
+    // read lang schema template from file
     let mut lang_schema_template = serde_json::from_str::<Value>(LANG_SCHEMA_TEMPLATE)
         .unwrap_or_else(|e| panic!("Invalid JSON in lang schema template: {e}"));
 
@@ -29,6 +33,7 @@ pub fn build() {
     let default_lang_path = lang_schema_settings["source"].as_str()
         .unwrap_or_else(|| panic!("Specify a lang file to generate the JSON schema from using {{\"source\": \"path/to/json\"}}"));
 
+    // filter out keys already specified in properties
     let default_lang_json = util::read_json(default_lang_path);
     let default_lang = default_lang_json
         .as_object().unwrap()
