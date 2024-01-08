@@ -1,11 +1,6 @@
 {
 	"language.name": "Ukrajinśka (Latin, Ukrajina)",
-    "language.translators": [
-        {
-            "name": "eldyj",
-            "link": "https://github.com/eldyj"
-        }
-    ],
+    "language.translators": ["eldyj"],
 
 	"tab.library": "Biblioteka",
 	"tab.favorites": "Uľubleni",

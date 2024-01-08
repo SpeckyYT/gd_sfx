@@ -1324,6 +1324,7 @@ dependencies = [
  "flate2",
  "lazy_static",
  "pretty-bytes",
+ "quote",
  "rayon",
  "reqwest",
  "rodio",

@@ -1,20 +1,12 @@
-use std::path::Path;
-
-mod lang_schema;
-// mod lang_credits;
+mod locale_schema;
 mod i18n;
 
 mod util;
 
 fn main() {
-    lang_schema::build();
-    // lang_credits::build();
+    locale_schema::build();
     i18n::build();
 
-    // rerun if any file in the lang folder changes
-    Path::new("lang")
-        .read_dir().unwrap()
-        .flatten()
-        .map(|entry| entry.path())
-        .for_each(build_script::cargo_rerun_if_changed);
+    // rerun if any file in the locales folder changes
+    util::get_locale_files().for_each(build_script::cargo_rerun_if_changed);
 }

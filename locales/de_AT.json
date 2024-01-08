@@ -1,11 +1,6 @@
 {
     "language.name": "Deutsch (Österreich)",
-    "language.translators": [
-        {
-            "name": "kr8gz",
-            "link": "https://github.com/kr8gz"
-        }
-    ],
+    "language.translators": ["kr8gz"],
 
     "tab.library": "Bibliothek",
     "tab.favorites": "Favoriten",

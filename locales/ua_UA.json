@@ -1,11 +1,6 @@
 {
     "language.name": "Українська (Україна)",
-    "language.translators": [
-        {
-            "name": "eldyj",
-            "link": "https://github.com/eldyj"
-        }
-    ],
+    "language.translators": ["eldyj"],
 
     "tab.library": "Бібліотека",
     "tab.favorites": "Улюблені",

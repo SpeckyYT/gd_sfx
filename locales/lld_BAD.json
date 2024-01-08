@@ -1,11 +1,6 @@
 {
     "language.name": "Ladin (Val Badia)",
-    "language.translators": [
-        {
-            "name": "Specky",
-            "link": "https://github.com/SpeckyYT"
-        }
-    ],
+    "language.translators": ["Specky"],
 
     "tab.library": "Libraria",
     "tab.favorites": "Favorit",

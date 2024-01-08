@@ -1,10 +1,14 @@
 {
     "json.schemas": [
         {
-            "id": "lang",
-            "fileMatch": ["lang/*.json"],
-            "url": ".vscode/lang_schema.json",
-            "source": "lang/en_US.json"
+            "id": "locales",
+            "fileMatch": ["locales/*.json"],
+            "url": ".vscode/schemas/locale_schema.json",
+            "source": "locales/en_US.json"
+        },
+        {
+            "fileMatch": ["credits.json"],
+            "url": ".vscode/schemas/credits_schema.json"
         }
     ]
 }
