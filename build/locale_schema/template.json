@@ -1,0 +1,13 @@
+{
+    "type": "object",
+    "properties": {
+        "language.translators": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": ["language.translators"],
+    "additionalProperties": false
+}

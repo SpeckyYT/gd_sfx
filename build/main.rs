@@ -1,9 +1,11 @@
+mod credits;
 mod i18n;
 mod locale_schema;
 
 mod util;
 
 fn main() {
+    credits::build();
     i18n::build();
     locale_schema::build();
 

@@ -8,27 +8,19 @@ const PROJECT_SETTINGS_PATH: &str = ".vscode/settings.json";
 
 const LOCALE_SCHEMA_ID: &str = "locales";
 
+const LOCALE_SCHEMA_TEMPLATE: &str = include_str!("template.json");
+
+// TODO: actually use serde for its intended purpose (deserializing)
 pub fn build() {
     // read project settings
-    let project_settings = util::read_json(PROJECT_SETTINGS_PATH);
+    let project_settings = util::read_json_file(PROJECT_SETTINGS_PATH);
     
     // find json schema with {"id": LOCALE_SCHEMA_ID}
     let locale_schema_settings = find_locale_schema_settings(&project_settings);
 
-    // define locale schema template
-    let mut locale_schema_template = json!({
-        "type": "object",
-        "properties": {
-            "language.translators": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
-        },
-        "required": ["language.translators"],
-        "additionalProperties": false
-    });
+    // parse locale schema template
+    let mut locale_schema_template = serde_json::from_str::<Value>(LOCALE_SCHEMA_TEMPLATE)
+        .unwrap_or_else(|e| panic!("Invalid JSON in locale schema template: {e}"));
 
     // get predefined locale schema properties
     let properties = locale_schema_template
@@ -45,7 +37,7 @@ pub fn build() {
     let default_locale_path = Path::new(default_locale_path);
 
     // filter out keys already specified in properties
-    let default_locale = util::read_json(default_locale_path);
+    let default_locale = util::read_json_file(default_locale_path);
     
     let default_locale = default_locale
         .as_object()
