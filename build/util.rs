@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::File;
+use std::fs::{File, DirEntry};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
@@ -19,9 +19,9 @@ pub fn read_json(path: &str) -> Value {
     serde_json::from_reader(reader).unwrap_or_else(|e| panic!("Invalid JSON in file '{path}': {e}"))
 }
 
-pub fn get_locale_files() -> impl Iterator<Item = PathBuf> {
+pub fn get_locale_files() -> impl Iterator<Item = DirEntry> {
     Path::new(LOCALES_DIR)
-        .read_dir().unwrap()
+        .read_dir()
+        .unwrap_or_else(|e| panic!("Couldn't read directory '{LOCALES_DIR}': {e}"))
         .flatten()
-        .map(|entry| entry.path())
 }
