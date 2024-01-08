@@ -1,5 +1,3 @@
-use std::fs;
-
 use quote::quote;
 
 use crate::util;
@@ -18,6 +16,5 @@ pub fn build() {
 
     // write macro invocation to OUTPUT_PATH to include!() it in main.rs
     // so that it updates every time the build script is rerun
-    fs::write(util::get_output_file(OUTPUT_PATH), test.to_string())
-        .unwrap_or_else(|e| panic!("Couldn't write to file '{OUTPUT_PATH}': {e}"));
+    util::write_output_file(OUTPUT_PATH, &test.to_string());
 }
