@@ -7,7 +7,7 @@ pub fn render(ui: &mut Ui, _gdsfx: &mut GdSfx) {
     
     ui.add_space(10.0);
 
-    let mut settings = SETTINGS.lock().unwrap();
+    let mut settings = SETTINGS.lock();
     let initial_settings = *settings;
 
     ui.checkbox(&mut settings.hide_empty_categories, t!("settings.hide_empty_categories"));

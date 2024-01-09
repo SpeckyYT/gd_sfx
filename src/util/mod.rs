@@ -1,8 +1,6 @@
-use std::path::PathBuf;
-use std::env;
-use std::sync::Arc;
-use eframe::epaint::ahash::HashMap;
-use eframe::epaint::mutex::Mutex;
+use std::{path::PathBuf, env, sync::Arc};
+
+use eframe::epaint::{ahash::HashMap, mutex::Mutex};
 use lazy_static::lazy_static;
 
 pub mod encoding;

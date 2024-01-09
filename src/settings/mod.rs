@@ -1,6 +1,6 @@
-use std::{path::PathBuf, sync::{Arc, Mutex}, fs};
+use std::{path::PathBuf, sync::Arc, fs};
 
-use eframe::epaint::ahash::HashSet;
+use eframe::epaint::{ahash::HashSet, mutex::Mutex};
 use lazy_static::lazy_static;
 
 use crate::util::{GD_FOLDER, encoding::*};
@@ -58,13 +58,13 @@ pub fn read_settings_file() -> (HashSet<i64>, Settings) {
 }
 
 pub fn generate_save_string() -> String {
-    let favourites_string = FAVOURITES_LIST.lock().unwrap()
+    let favourites_string = FAVOURITES_LIST.lock()
         .iter()
         .map(|s| s.to_string())
         .collect::<Vec<String>>()
         .join(",");
     
-    let settings = SETTINGS.lock().unwrap();
+    let settings = SETTINGS.lock();
 
     let strings = [
         favourites_string,
@@ -81,15 +81,15 @@ pub fn save() {
 }
 
 pub fn add_favourite(id: i64) {
-    FAVOURITES_LIST.lock().unwrap().insert(id);
+    FAVOURITES_LIST.lock().insert(id);
     save();
 }
 
 pub fn has_favourite(id: i64) -> bool {
-    FAVOURITES_LIST.lock().unwrap().contains(&id)
+    FAVOURITES_LIST.lock().contains(&id)
 }
 
 pub fn remove_favourite(id: i64) {
-    FAVOURITES_LIST.lock().unwrap().remove(&id);
+    FAVOURITES_LIST.lock().remove(&id);
     save();
 }

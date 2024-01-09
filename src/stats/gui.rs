@@ -20,5 +20,5 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     
     ui.add_space(10.0);
 
-    ui.label(t!("stats.files.downloaded", files = EXISTING_SOUND_FILES.lock().unwrap().len()));
+    ui.label(t!("stats.files.downloaded", files = EXISTING_SOUND_FILES.lock().len()));
 }

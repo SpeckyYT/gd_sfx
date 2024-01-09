@@ -1,5 +1,6 @@
-use std::{sync::{Arc, Mutex}, thread::{JoinHandle, self}, fs};
+use std::{sync::Arc, thread::{JoinHandle, self}, fs};
 
+use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
 use rayon::prelude::*;
 
@@ -36,12 +37,12 @@ pub fn download_everything(library: LibraryEntry) {
     start_process(|| {
         let all_sfx = get_sounds(library);
 
-        DOWNLOAD_PROGRESS.lock().unwrap().remaining = all_sfx.len();
+        DOWNLOAD_PROGRESS.lock().remaining = all_sfx.len();
 
         all_sfx.into_par_iter()
             .for_each(|entry| {
                 entry.download_and_store();
-                DOWNLOAD_PROGRESS.lock().unwrap().done += 1;
+                DOWNLOAD_PROGRESS.lock().done += 1;
             });
     });
 }
@@ -50,7 +51,7 @@ pub fn bruteforce_everything() {
     start_process(|| {
         let range = BRUTEFORCE_MIN..BRUTEFORCE_MAX;
 
-        DOWNLOAD_PROGRESS.lock().unwrap().remaining = BRUTEFORCE_COUNT;
+        DOWNLOAD_PROGRESS.lock().remaining = BRUTEFORCE_COUNT;
 
         range.into_par_iter()
             .for_each(|id| {
@@ -69,7 +70,7 @@ pub fn bruteforce_everything() {
                     sfx.download_and_store();
                 }
 
-                DOWNLOAD_PROGRESS.lock().unwrap().done += 1;
+                DOWNLOAD_PROGRESS.lock().done += 1;
             })
     });
 }
@@ -77,9 +78,9 @@ pub fn bruteforce_everything() {
 pub fn delete_everything() {
     start_process(|| {
         stats::add_existing_sfx_files();
-        let existing_sound_files = stats::EXISTING_SOUND_FILES.lock().unwrap();
+        let existing_sound_files = stats::EXISTING_SOUND_FILES.lock();
         
-        DOWNLOAD_PROGRESS.lock().unwrap().remaining = existing_sound_files.len();
+        DOWNLOAD_PROGRESS.lock().remaining = existing_sound_files.len();
         
         for id in existing_sound_files.iter() {
             let filename = format!("s{id}.ogg");
@@ -89,13 +90,13 @@ pub fn delete_everything() {
                 let _ = fs::remove_file(filepath);
             }
     
-            DOWNLOAD_PROGRESS.lock().unwrap().done += 1;
+            DOWNLOAD_PROGRESS.lock().done += 1;
         }
     });
 }
 
 fn start_process(process: impl FnOnce() + Send + 'static) {
-    *DOWNLOAD_PROGRESS.lock().unwrap() = DownloadProgress {
+    *DOWNLOAD_PROGRESS.lock() = DownloadProgress {
         handle: Some(thread::spawn(process)),
         ..Default::default()
     };

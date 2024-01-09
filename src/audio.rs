@@ -5,7 +5,7 @@ use std::{
     sync::Arc
 };
 
-use crossbeam_channel::{unbounded, Sender, Receiver};
+use crossbeam_channel::{Sender, Receiver};
 use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
 use rodio::{OutputStream, Sink, Decoder};
@@ -14,7 +14,7 @@ use crate::library::LibraryEntry;
 
 lazy_static!{
     pub static ref PLAYERS: Arc<Mutex<usize>> = Default::default();
-    pub static ref AUDIO_MESSAGES: (Sender<Instant>, Receiver<Instant>) = unbounded();
+    pub static ref AUDIO_MESSAGES: (Sender<Instant>, Receiver<Instant>) = crossbeam_channel::unbounded();
 }
 
 pub fn play_sound(sfx: &LibraryEntry) {

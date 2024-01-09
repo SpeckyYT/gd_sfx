@@ -1,6 +1,6 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-use eframe::epaint::ahash::HashSet;
+use eframe::epaint::{ahash::HashSet, mutex::Mutex};
 use lazy_static::lazy_static;
 
 use crate::{util::GD_FOLDER, library::LibraryEntry};
@@ -18,11 +18,11 @@ lazy_static!{
 }
 
 pub fn add_file_to_stats(id: i64) {
-    EXISTING_SOUND_FILES.lock().unwrap().insert(id);
+    EXISTING_SOUND_FILES.lock().insert(id);
 }
 
 pub fn remove_file_from_stats(id: i64) {
-    EXISTING_SOUND_FILES.lock().unwrap().remove(&id);
+    EXISTING_SOUND_FILES.lock().remove(&id);
 }
 
 pub fn add_existing_sfx_files() {

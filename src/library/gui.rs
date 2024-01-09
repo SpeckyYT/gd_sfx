@@ -24,7 +24,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
                 for child in children {
                     render(ui, gdsfx, child);
                 }
-            } else if enabled || !SETTINGS.lock().unwrap().hide_empty_categories {
+            } else if enabled || !SETTINGS.lock().hide_empty_categories {
                 ui.add_enabled_ui(enabled, |ui| {
                     ui.collapsing(name, |ui| {
                         for child in children {

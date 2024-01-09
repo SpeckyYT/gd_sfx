@@ -8,8 +8,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, ctx: &Context) {
         let modal = Modal::new(ctx, format!("{id}_modal"));
 
         modal.show(|ui| {
-            let DownloadProgress { ref mut handle, done, remaining } = *DOWNLOAD_PROGRESS.lock().unwrap();
-
+            let DownloadProgress { ref mut handle, done, remaining } = *DOWNLOAD_PROGRESS.lock();
             if handle.as_ref().filter(|handle| handle.is_finished()).is_some() {
                 *handle = None;
                 modal.close();
