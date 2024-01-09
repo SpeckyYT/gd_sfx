@@ -37,7 +37,7 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
     let parsed = syn::parse2(tokens)
         .unwrap_or_else(|e| panic!("Couldn't parse token stream for {path:?}: {e}"));
     
-    // before finally writing the formatted version to the file
+    // ...before finally writing the formatted version to the file
     fs::write(&path, prettyplease::unparse(&parsed))
-        .unwrap_or_else(|e| panic!("Couldn't write to file {path:?}: {e}"));
+        .unwrap_or_else(|e| panic!("Couldn't write to file {path:?}: {e}"))
 }

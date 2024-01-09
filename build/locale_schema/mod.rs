@@ -1,6 +1,5 @@
 use std::{fs, path::PathBuf};
 
-use anyhow::{Result, Context};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value, Map};
 
@@ -42,11 +41,11 @@ struct LocaleSchema {
 
 const LOCALE_SCHEMA_TEMPLATE: &str = include_str!("template.json");
 
-pub fn build() -> Result<()> {
-    let settings = find_locale_schema_settings()?;
+pub fn build() {
+    let settings = find_locale_schema_settings();
 
     let mut template: LocaleSchema = serde_json::from_str(LOCALE_SCHEMA_TEMPLATE)
-        .context("Incorrect JSON in locale schema template")?;
+        .unwrap_or_else(|e| panic!("Incorrect JSON in locale schema template: {e}"));
     
     let source_locale: Map<String, Value> = util::read_json_file(settings.source);
 
@@ -63,23 +62,24 @@ pub fn build() -> Result<()> {
     if let Some(path) = destination_file.parent() {
         if !path.exists() {
             std::fs::create_dir_all(path)
-                .with_context(|| format!("Couldn't create directories to path {path:?}"))?;
+                .unwrap_or_else(|e| panic!("Couldn't create directories to path {path:?}: {e}"));
         }
     }
-    
-    fs::write(&destination_file, serde_json::to_string_pretty(&template)?)
-        .with_context(|| format!("Couldn't write locale schema to file {destination_file:?}"))?;
 
-    Ok(())
+    let formatted_template = serde_json::to_string_pretty(&template)
+        .unwrap_or_else(|e| panic!("Couldn't serialize locale schema: {e}"));
+    
+    fs::write(&destination_file, formatted_template)
+        .unwrap_or_else(|e| panic!("Couldn't write locale schema to file {destination_file:?}: {e}"));
 }
 
-fn find_locale_schema_settings() -> Result<LocaleSchemaSettings> {
+fn find_locale_schema_settings() -> LocaleSchemaSettings {
     let project_settings: ProjectSettings = util::read_json_file(PROJECT_SETTINGS_PATH);
     
     project_settings.schemas
         .into_iter()
         .find(|schema| schema.id == LOCALE_SCHEMA_ID)
-        .with_context(|| format!(
+        .unwrap_or_else(|| panic!(
             "No locale schema found.\nAdd {{\"id\": \"{LOCALE_SCHEMA_ID}\"}} to a JSON schema in {PROJECT_SETTINGS_PATH:?} to designate it as a locale schema,\nand specify a locale file to generate the JSON schema from using {{\"source\": \"path/to/file\"}}"
         ))
 }
