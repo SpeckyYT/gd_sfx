@@ -25,7 +25,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.label(t!("credits.this_project.developers"));
 
     for &developer in DEVELOPERS {
-        ui.hyperlink_to(developer, get_link(developer));
+        add_optional_link(ui, developer);
     }
 
     ui.add_space(10.0);
@@ -37,7 +37,15 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     if !translators.is_empty() {
         ui.label(t!("credits.this_project.translations", lang = t!("language.name")));
         for &translator in translators {
-            ui.hyperlink_to(translator, get_link(translator));
+            add_optional_link(ui, translator);
         }
+    }
+}
+
+fn add_optional_link(ui: &mut Ui, name: &str) {
+    if let Some(link) = get_link(name) {
+        ui.hyperlink_to(name, link);
+    } else {
+        ui.label(name);
     }
 }

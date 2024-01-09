@@ -23,11 +23,14 @@ rayon = "1.8.0"
 
 [build-dependencies]
 build_script = "0.2.0"
+serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
+serde_with = "3.4.0"
 quote = "1.0.35"
+syn = "2.0.48"
 proc-macro2 = "1.0.76"
 prettyplease = "0.2.16"
-syn = "2.0.48"
+anyhow = "1.0.79"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winapi = { version = "0.3.9", features = ["wincon", "winuser"] }

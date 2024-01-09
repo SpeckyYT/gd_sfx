@@ -4,7 +4,7 @@ pub mod gui;
 // → see build/credits.rs
 include!(concat!(env!("OUT_DIR"), "/credits.rs"));
 
-fn get_link(name: &str) -> &str {
+fn get_link(name: &str) -> Option<&str> {
     __get_link(name)
 }
 
