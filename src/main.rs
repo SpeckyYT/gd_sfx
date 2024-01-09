@@ -3,7 +3,7 @@ use std::thread;
 use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
 use settings::FIRST_READ;
 use stats::add_existing_sfx_files;
-use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
+use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT, update_unlisted_sfx};
 
 mod audio;
 mod gui;
@@ -34,6 +34,8 @@ fn main() {
     gdsfx.get_cdn_url(false);
     gdsfx.get_sfx_version(false);
     gdsfx.get_sfx_library(false);
+
+    update_unlisted_sfx(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
 
     // set default locale, will be overwritten by reading settings
     rust_i18n::set_locale("en_US");

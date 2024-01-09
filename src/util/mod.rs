@@ -1,7 +1,9 @@
-use std::{path::PathBuf, env, sync::Arc};
+use std::{path::PathBuf, env, sync::Arc, thread::spawn};
 
-use eframe::epaint::{ahash::HashMap, mutex::Mutex};
+use eframe::epaint::{ahash::{HashMap, HashSet}, mutex::Mutex};
 use lazy_static::lazy_static;
+
+use crate::library::LibraryEntry;
 
 pub mod encoding;
 pub mod requests;
@@ -10,6 +12,7 @@ pub const MIN_LIBRARY_WIDTH: f32 = 200.0;
 pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
 pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
+include!(concat!(env!("OUT_DIR"), "/sfx_list.rs"));
 
 pub const TOTAL_HEIGHT: f32 = 600.0;
 
@@ -31,8 +34,8 @@ lazy_static!{
         }
     };
     pub static ref SFX_LIBRARY_FILE: PathBuf = GD_FOLDER.join("sfxlibrary.dat");
-
     pub static ref LOCAL_SFX_LIBRARY: Arc<Mutex<HashMap<u32, Vec<u8>>>> = Default::default();
+    pub static ref UNLISTED_SFX: Arc<Mutex<HashSet<u32>>> = Default::default();
 }
 
 pub fn hide_console_window() {
@@ -61,4 +64,21 @@ mod test {
         assert_eq!("0.10",  stringify_duration(10));
         assert_eq!("1.00",  stringify_duration(100));
     }
+}
+
+// util is the wrong folder for this
+pub fn update_unlisted_sfx(library: &LibraryEntry) {
+    let entries: Vec<LibraryEntry> = library.get_all_children().into_iter().cloned().collect();
+
+    spawn(move || {
+        // todo: also local downloaded sfx should be checked
+        let mut all_ids: HashSet<u32> = HashSet::from_iter(ALL_SFX_IDS);
+
+        entries.iter()
+        .for_each(|entry| {
+            all_ids.remove(&entry.id());
+        });
+
+        *UNLISTED_SFX.lock() = all_ids;
+    });
 }

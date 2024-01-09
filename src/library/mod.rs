@@ -227,6 +227,14 @@ impl LibraryEntry {
     pub fn is_favourite(&self) -> bool {
         has_favourite(self.id())
     }
+    pub fn get_all_children(&self) -> Vec<&LibraryEntry> {
+        match self {
+            LibraryEntry::Sound { .. } => vec![self],
+            LibraryEntry::Category { children, .. } => {
+                children.iter().map(|child| child.get_all_children()).flatten().collect()
+            }
+        }
+    }
 }
 
 impl Credit {

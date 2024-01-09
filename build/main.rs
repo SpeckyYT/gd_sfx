@@ -1,6 +1,7 @@
 mod credits;
 mod i18n;
 mod locale_schema;
+mod sfx_list;
 
 mod util;
 
@@ -8,6 +9,7 @@ fn main() {
     credits::build();
     i18n::build();
     locale_schema::build();
+    sfx_list::build();
 
     // rerun if any file in the locales folder changes
     util::get_locale_files()

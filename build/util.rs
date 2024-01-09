@@ -1,7 +1,7 @@
 use std::{env, fs};
 use std::fs::{File, DirEntry};
 use std::io::BufReader;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use proc_macro2::TokenStream;
 use serde::de::DeserializeOwned;
@@ -40,4 +40,10 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
     // ...before finally writing the formatted version to the file
     fs::write(&path, prettyplease::unparse(&parsed))
         .unwrap_or_else(|e| panic!("Couldn't write to file {path:?}: {e}"))
+}
+
+pub fn geometry_dash_dir() -> PathBuf {
+    let mut path = PathBuf::from(env!("localappdata"));
+    path.push("GeometryDash");
+    path
 }
