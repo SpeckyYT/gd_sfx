@@ -15,8 +15,8 @@ pub struct Settings {
 lazy_static!{
     pub static ref FAVOURITES_FILE: PathBuf = GD_FOLDER.join("gdsfx_favourites.dat");
 
-    pub static ref FIRST_READ: (HashSet<i64>, Settings) = read_settings_file();
-    pub static ref FAVOURITES_LIST: Arc<Mutex<HashSet<i64>>> = Arc::new(Mutex::new(FIRST_READ.0.clone()));
+    pub static ref FIRST_READ: (HashSet<u32>, Settings) = read_settings_file();
+    pub static ref FAVOURITES_LIST: Arc<Mutex<HashSet<u32>>> = Arc::new(Mutex::new(FIRST_READ.0.clone()));
     pub static ref SETTINGS: Arc<Mutex<Settings>> = Arc::new(Mutex::new(FIRST_READ.1));
 
     pub static ref EMPTY_FAVOURITES: String = full_encode(&[]); 
@@ -24,7 +24,7 @@ lazy_static!{
 
 pub const FAVOURITES_CHARACTER: char = '⭐';
 
-pub fn read_settings_file() -> (HashSet<i64>, Settings) {
+pub fn read_settings_file() -> (HashSet<u32>, Settings) {
     if FAVOURITES_FILE.exists() {
         let mut favourites = HashSet::default();
 
@@ -80,16 +80,16 @@ pub fn save() {
     fs::write(FAVOURITES_FILE.as_path(), data).unwrap();
 }
 
-pub fn add_favourite(id: i64) {
+pub fn add_favourite(id: u32) {
     FAVOURITES_LIST.lock().insert(id);
     save();
 }
 
-pub fn has_favourite(id: i64) -> bool {
+pub fn has_favourite(id: u32) -> bool {
     FAVOURITES_LIST.lock().contains(&id)
 }
 
-pub fn remove_favourite(id: i64) {
+pub fn remove_favourite(id: u32) {
     FAVOURITES_LIST.lock().remove(&id);
     save();
 }

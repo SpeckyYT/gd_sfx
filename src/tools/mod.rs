@@ -60,7 +60,7 @@ pub fn bruteforce_everything() {
 
                 if !filepath.exists() {
                     let sfx = LibraryEntry::Sound {
-                        id: id as i64,
+                        id: id as u32,
                         bytes: 0,
                         duration: 0,
                         enabled: false,

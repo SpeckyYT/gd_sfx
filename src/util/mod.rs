@@ -32,7 +32,7 @@ lazy_static!{
     };
     pub static ref SFX_LIBRARY_FILE: PathBuf = GD_FOLDER.join("sfxlibrary.dat");
 
-    pub static ref LOCAL_SFX_LIBRARY: Arc<Mutex<HashMap<i64, Vec<u8>>>> = Default::default();
+    pub static ref LOCAL_SFX_LIBRARY: Arc<Mutex<HashMap<u32, Vec<u8>>>> = Default::default();
 }
 
 pub fn hide_console_window() {

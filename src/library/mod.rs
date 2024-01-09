@@ -20,16 +20,16 @@ pub struct Library {
 #[derive(Debug, Clone)]
 pub enum LibraryEntry {
     Category { // 3544,Aquatic Sounds,1,1,0,0;
-        id: i64,
+        id: u32,
         name: String,
-        parent: i64,
+        parent: u32,
         children: Vec<LibraryEntry>,
         enabled: bool,
     },
     Sound { // 10728,Background Ambience Loop 01,0,10642,96677,699;
-        id: i64,
+        id: u32,
         name: String,
-        parent: i64,
+        parent: u32,
         bytes: i64,
         duration: i64, // in centiseconds
         enabled: bool,
@@ -43,7 +43,7 @@ pub struct Credit {
 }
 
 impl LibraryEntry {
-    pub fn id(&self) -> i64 {
+    pub fn id(&self) -> u32 {
         match self {
             | LibraryEntry::Category { id, .. }
             | LibraryEntry::Sound { id, .. } => *id,
@@ -69,7 +69,7 @@ impl LibraryEntry {
     pub fn is_sound(&self) -> bool {
         matches!(self, LibraryEntry::Sound { .. })
     }
-    pub fn parent(&self) -> i64 {
+    pub fn parent(&self) -> u32 {
         match self {
             | LibraryEntry::Category { parent, .. }
             | LibraryEntry::Sound { parent, .. } => *parent,
@@ -149,7 +149,7 @@ impl LibraryEntry {
         })
         .collect::<Vec<_>>();
 
-        let mut library_map: HashMap<i64, (&mut LibraryEntry, NodeId)> = HashMap::with_capacity(entries.len());
+        let mut library_map: HashMap<u32, (&mut LibraryEntry, NodeId)> = HashMap::with_capacity(entries.len());
         let mut library_tree = TreeBuilder::new().with_capacity(entries.len()).with_root(entries[0].id()).build();
 
         let root_id = entries[0].id();
@@ -157,14 +157,14 @@ impl LibraryEntry {
         for entry in &mut entries {
             if entry.id() != root_id {
                 let mut parent_id = library_tree.get_mut((library_map.get(&entry.parent()).unwrap()).1).unwrap();
-                let entry_id: slab_tree::NodeMut<'_, i64> = parent_id.append(entry.id());
+                let entry_id: slab_tree::NodeMut<'_, u32> = parent_id.append(entry.id());
                 library_map.insert(entry.id(), (entry, entry_id.node_id()));
             } else {
                 library_map.insert(entry.id(), (entry, library_tree.root_id().unwrap()));
             }
         }
 
-        fn recurse(tree: &NodeRef<'_, i64>, map: &mut HashMap<i64, (&mut LibraryEntry, NodeId)>) {
+        fn recurse(tree: &NodeRef<'_, u32>, map: &mut HashMap<u32, (&mut LibraryEntry, NodeId)>) {
             for child in tree.children() {
                 recurse(&child, map);
             }
