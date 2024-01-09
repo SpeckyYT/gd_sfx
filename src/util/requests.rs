@@ -1,6 +1,3 @@
-// DISCALIMER: this file contains the worst code and mispells you've ever seen
-// make sure to contribute to fix that
-
 use std::fs;
 
 use reqwest::blocking::Client;
@@ -10,8 +7,7 @@ use crate::gui::{GdSfx, VersionType};
 use crate::library::{parse_library, LibraryEntry, Library};
 use crate::util::SFX_LIBRARY_FILE;
 
-pub const GET_CUSTOM_CONTENT_URL: &str =
-    "https://www.boomlings.com/database/getCustomContentURL.php";
+pub const GET_CUSTOM_CONTENT_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
 pub const CDN_URL: &str = "https://geometrydashfiles.b-cdn.net";
 pub const ENDPOINT_SFX_VERSION: &str = "sfx/sfxlibrary_version.txt";
 pub const ENDPOINT_SFX_LIBRARY: &str = "sfx/sfxlibrary.dat";
@@ -92,11 +88,7 @@ pub fn download_sfx(cdn_url: &str, sound: &LibraryEntry) -> Option<Vec<u8>> {
         .send().ok()?;
 
     if response.status().is_success() {
-        Some(
-            response.bytes()
-            .ok()?
-            .to_vec()
-        )
+        Some(response.bytes().ok()?.to_vec())
     } else {
         None
     }

@@ -5,6 +5,9 @@ use eframe::epaint::ahash::HashMap;
 use eframe::epaint::mutex::Mutex;
 use lazy_static::lazy_static;
 
+pub mod encoding;
+pub mod requests;
+
 pub const MIN_LIBRARY_WIDTH: f32 = 200.0;
 pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
@@ -43,4 +46,21 @@ pub fn hide_console_window() {
 
 pub fn stringify_duration(centiseconds: i64) -> String {
     format!("{:.2}", centiseconds as f64 / 100.0)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_stringify_duration() {
+        assert_eq!("0.00",  stringify_duration(0));
+        assert_eq!("0.12",  stringify_duration(12));
+        assert_eq!("3.45",  stringify_duration(345));
+        assert_eq!("67.89", stringify_duration(6789));
+        
+        assert_eq!("0.01",  stringify_duration(1));
+        assert_eq!("0.10",  stringify_duration(10));
+        assert_eq!("1.00",  stringify_duration(100));
+    }
 }

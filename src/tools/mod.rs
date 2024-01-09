@@ -5,6 +5,8 @@ use rayon::prelude::*;
 
 use crate::{library::LibraryEntry, stats, util::GD_FOLDER};
 
+pub mod gui;
+
 const BRUTEFORCE_MIN: usize = 0;
 const BRUTEFORCE_MAX: usize = 14500;
 const BRUTEFORCE_COUNT: usize = BRUTEFORCE_MAX - BRUTEFORCE_MIN;

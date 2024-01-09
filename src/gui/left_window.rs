@@ -1,13 +1,6 @@
-mod library_tab;
-mod favourites_tab;
-mod tools_tab;
-mod settings_tab;
-mod stats_tab;
-mod credits_tab;
-
 use eframe::egui::{Ui, Context, SidePanel, ScrollArea};
 
-use crate::{library::LibraryEntry, settings, audio, util::{RIGHT_PANEL_WIDTH, MIN_LIBRARY_WIDTH, DEFAULT_LIBRARY_WIDTH}};
+use crate::{*, library::LibraryEntry, util::{RIGHT_PANEL_WIDTH, MIN_LIBRARY_WIDTH, DEFAULT_LIBRARY_WIDTH}};
 
 use super::{GdSfx, Tab, Sorting};
 
@@ -26,12 +19,12 @@ pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
                 let mut library = sfx_library.sound_effects.clone();
                 filter_sounds(gdsfx, &mut library);
                 match gdsfx.tab {
-                    Tab::Library => library_tab::render(ui, gdsfx, library),
-                    Tab::Favourites => favourites_tab::render(ui, gdsfx, library),
-                    Tab::Tools => tools_tab::render(ui, gdsfx, ctx),
-                    Tab::Settings => settings_tab::render(ui, gdsfx),
-                    Tab::Stats => stats_tab::render(ui, gdsfx),
-                    Tab::Credits => credits_tab::render(ui, gdsfx),
+                    Tab::Library => library::gui::render(ui, gdsfx, library),
+                    Tab::Favourites => favorites::gui::render(ui, gdsfx, library),
+                    Tab::Tools => tools::gui::render(ui, gdsfx, ctx),
+                    Tab::Settings => settings::gui::render(ui, gdsfx),
+                    Tab::Stats => stats::gui::render(ui, gdsfx),
+                    Tab::Credits => credits::gui::render(ui, gdsfx),
                 }
             }
         });
@@ -77,44 +70,5 @@ fn filter_sounds(gdsfx: &mut GdSfx, node: &mut LibraryEntry) {
             let any_enabled = children.iter().any(LibraryEntry::is_enabled);
             node.set_enabled(any_enabled);
         }
-    }
-}
-
-fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
-    if !entry.is_enabled() { return }
-
-    let sound = ui.button(entry.pretty_name());
-
-    let entry_selected = sound.hovered();
-
-    if sound.clicked() {
-        audio::stop_audio();
-        audio::play_sound(&entry);
-    }
-
-    sound.context_menu(|ui| {
-        if settings::has_favourite(entry.id()) {
-            if ui.button(t!("sound.button.favorite.remove")).clicked() {
-                settings::remove_favourite(entry.id());
-                ui.close_menu();
-            }
-        } else if ui.button(t!("sound.button.favorite.add")).clicked() {
-            settings::add_favourite(entry.id());
-            ui.close_menu();
-        }
-
-        if entry.exists() {
-            if ui.button(t!("sound.button.delete")).clicked() {
-                entry.delete();
-                ui.close_menu();
-            }
-        } else if ui.button(t!("sound.button.download")).clicked() {
-            entry.download_and_store();
-            ui.close_menu();
-        }
-    });
-
-    if entry_selected {
-        gdsfx.selected_sfx = Some(entry);
     }
 }

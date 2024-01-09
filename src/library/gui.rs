@@ -1,7 +1,6 @@
 use eframe::egui::Ui;
 
-use crate::{gui::{GdSfx, Sorting}, library::LibraryEntry, settings::SETTINGS};
-use super::add_sfx_button;
+use crate::{gui::{GdSfx, Sorting, self}, library::LibraryEntry, settings::SETTINGS};
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
     match entry {
@@ -35,6 +34,6 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
                 });
             }
         }
-        LibraryEntry::Sound { .. } => add_sfx_button(ui, gdsfx, entry)
+        LibraryEntry::Sound { .. } => gui::add_sfx_button(ui, gdsfx, entry)
     }
 }

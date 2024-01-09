@@ -1,14 +1,14 @@
-mod top_panel;
-mod left_window;
-mod right_window;
-
 use eframe::{
-    egui::Context,
+    egui::{Context, Ui},
     NativeOptions,
 };
 use strum::EnumIter;
 
-use crate::library::{Library, LibraryEntry};
+use crate::{library::{Library, LibraryEntry}, audio, settings};
+
+mod top_panel;
+mod left_window;
+mod right_window;
 
 pub type VersionType = usize;
 
@@ -81,3 +81,41 @@ impl GdSfx {
     }
 }
 
+pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
+    if !entry.is_enabled() { return }
+
+    let sound = ui.button(entry.pretty_name());
+
+    let entry_selected = sound.hovered();
+
+    if sound.clicked() {
+        audio::stop_audio();
+        audio::play_sound(&entry);
+    }
+
+    sound.context_menu(|ui| {
+        if settings::has_favourite(entry.id()) {
+            if ui.button(t!("sound.button.favorite.remove")).clicked() {
+                settings::remove_favourite(entry.id());
+                ui.close_menu();
+            }
+        } else if ui.button(t!("sound.button.favorite.add")).clicked() {
+            settings::add_favourite(entry.id());
+            ui.close_menu();
+        }
+
+        if entry.exists() {
+            if ui.button(t!("sound.button.delete")).clicked() {
+                entry.delete();
+                ui.close_menu();
+            }
+        } else if ui.button(t!("sound.button.download")).clicked() {
+            entry.download_and_store();
+            ui.close_menu();
+        }
+    });
+
+    if entry_selected {
+        gdsfx.selected_sfx = Some(entry);
+    }
+}

@@ -1,7 +1,6 @@
 use eframe::egui::Ui;
 
-use crate::{gui::GdSfx, library::LibraryEntry, settings};
-use super::add_sfx_button;
+use crate::{gui::{GdSfx, self}, library::LibraryEntry, settings};
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {    
     match entry {
@@ -12,7 +11,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
         }
         LibraryEntry::Sound { id, .. } => {
             if settings::has_favourite(id) {
-                add_sfx_button(ui, gdsfx, entry);
+                gui::add_sfx_button(ui, gdsfx, entry);
             }
         }
     }

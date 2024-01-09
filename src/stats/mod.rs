@@ -5,6 +5,8 @@ use lazy_static::lazy_static;
 
 use crate::{util::GD_FOLDER, library::LibraryEntry};
 
+pub mod gui;
+
 pub struct Stats {
     pub bytes: u128,
     pub duration: u128,

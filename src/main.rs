@@ -5,12 +5,13 @@ use settings::FIRST_READ;
 use stats::add_existing_sfx_files;
 use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT};
 
-mod requests;
-mod encoding;
-mod library;
+mod audio;
 mod gui;
 mod util;
-mod audio;
+
+mod credits;
+mod favorites;
+mod library;
 mod settings;
 mod stats;
 mod tools;
@@ -18,8 +19,9 @@ mod tools;
 #[cfg(test)]
 mod test;
 
-// build.rs reruns every time a file in the lang folder is changed
-// and writes the i18n!(...) macro invocation to this file
+// the build script reruns every time a file in the lang folder is changed
+// and writes the i18n!(...) macro invocation to this file so it is always updated
+// → see build/i18n.rs
 include!(concat!(env!("OUT_DIR"), "/i18n.rs"));
 
 fn main() {

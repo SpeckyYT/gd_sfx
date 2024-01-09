@@ -1,11 +1,11 @@
-// this contains both favourite and settings
-
 use std::{path::PathBuf, sync::{Arc, Mutex}, fs};
 
 use eframe::epaint::ahash::HashSet;
 use lazy_static::lazy_static;
 
-use crate::{util::GD_FOLDER, encoding::*};
+use crate::util::{GD_FOLDER, encoding::*};
+
+pub mod gui;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Settings {
