@@ -7,10 +7,10 @@ build = "build/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-base64 = "0.21.5"
-crossbeam-channel = "0.5.10"
-eframe = "0.24.1"
-egui-modal = "0.3.1"
+base64 = "0.21.6"
+crossbeam-channel = "0.5.11"
+eframe = "0.25.0"
+egui-modal = "0.3.2"
 flate2 = "1.0.28"
 lazy_static = "1.4.0"
 pretty-bytes = "0.2.2"
