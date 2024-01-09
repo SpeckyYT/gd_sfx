@@ -42,8 +42,9 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
         .unwrap_or_else(|e| panic!("Couldn't write to file {path:?}: {e}"))
 }
 
+// specky wtf is this
+// lets make a new crate for stuff that doesnt depend on build/ or runtime stuff
+// https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
 pub fn geometry_dash_dir() -> PathBuf {
-    let mut path = PathBuf::from(env!("localappdata"));
-    path.push("GeometryDash");
-    path
+    PathBuf::from(env!("localappdata")).join("GeometryDash")
 }

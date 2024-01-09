@@ -1,9 +1,7 @@
 use std::thread;
 
 use eframe::{NativeOptions, egui::ViewportBuilder, epaint::Vec2};
-use settings::FIRST_READ;
-use stats::add_existing_sfx_files;
-use util::{hide_console_window, TOTAL_WIDTH, TOTAL_HEIGHT, update_unlisted_sfx};
+use util::{TOTAL_WIDTH, TOTAL_HEIGHT};
 
 mod audio;
 mod gui;
@@ -25,9 +23,9 @@ mod test;
 include!(concat!(env!("OUT_DIR"), "/i18n.rs"));
 
 fn main() {
-    hide_console_window();
+    util::hide_console_window();
 
-    thread::spawn(add_existing_sfx_files);
+    thread::spawn(stats::add_existing_sfx_files);
 
     let mut gdsfx = gui::GdSfx::default();
 
@@ -35,11 +33,11 @@ fn main() {
     gdsfx.get_sfx_version(false);
     gdsfx.get_sfx_library(false);
 
-    update_unlisted_sfx(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
+    library::update_unlisted_sfx(&gdsfx.sfx_library.as_ref().unwrap().sound_effects);
 
     // set default locale, will be overwritten by reading settings
     rust_i18n::set_locale("en_US");
-    lazy_static::initialize(&FIRST_READ);
+    lazy_static::initialize(&settings::FIRST_READ);
 
     gdsfx.run(NativeOptions {
         viewport: ViewportBuilder::default()

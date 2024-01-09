@@ -26,23 +26,24 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
                     name: "Unlisted SFX".to_string(),
                     parent: 1,
                     children: {
-                        let unlisted_sfx = UNLISTED_SFX.lock();
-                        let mut sfxes: Vec<_> = unlisted_sfx.iter().copied().collect();
-                        drop(unlisted_sfx);
-                        sfxes.sort_unstable();
-                        sfxes.into_iter()
-                        .enumerate()
-                        .map(|(i, id)| {
-                            LibraryEntry::Sound {
-                                id,
-                                name: format!("Unused SFX #{}", i + 1), // lua simulator
-                                parent: u32::MAX,
-                                bytes: 0,
-                                duration: 0,
-                                enabled: true,
-                            }
-                        })
-                        .collect()
+                        let mut unlisted_sfx = UNLISTED_SFX.lock()
+                            .iter().copied()
+                            .collect::<Vec<_>>();
+
+                        unlisted_sfx.sort_unstable(); // @SPEcky why not BTreeSet
+                        unlisted_sfx.into_iter()
+                            .enumerate()
+                            .map(|(i, id)| {
+                                LibraryEntry::Sound {
+                                    id,
+                                    name: format!("Unused SFX #{}", i + 1), // lua simulator
+                                    parent: u32::MAX,
+                                    bytes: 0,
+                                    duration: 0,
+                                    enabled: true,
+                                }
+                            })
+                            .collect()
                     },
                     enabled: true,
                 });

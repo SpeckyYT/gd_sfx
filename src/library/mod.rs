@@ -1,10 +1,10 @@
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, thread};
 
-use eframe::epaint::ahash::{HashMap, HashMapExt};
+use eframe::epaint::ahash::{HashMap, HashMapExt, HashSet};
 use slab_tree::{TreeBuilder, NodeId, NodeRef};
 
 use crate::{
-    util::{GD_FOLDER, LOCAL_SFX_LIBRARY, encoding::full_decode, requests::{download_sfx, CDN_URL}},
+    util::{*, encoding::full_decode, requests::{download_sfx, CDN_URL}},
     settings::{has_favourite, FAVOURITES_CHARACTER},
     stats::{add_file_to_stats, remove_file_from_stats}
 };
@@ -231,7 +231,7 @@ impl LibraryEntry {
         match self {
             LibraryEntry::Sound { .. } => vec![self],
             LibraryEntry::Category { children, .. } => {
-                children.iter().map(|child| child.get_all_children()).flatten().collect()
+                children.iter().flat_map(|child| child.get_all_children()).collect()
             }
         }
     }
@@ -266,4 +266,20 @@ pub fn parse_library(data: &[u8]) -> Library {
     let data: Vec<u8> = full_decode(data);
     let string = std::str::from_utf8(&data).unwrap();
     Library::parse_string(string)
+}
+
+pub fn update_unlisted_sfx(library: &LibraryEntry) {
+    let entries: Vec<LibraryEntry> = library.get_all_children().into_iter().cloned().collect();
+
+    thread::spawn(move || {
+        // todo: also local downloaded sfx should be checked
+        let mut all_ids: HashSet<u32> = HashSet::from_iter(ALL_SFX_IDS);
+
+        entries.iter()
+            .for_each(|entry| {
+                all_ids.remove(&entry.id());
+            });
+
+        *UNLISTED_SFX.lock() = all_ids;
+    });
 }

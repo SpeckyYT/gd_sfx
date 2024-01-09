@@ -1,24 +1,26 @@
-use crate::util::{geometry_dash_dir, self};
+use std::ffi::OsStr;
+
 use quote::quote;
+
+use crate::util;
 
 const OUTPUT_FILE: &str = "sfx_list.rs";
 
 pub fn build() {
-    let gd_folder = geometry_dash_dir();
+    let gd_folder = util::geometry_dash_dir();
 
     let ids = gd_folder.read_dir().unwrap()
-    .map(|path| path.unwrap().path())
-    .filter_map(|path| {
-        let name = path.file_name().unwrap().to_str().unwrap();
-
-        if name.starts_with("s") && name.ends_with(".ogg") {
-            Some(name[1..name.len()-4].parse::<u32>().unwrap())
-        } else {
+        .flatten()
+        .map(|path| path.path())
+        .filter_map(|path| {
+            if let Some(name) = path.file_name().and_then(OsStr::to_str) {
+                if name.starts_with('s') && name.ends_with(".ogg") {
+                    return Some(name[1..name.len()-4].parse::<u32>().unwrap())
+                }
+            }
             None
-        }
-    })
-    .map(|id| quote!(#id))
-    .collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
 
     let len = ids.len();
 
@@ -30,5 +32,3 @@ pub fn build() {
 
     util::write_output_file(OUTPUT_FILE, tokens);
 }
-
-
