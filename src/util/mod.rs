@@ -1,4 +1,4 @@
-use std::{path::PathBuf, env, sync::Arc};
+use std::{path::{Path, PathBuf}, env, sync::Arc};
 
 use eframe::epaint::{ahash::{HashMap, HashSet}, mutex::Mutex};
 use lazy_static::lazy_static;
@@ -25,8 +25,22 @@ lazy_static!{
             PathBuf::from(env::var("HOME").expect("No home directory"))
                 .join("Library/Application Support/GeometryDash")
         } else if cfg!(target_os = "linux") {
-            PathBuf::from(env::var("HOME").expect("No home directory"))
-                .join(".steam/steam/steamapps/compatdata/322170/pfx/drive_c/users/steamuser/Local Settings/Application Data/GeometryDash")
+            let home_path_str: String = env::var("HOME").expect("home directory ENV variable not set");
+            let home_path: &Path = Path::new(home_path_str.as_str());
+
+            let possible_gd_paths: [&str; 2] = [
+                ".steam/steam/steamapps/compatiata/322170/drive_c/users/steamuser/Local Settings/Application Data/GeometryDash",
+                "PortWINE/PortProton/prefixes/DEFAULT/drive_c/users/steamuser/AppData/Local/GeometryDash"
+            ];
+
+            for path in possible_gd_paths {
+                let full_path: PathBuf = home_path.join(path);
+                if full_path.exists() {
+                    return full_path;
+                }
+            }
+
+            panic!("no GD path found");
         } else if cfg!(target_os = "android") {
             PathBuf::from("/data/data/com.robtopx.geometryjump")
         } else {

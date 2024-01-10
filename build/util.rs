@@ -45,6 +45,35 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
 // specky wtf is this
 // lets make a new crate for stuff that doesnt depend on build/ or runtime stuff
 // https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html
+
+// temporary, copy-pasted from src/util/mod.rs
 pub fn geometry_dash_dir() -> PathBuf {
-    PathBuf::from(env!("localappdata")).join("GeometryDash")
+    if cfg!(target_os = "windows") {
+            PathBuf::from(env::var("localappdata").expect("No local app data"))
+                .join("GeometryDash")
+    } else if cfg!(target_os = "macos") {
+            PathBuf::from(env::var("HOME").expect("No home directory"))
+                .join("Library/Application Support/GeometryDash")
+    } else if cfg!(target_os = "linux") {
+        let home_path_str: String = env::var("HOME").expect("home directory ENV variable not set");
+        let home_path: &Path = Path::new(home_path_str.as_str());
+
+        let possible_gd_paths: [&str; 2] = [
+            ".steam/steam/steamapps/compatiata/322170/drive_c/users/steamuser/Local Settings/Application Data/GeometryDash",
+            "PortWINE/PortProton/prefixes/DEFAULT/drive_c/users/steamuser/AppData/Local/GeometryDash"
+        ];
+
+        for path in possible_gd_paths {
+            let full_path: PathBuf = home_path.join(path);
+            if full_path.exists() {
+                return full_path;
+            }
+        }
+
+        panic!("no GD path found");
+    } else if cfg!(target_os = "android") {
+        PathBuf::from("/data/data/com.robtopx.geometryjump")
+    } else {
+        panic!("Unsupported operating system");
+    }
 }
