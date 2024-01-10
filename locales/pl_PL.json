@@ -26,6 +26,8 @@
     "tools.instruction": "Naciśnij przycisk trzy razy aby uruchomić",
     "tools.download_all_sfx": "Pobierz wszystkie efekty dźwiękowe",
     "tools.download_all_sfx.title": "Pobieranie...",
+    "tools.bruteforce_all_sfx": "Pobierz wszystkie efekty dźwiękowe (metoda siłowa)",
+    "tools.bruteforce_all_sfx.title": "Siłowe pobieranie efektów dźwiękowych...",
     "tools.delete_all_sfx": "Usuń wszystkie efekty dźwiękowe",
     "tools.delete_all_sfx.title": "Usuwanie...",
     "tools.progress": "Postęp",
