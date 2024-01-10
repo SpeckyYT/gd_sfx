@@ -11,9 +11,6 @@ pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
 pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
 
-// → see build/sfx_list.rs
-include!(concat!(env!("OUT_DIR"), "/sfx_list.rs"));
-
 pub const TOTAL_HEIGHT: f32 = 600.0;
 
 lazy_static!{
