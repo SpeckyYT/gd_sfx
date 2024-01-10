@@ -275,7 +275,7 @@ pub fn update_unlisted_sfx(library: &LibraryEntry) {
     //     .map(|entry| entry.id())
     //     .collect::<Vec<_>>();
 
-    dbg!(library);
+    let _ = library;
 
     thread::spawn(move || {
         // TODO merge this with stats::add_existing_sfx_files
