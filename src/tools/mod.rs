@@ -92,6 +92,8 @@ pub fn delete_everything() {
     
             DOWNLOAD_PROGRESS.lock().done += 1;
         }
+
+        // refactor stats::add_existing_sfx_files to update list of existing sound files from dir instead of just adding then call it here too
     });
 }
 

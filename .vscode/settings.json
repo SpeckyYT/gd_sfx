@@ -2,8 +2,7 @@
     "json.schemas": [
         {
             "fileMatch": ["locales/*.json"],
-            "url": ".vscode/schemas/locale_schema.json",
-            "source_locale": "locales/en_US.json"
+            "url": ".vscode/schemas/locale_schema.json"
         },
         {
             "fileMatch": ["credits.json"],

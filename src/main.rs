@@ -14,9 +14,6 @@ mod settings;
 mod stats;
 mod tools;
 
-#[cfg(test)]
-mod test;
-
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated
 // → see build/i18n.rs

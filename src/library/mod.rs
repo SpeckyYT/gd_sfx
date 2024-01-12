@@ -122,6 +122,61 @@ impl LibraryEntry {
             self.duration(),
         )
     }
+    pub fn filename(&self) -> String {
+        format!("s{}.ogg", self.id())
+    }
+    pub fn path(&self) -> PathBuf {
+        GD_FOLDER.join(self.filename())
+    }
+    pub fn download(&self) -> Option<Vec<u8>> {
+        if self.is_category() { return None }
+
+        let path = self.path();
+
+        let sfx_data;
+        
+        if let Some(data) = LOCAL_SFX_LIBRARY.lock().get(&self.id()) {
+            return Some(data.clone())
+        }
+        else if path.exists() {
+            sfx_data = fs::read(path).unwrap();
+        }
+        else if let Some(data) = download_sfx(CDN_URL, self) {
+            sfx_data = data;
+        }
+        else {
+            return None
+        }
+        
+        LOCAL_SFX_LIBRARY.lock().insert(self.id(), sfx_data.clone());
+        Some(sfx_data)
+    }
+    pub fn download_and_store(&self) {
+        if self.exists() { return }
+        if let Some(content) = self.download() {
+            fs::write(self.path(), content).unwrap();
+            add_file_to_stats(self.id());
+        }
+    }
+    pub fn delete(&self) {
+        let _ = fs::remove_file(self.path());
+        remove_file_from_stats(self.id());
+    }
+    pub fn exists(&self) -> bool {
+        self.path().exists()
+    }
+    pub fn is_favourite(&self) -> bool {
+        has_favourite(self.id())
+    }
+    #[allow(unused)]
+    pub fn get_all_children(&self) -> Vec<&LibraryEntry> {
+        match self {
+            LibraryEntry::Sound { .. } => vec![self],
+            LibraryEntry::Category { children, .. } => {
+                children.iter().flat_map(|child| child.get_all_children()).collect()
+            }
+        }
+    }
     pub fn parse_string(string: &str) -> Self {
         let mut entries: Vec<LibraryEntry> = string.split(';').filter_map(|line| {
             let segments = line.split(',').collect::<Vec<&str>>();
@@ -180,61 +235,6 @@ impl LibraryEntry {
         let root = library_map.get(&root_id).unwrap();
 
         root.0.clone()
-    }
-    pub fn filename(&self) -> String {
-        format!("s{}.ogg", self.id())
-    }
-    pub fn path(&self) -> PathBuf {
-        GD_FOLDER.join(self.filename())
-    }
-    pub fn download(&self) -> Option<Vec<u8>> {
-        if self.is_category() { return None }
-
-        let path = self.path();
-
-        let sfx_data;
-        
-        if let Some(data) = LOCAL_SFX_LIBRARY.lock().get(&self.id()) {
-            return Some(data.clone())
-        }
-        else if path.exists() {
-            sfx_data = fs::read(path).unwrap();
-        }
-        else if let Some(data) = download_sfx(CDN_URL, self) {
-            sfx_data = data;
-        }
-        else {
-            return None
-        }
-        
-        LOCAL_SFX_LIBRARY.lock().insert(self.id(), sfx_data.clone());
-        Some(sfx_data)
-    }
-    pub fn download_and_store(&self) {
-        if self.exists() { return }
-        if let Some(content) = self.download() {
-            fs::write(self.path(), content).unwrap();
-            add_file_to_stats(self.id());
-        }
-    }
-    pub fn delete(&self) {
-        let _ = fs::remove_file(self.path());
-        remove_file_from_stats(self.id());
-    }
-    pub fn exists(&self) -> bool {
-        self.path().exists()
-    }
-    pub fn is_favourite(&self) -> bool {
-        has_favourite(self.id())
-    }
-    #[allow(unused)]
-    pub fn get_all_children(&self) -> Vec<&LibraryEntry> {
-        match self {
-            LibraryEntry::Sound { .. } => vec![self],
-            LibraryEntry::Category { children, .. } => {
-                children.iter().flat_map(|child| child.get_all_children()).collect()
-            }
-        }
     }
 }
 

@@ -1,0 +1,12 @@
+[env]
+# cargo doesn't have this built-in
+CARGO_WORKSPACE_ROOT = { value = "", relative = true }
+
+# project build settings
+GDSFX_PROJECT_SETTINGS_FILE = { value = ".vscode/settings.json", relative = true }
+GDSFX_LOCALE_SCHEMA_TARGET_FILE = { value = ".vscode/schemas/locale_schema.json", relative = true }
+GDSFX_LOCALE_SCHEMA_SOURCE_FILE = { value = "locales/en_US.json", relative = true }
+GDSFX_LOCALES_DIR = { value = "locales", relative = true }
+GDSFX_CREDITS_FILE = { value = "credits.json", relative = true }
+
+# see gdsfx-data/src/paths.rs for runtime paths
