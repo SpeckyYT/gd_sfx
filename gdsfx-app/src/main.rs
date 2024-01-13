@@ -1,4 +1,5 @@
 use eframe::{egui, epaint::Vec2};
+use gdsfx_audio::AudioSettings;
 use gdsfx_data::paths;
 use gdsfx_library::{sorting::Sorting, Library, LibraryEntry};
 use settings::Settings;
@@ -22,6 +23,7 @@ struct GdSfx {
     search_query: String,
     sorting: Sorting,
     settings: Settings,
+    audio_settings: AudioSettings,
 }
 
 impl GdSfx {
@@ -52,6 +54,7 @@ impl GdSfx {
             search_query: String::new(),
             sorting: Sorting::default(),
             settings: Settings::load_or_default(),
+            audio_settings: AudioSettings::default(),
         })
     }
 }
