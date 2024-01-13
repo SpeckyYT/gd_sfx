@@ -7,11 +7,11 @@ use crate::Bytes;
 static CLIENT: Lazy<Client> = Lazy::new(Client::default);
 
 fn get_cdn_url() -> Url {
-    const GET_CUSTOM_CONTENT_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
+    const CDN_URL_REQUEST_URL: &str = "https://www.boomlings.com/database/getCustomContentURL.php";
     const FALLBACK_CDN_URL: &str = "https://geometrydashfiles.b-cdn.net";
 
     let url = CLIENT
-        .post(GET_CUSTOM_CONTENT_URL)
+        .post(CDN_URL_REQUEST_URL)
         .header(USER_AGENT, "")
         .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
         .send().ok()

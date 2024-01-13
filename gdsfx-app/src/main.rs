@@ -59,9 +59,10 @@ impl GdSfx {
 impl eframe::App for GdSfx {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         use layout::*;
+        
         top_panel::render(self, ctx);
         left_window::render(self, ctx);
-        // right_window::render(self, ctx);
+        right_window::render(self, ctx);
     }
 }
 

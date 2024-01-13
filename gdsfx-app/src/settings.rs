@@ -4,6 +4,7 @@ use anyhow::Result;
 use educe::Educe;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
+use strum::EnumIter;
 
 use crate::paths;
 
@@ -18,11 +19,15 @@ pub struct Settings {
     #[educe(Default = paths::runtime::GD_FOLDER.clone())]
     pub gd_folder: Option<PathBuf>,
 
+    pub search_filter_mode: SearchFilterMode,
+
+    pub sfx_select_mode: SFXSelectMode,
+
+    #[educe(Default = true)]
+    pub play_sfx_on_click: bool,
+
     #[educe(Default = String::from("en_US"))]
     pub locale: String,
-
-    #[educe(Default = false)]
-    pub hide_empty_categories: bool,
 
     #[educe(Default = 0..14500)]
     pub download_ids_range: Range<u32>,
@@ -30,6 +35,20 @@ pub struct Settings {
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
     last_state: Option<Box<Settings>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
+pub enum SearchFilterMode {
+    #[default]
+    GrayOut,
+    Hide,
+}
+
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
+pub enum SFXSelectMode {
+    #[default]
+    Hover,
+    Click,
 }
 
 fn ignore_option<T>(_: &Option<T>) -> Option<T> { None }

@@ -1,22 +1,16 @@
-use std::{path::PathBuf, fs, collections::HashMap};
+use std::{path::PathBuf, fs, collections::HashMap, ops::Deref, fmt};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
 use stats::Centiseconds;
-
-use crate::credits::Credit;
 
 pub mod favorites;
 pub mod sorting;
 pub mod stats;
 pub mod tools;
 
-mod credits;
 mod requests;
 mod parse;
-
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
-pub struct EntryId(u32);
 
 type Bytes = Vec<u8>;
 
@@ -54,6 +48,21 @@ pub struct LibraryEntry {
 pub enum EntryKind {
     Category { children: Vec<EntryId> },
     Sound { bytes: i64, duration: Centiseconds },
+}
+
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub struct EntryId(u32);
+
+impl fmt::Display for EntryId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+#[derive(Debug)]
+pub struct Credit {
+    pub name: String,
+    pub link: String,
 }
 
 fn try_read_file() -> Option<Bytes> {

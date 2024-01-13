@@ -4,13 +4,14 @@ use gdsfx_library::{LibraryEntry, EntryKind};
 use crate::{GdSfx, layout};
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
+    layout::add_search_area(ui, gdsfx);
     render_recursive(ui, gdsfx, gdsfx.library.get_root().clone());
 }
 
 fn render_recursive(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
     match entry.kind {
         EntryKind::Category { children } => {
-            // TODO extra shit
+            // TODO category shit
             for child in children {
                 render_recursive(ui, gdsfx, gdsfx.library.get_entry(child).clone());
             }
