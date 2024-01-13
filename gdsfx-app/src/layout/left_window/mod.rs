@@ -21,18 +21,16 @@ pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
         }
         
         ScrollArea::vertical().show(ui, |ui| {
-            // let mut library = get_library().library().clone();
+            let mut library = get_library().library().clone();
             // filter_sounds(gdsfx, &mut library);
-            /*
             match gdsfx.selected_tab {
-                Tab::Library => library::gui::render(ui, gdsfx, library),
-                Tab::Favourites => favorites::gui::render(ui, gdsfx, library),
-                Tab::Tools => tools::gui::render(ui, gdsfx, ctx),
-                Tab::Settings => settings::gui::render(ui, gdsfx),
-                Tab::Stats => stats::gui::render(ui, gdsfx),
-                Tab::Credits => credits::gui::render(ui, gdsfx),
+                Tab::Library => library::render(ui, gdsfx, library),
+                Tab::Favourites => favorites::render(ui, gdsfx, library),
+                Tab::Tools => tools::render(ui, gdsfx, ctx),
+                Tab::Settings => settings::render(ui, gdsfx),
+                Tab::Stats => stats::render(ui, gdsfx),
+                Tab::Credits => credits::render(ui, gdsfx),
             }
-            */
         });
     });
 }
@@ -48,8 +46,8 @@ fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
             (Sorting::NameDec,   t!("sort.name.descending")),
             (Sorting::LengthInc, t!("sort.length.ascending")),
             (Sorting::LengthDec, t!("sort.length.descending")),
-            (Sorting::IdDec,     t!("sort.id.ascending")),  // this is not a bug, in gd, the id sorting is reversed,
-            (Sorting::IdInc,     t!("sort.id.descending")), // in-game it's `ID+ => 9 - 0; ID- => 0 - 9`
+            (Sorting::IdInc,     t!("sort.id.ascending")),
+            (Sorting::IdDec,     t!("sort.id.descending")),
             (Sorting::SizeInc,   t!("sort.size.ascending")),
             (Sorting::SizeDec,   t!("sort.size.descending")),
         ] {
