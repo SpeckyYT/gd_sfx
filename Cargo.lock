@@ -1480,7 +1480,9 @@ dependencies = [
 name = "gdsfx-library"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "gdsfx-data",
+ "id_tree",
  "once_cell",
  "reqwest",
  "url",
@@ -1795,6 +1797,15 @@ dependencies = [
  "block2 0.3.0",
  "dispatch",
  "objc2 0.4.1",
+]
+
+[[package]]
+name = "id_tree"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bcd9db8dd5be8bde5a2624ed4b2dfb74368fe7999eb9c4940fd3ca344b61071a"
+dependencies = [
+ "snowflake",
 ]
 
 [[package]]
@@ -3220,6 +3231,12 @@ checksum = "74212e6bbe9a4352329b2f68ba3130c15a3f26fe88ff22dbdc6cdd58fa85e99c"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "snowflake"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27207bb65232eda1f588cf46db2fee75c0808d557f6b3cf19a75f5d6d7c94df1"
 
 [[package]]
 name = "socket2"

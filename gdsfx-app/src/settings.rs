@@ -12,7 +12,7 @@ static SETTINGS_FILE: Lazy<PathBuf> = Lazy::new(|| {
         .join("settings.json")
 });
 
-#[derive(Educe, Serialize, Deserialize)]
+#[derive(Educe, Serialize, Deserialize, Debug)]
 #[educe(Default, Clone, PartialEq)]
 pub struct Settings {
     #[educe(Default = paths::runtime::GD_FOLDER.clone())]
@@ -29,15 +29,18 @@ pub struct Settings {
 
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
-    last_save: Option<Box<Settings>>,
+    last_state: Option<Box<Settings>>,
 }
 
 fn ignore_option<T>(_: &Option<T>) -> Option<T> { None }
 
 impl Settings {
     pub fn load_or_default() -> Self {
-        gdsfx_data::read_json_file(&*SETTINGS_FILE)
-            .unwrap_or_default()
+        let mut settings: Settings = gdsfx_data::read_json_file(&*SETTINGS_FILE)
+            .unwrap_or_default();
+
+        settings.set_last_state();
+        settings
     }
 
     pub fn try_save_if_changed(&mut self) -> Result<()> {
@@ -47,14 +50,52 @@ impl Settings {
             gdsfx_data::create_parent_dirs(&*SETTINGS_FILE)?;
             gdsfx_data::write_file(&*SETTINGS_FILE, json_data)?;
 
-            self.last_save = Some(Box::new(self.clone()));
+            self.set_last_state();
         }
         Ok(())
     }
 
     fn has_changed(&self) -> bool {
-        self.last_save.as_ref()
+        self.last_state.as_ref()
             .map(|last| self.ne(last))
             .unwrap_or(true) // has not saved before
+    }
+
+    fn set_last_state(&mut self) {
+        self.last_state = Some(Box::new(self.clone()))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_last_state() {
+        let mut settings = Settings::default();
+        assert_eq!(settings.last_state, None);
+        
+        settings.set_last_state();
+        assert_eq!(settings.last_state, Some(Box::new(settings.clone())));
+
+        let last_state = settings.last_state.as_ref().unwrap();
+
+        // last_state shouldn't be cloned
+        assert_eq!(last_state.last_state, None);
+        // and also shouldn't be considered when checking equality
+        assert_eq!(settings, **last_state);
+    }
+
+    #[test]
+    fn test_change_detection() {
+        let mut settings = Settings::default();
+        settings.set_last_state();
+        assert!(!settings.has_changed());
+
+        settings.locale = String::from("de_AT");
+        assert!(settings.has_changed());
+
+        settings.set_last_state();
+        assert!(!settings.has_changed());
     }
 }

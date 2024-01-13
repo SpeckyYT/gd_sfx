@@ -9,4 +9,4 @@ GDSFX_LOCALE_SCHEMA_SOURCE_FILE = { value = "locales/en_US.json", relative = tru
 GDSFX_LOCALES_DIR = { value = "locales", relative = true }
 GDSFX_CREDITS_FILE = { value = "credits.json", relative = true }
 
-# see gdsfx-data/src/paths.rs for runtime paths
+# see gdsfx-data/src/paths/runtime.rs for runtime paths

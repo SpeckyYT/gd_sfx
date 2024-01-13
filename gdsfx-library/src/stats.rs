@@ -1,6 +1,7 @@
 use std::fmt;
 
-pub struct Centiseconds(i64);
+#[derive(Debug)]
+pub struct Centiseconds(pub i64);
 
 impl fmt::Display for Centiseconds {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
