@@ -38,10 +38,10 @@ impl Library {
 
 #[derive(Debug)]
 pub struct LibraryEntry {
-    id: EntryId,
-    name: String,
-    parent_id: EntryId,
-    kind: EntryKind,
+    pub id: EntryId,
+    pub name: String,
+    pub parent_id: EntryId,
+    pub kind: EntryKind,
 }
 
 #[derive(Debug)]
