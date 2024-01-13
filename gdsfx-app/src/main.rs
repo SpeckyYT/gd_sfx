@@ -18,10 +18,10 @@ gdsfx_build::include!("i18n.rs");
 
 #[derive(Default)]
 struct GdSfx {
-    pub selected_tab: Tab,
-    pub search_query: String,
-    pub sorting: Sorting,
-    pub settings: Settings,
+    selected_tab: Tab,
+    search_query: String,
+    sorting: Sorting,
+    settings: Settings,
 }
 
 impl GdSfx {

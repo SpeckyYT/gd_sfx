@@ -51,10 +51,10 @@
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Категорія: %{id}",
     "sound.info.size": "Розмір: %{size}",
-    "sound.info.duration": "Тривалість: %{duration}s",
+    "sound.info.duration": "Тривалість: %{duration}",
     
     "stats.library": "SFX Бібліотека",
-    "stats.library.duration": "Загальна тривалість: %{duration}s",
+    "stats.library.duration": "Загальна тривалість: %{duration}",
     "stats.library.files": "Усього файлів: %{files}",
     "stats.library.size": "Загальний розмір: %{size}",
     "stats.files": "SFX файли",

@@ -53,10 +53,10 @@
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Categoria: %{id}",
     "sound.info.size": "Dimensione: %{size}",
-    "sound.info.duration": "Durata: %{duration}s",
+    "sound.info.duration": "Durata: %{duration}",
     
     "stats.library": "Libreria degli effetti sonori",
-    "stats.library.duration": "Durata totale: %{duration}s",
+    "stats.library.duration": "Durata totale: %{duration}",
     "stats.library.files": "Quantità suoni totale: %{files}",
     "stats.library.size": "Dimensione totale: %{size}",
     "stats.files": "File effetti sonori",

@@ -53,10 +53,10 @@
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Categoria: %{id}",
     "sound.info.size": "Grandëza: %{size}",
-    "sound.info.duration": "Dorada: %{duration}s",
+    "sound.info.duration": "Dorada: %{duration}",
     
     "stats.library": "Libraria SFX",
-    "stats.library.duration": "Dorada totala: %{duration}s",
+    "stats.library.duration": "Dorada totala: %{duration}",
     "stats.library.files": "Files totai: %{files}",
     "stats.library.size": "Grandëza totala: %{size}",
     "stats.files": "Files SFX",

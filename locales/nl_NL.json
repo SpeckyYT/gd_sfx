@@ -49,10 +49,10 @@
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Categorie: %{id}",
     "sound.info.size": "Grootte: %{size}",
-    "sound.info.duration": "Lengte: %{duration}s",
+    "sound.info.duration": "Lengte: %{duration}",
     
     "stats.library": "SFX Bibliotheek",
-    "stats.library.duration": "Totale lengte: %{duration}s",
+    "stats.library.duration": "Totale lengte: %{duration}",
     "stats.library.files": "Totaal aantal bestanden: %{files}",
     "stats.library.size": "Totale grootte: %{size}",
     "stats.files": "SFX bestanden",

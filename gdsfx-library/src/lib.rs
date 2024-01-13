@@ -1,4 +1,4 @@
-use std::{sync::OnceLock, path::PathBuf, fs};
+use std::{sync::OnceLock, path::PathBuf, fs, collections::HashMap};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
@@ -21,32 +21,37 @@ type Bytes = Vec<u8>;
 
 #[derive(Debug)]
 pub struct Library {
-    library: LibraryEntry,
+    root: LibraryEntry,
+    entries: HashMap<EntryId, LibraryEntry>,
+
     credits: Vec<Credit>,
 }
 
-// no mutatable!!
 impl Library {
-    pub fn library(&self) -> &LibraryEntry {
-        &self.library
+    pub fn get_root(&self) -> &LibraryEntry {
+        &self.root
     }
 
-    pub fn credits(&self) -> &Vec<Credit> {
+    pub fn get_entry(&self, id: EntryId) -> Option<&LibraryEntry> {
+        self.entries.get(&id)
+    }
+
+    pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LibraryEntry {
-    id: EntryId,
-    name: String,
-    parent_id: EntryId,
-    kind: EntryKind,
+    pub id: EntryId,
+    pub name: String,
+    pub parent_id: EntryId,
+    pub kind: EntryKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum EntryKind {
-    Category { children: Vec<LibraryEntry> },
+    Category { children: Vec<EntryId> },
     Sound { bytes: i64, duration: Centiseconds },
 }
 

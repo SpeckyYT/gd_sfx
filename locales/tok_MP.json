@@ -53,10 +53,10 @@
     "sound.info.id": "nanpa: %{id}",
     "sound.info.category.id": "poki: %{id}",
     "sound.info.size": "suli: %{size}",
-    "sound.info.duration": "tenpo: %{duration}s",
+    "sound.info.duration": "tenpo: %{duration}",
     
     "stats.library": "poki kalama",
-    "stats.library.duration": "tenpo ale: %{duration}s",
+    "stats.library.duration": "tenpo ale: %{duration}",
     "stats.library.files": "kalama ale: %{files}",
     "stats.library.size": "suli ale: %{size}",
     "stats.files": "lipu kalama",

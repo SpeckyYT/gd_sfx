@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, collections::HashMap};
 
 use anyhow::anyhow;
 
@@ -14,20 +14,22 @@ pub(crate) fn parse_library_string(string: &str) -> Library {
             .flat_map(T::from_str)
             .collect()
     }
-    
-    Library {
-        library: build_library_tree(parse_semicolon_separated(library_string)),
-        credits: parse_semicolon_separated(credits_string),
-    }
+
+    let entries = parse_semicolon_separated(library_string);
+    let credits = parse_semicolon_separated(credits_string);
+
+    build_library(entries, credits)
 }
 
 impl FromStr for LibraryEntry {
     type Err = anyhow::Error;
 
-    fn from_str(string: &str) -> Result<Self, Self::Err> {
-        let parts = string.split(',').collect::<Vec<_>>();
-        let parts @ [id, name, kind, parent_id, ..]: [&str; 6] =
-            parts.try_into().map_err(|e| anyhow!("Invalid library entry data: {e:?}"))?;
+    fn from_str(string: &str) -> Result<Self, Self::Err> {        
+        let parts @ [id, name, kind, parent_id, ..]: [&str; 6] = string
+            .split(',')
+            .collect::<Vec<_>>()
+            .try_into()
+            .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
 
         let entry = Self {
             id: id.parse()?,
@@ -39,7 +41,7 @@ impl FromStr for LibraryEntry {
                     bytes: parts[4].parse()?,
                     duration: Centiseconds(parts[5].parse()?),
                 },
-                "1" => EntryKind::Category { children: vec![] },
+                "1" => EntryKind::Category { children: Vec::new() },
 
                 _ => anyhow::bail!("Unknown library entry type")
             }
@@ -49,19 +51,36 @@ impl FromStr for LibraryEntry {
     }
 }
 
-fn build_library_tree(entries: Vec<LibraryEntry>) -> LibraryEntry {
-    todo!()
-}
-
 impl FromStr for Credit {
     type Err = anyhow::Error;
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {
-        string.split_once(',')
+        string
+            .split_once(',')
             .map(|(name, link)| Self {
                 name: name.to_string(),
                 link: link.to_string(),
             })
-            .ok_or(anyhow!("Credit must have format \"name,link\", found {string}"))
+            .ok_or(anyhow!("Credits must have format \"name,link\", found {string}"))
+    }
+}
+
+fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
+    let mut map = entries.iter()
+        .map(|entry| (entry.id, entry.clone()))
+        .collect::<HashMap<_, _>>();
+
+    for entry in &entries {
+        map.entry(entry.parent_id).and_modify(|parent| {
+            if let EntryKind::Category { children } = &mut parent.kind {
+                children.push(entry.id);
+            }
+        });
+    }
+
+    Library {
+        root: entries.into_iter().next().expect("No library entries"),
+        entries: map,
+        credits
     }
 }

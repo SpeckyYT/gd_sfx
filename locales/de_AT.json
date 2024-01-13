@@ -51,10 +51,10 @@
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Kategorie: %{id}",
     "sound.info.size": "Größe: %{size}",
-    "sound.info.duration": "Länge: %{duration}s",
+    "sound.info.duration": "Länge: %{duration}",
     
     "stats.library": "SFX-Bibliothek",
-    "stats.library.duration": "Gesamtlänge: %{duration}s",
+    "stats.library.duration": "Gesamtlänge: %{duration}",
     "stats.library.files": "Dateianzahl: %{files}",
     "stats.library.size": "Gesamtgröße: %{size}",
     "stats.files": "SFX-Dateien",
