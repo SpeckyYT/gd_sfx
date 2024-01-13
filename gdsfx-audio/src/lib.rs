@@ -16,6 +16,25 @@ pub struct Channel<T> {
     receiver: Receiver<T>,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub struct AudioSettings {
+    volume: f32,
+    speed: f32,
+    pitch: f32, // -12..12
+    reverse: bool,
+}
+
+impl Default for AudioSettings {
+    fn default() -> Self {
+        Self {
+            volume: 1.0,
+            speed: 1.0,
+            pitch: 0.0,
+            reverse: false,
+        }
+    }
+}
+
 impl<T> From<(Sender<T>, Receiver<T>)> for Channel<T> {
     fn from((sender, receiver): (Sender<T>, Receiver<T>)) -> Self {
         Self { sender, receiver }
@@ -27,15 +46,32 @@ lazy_static! {
     static ref AUDIO_MESSAGES: Channel<Instant> = crossbeam_channel::unbounded().into();
 }
 
-pub fn play_sound(ogg: Vec<u8>) -> JoinHandle<()> {
-    thread::spawn(|| {
-        // i have no idea what this does so im just gonna leave it
+pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) -> JoinHandle<()> {
+    thread::spawn(move || {
         *PLAYERS.lock() += 1;
         let start_time = Instant::now();
-        let cursor = Cursor::new(ogg);
+
+        // i have no idea what this does so im just gonna leave it
+        // ok zoomer
+
         let (_stream, handle) = OutputStream::try_default().unwrap();
         let sink = Sink::try_new(&handle).unwrap();
-        sink.append(Decoder::new(cursor).unwrap());
+
+        let sfx_data = Decoder::new(Cursor::new(ogg)).unwrap();
+
+        sink.set_volume(settings.volume);
+
+        if settings.pitch != 0.0 || settings.speed != 1.0 {
+            let pitch_correction = 2f32.powf(settings.pitch / 12.0);
+            let pitch_correction = pitch_correction / settings.speed;
+
+            println!("TODO: pitch should be corrected by {}", pitch_correction);
+
+            sink.set_speed(settings.speed);
+        }
+
+        sink.append(sfx_data);
+
         while !sink.empty() {
             if let Ok(received_time) = AUDIO_MESSAGES.receiver.try_recv() {
                 if received_time > start_time {
@@ -43,6 +79,7 @@ pub fn play_sound(ogg: Vec<u8>) -> JoinHandle<()> {
                 }
             }
         }
+
         *PLAYERS.lock() -= 1;
     })
 }
