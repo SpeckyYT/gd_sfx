@@ -47,9 +47,7 @@ pub(crate) fn fetch_library_data() -> Option<Bytes> {
 }
 
 pub(crate) fn fetch_sfx_data(entry: &LibraryEntry) -> Option<Bytes> {
-    const SFX_LIBRARY_ENDPOINT: &str = "sfxlibrary.dat";
-
-    let url = SFX_URL_PATH.join(&entry.filename()).unwrap();
+    let url = SFX_URL_PATH.join(&entry.get_file_name()).unwrap();
     CLIENT
         .get(url.as_str())
         .send().ok()?

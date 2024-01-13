@@ -2,6 +2,13 @@ use eframe::egui::Ui;
 
 use crate::GdSfx;
 
+// this build output file contains the following function:
+// ```
+// fn get_link(name: &str) -> Option<&str> { ... }
+// ```
+// see gdsfx-app/build/credits.rs
+gdsfx_build::include!("credits.rs");
+
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
@@ -9,7 +16,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
 
     ui.add_space(10.0);
 
-    for credits in gdsfx_library::load_library().get_credits() {
+    for credits in gdsfx.library.get_credits() {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 
@@ -29,8 +36,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.add_space(10.0);
 
     let current_locale = rust_i18n::locale();
-
-    let translators = vec![]; // get_translators(&current_locale);
+    let translators = crate::get_translators(&current_locale);
 
     if !translators.is_empty() {
         ui.label(t!("credits.this_project.translations", lang = t!("language.name")));
@@ -41,7 +47,7 @@ pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 fn add_optional_link(ui: &mut Ui, name: &str) {
-    if let Some(link) = Some("https://specky.one/summertime")/*get_link(name)*/ {
+    if let Some(link) = get_link(name) {
         ui.hyperlink_to(name, link);
     } else {
         ui.label(name);

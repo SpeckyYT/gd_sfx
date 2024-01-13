@@ -16,7 +16,7 @@ pub fn build() {
     let links = credits_json.values();
 
     let tokens = quote! {
-        fn __get_link(name: &str) -> Option<&str> {
+        fn get_link(name: &str) -> Option<&str> {
             match name {
                 #(#names => Some(#links),)*
                 _ => None

@@ -34,7 +34,7 @@ pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
-    // TODO gray out/hide behavior
+    if !gdsfx.is_enabled_entry(entry.clone()) { return }
 
     let sound = ui.button(&entry.name); // TODO with favorites star
 

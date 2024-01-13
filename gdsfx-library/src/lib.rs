@@ -1,8 +1,7 @@
-use std::{path::PathBuf, fs, collections::HashMap, fmt, sync::Arc};
+use std::{path::PathBuf, fs, collections::HashMap, fmt, sync::Arc, ops::Deref};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
-use requests::fetch_sfx_data;
 use stats::Centiseconds;
 use lazy_static::lazy_static;
 use eframe::epaint::mutex::Mutex;
@@ -62,6 +61,14 @@ impl fmt::Display for EntryId {
     }
 }
 
+impl Deref for EntryId {
+    type Target = u32;
+    
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 #[derive(Debug)]
 pub struct Credit {
     pub name: String,
@@ -92,22 +99,22 @@ pub fn load_library() -> Library {
     parse::parse_library_string(string)
 }
 
-lazy_static!{
-    pub static ref CACHED_SFX: Arc<Mutex<HashMap<EntryId, Vec<u8>>>> = Default::default();
-}
-
 impl LibraryEntry {
     pub fn get_file_data(&self) -> Option<Vec<u8>> {
+        lazy_static! {
+            static ref CACHED_SFX: Arc<Mutex<HashMap<EntryId, Vec<u8>>>> = Default::default();
+        }
+
         match CACHED_SFX.lock().get(&self.id) {
             Some(data) => Some(data.clone()),
             None => {
-                let data = match self.file_path().map(|path| fs::read(path)) {
+                let data = match self.get_file_path().map(fs::read) {
                     Some(Ok(data)) => data,
                     Some(Err(_)) | None => {
-                        match fetch_sfx_data(self) {
+                        match requests::fetch_sfx_data(self) {
                             None => return None,
                             Some(data) => {
-                                if let Some(path) = self.file_path() {
+                                if let Some(path) = self.get_file_path() {
                                     let _ = fs::write(path, &data);
                                 }
 
@@ -123,10 +130,12 @@ impl LibraryEntry {
             },
         }
     }
-    pub fn file_path(&self) -> Option<PathBuf> {
-        paths::runtime::GD_FOLDER.as_ref().map(|v| v.join(self.filename()))
+    
+    pub fn get_file_path(&self) -> Option<PathBuf> {
+        paths::runtime::GD_FOLDER.as_ref().map(|v| v.join(self.get_file_name()))
     }
-    pub fn filename(&self) -> String {
-        format!("s{}.ogg", self.id.0)
+
+    pub fn get_file_name(&self) -> String {
+        format!("s{}.ogg", self.id)
     }
 }

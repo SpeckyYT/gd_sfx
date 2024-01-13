@@ -1493,8 +1493,10 @@ name = "gdsfx-library"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "eframe",
  "gdsfx-data",
  "id_tree",
+ "lazy_static",
  "once_cell",
  "reqwest",
  "url",
