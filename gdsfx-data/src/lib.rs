@@ -29,13 +29,11 @@ pub fn read_json_file<T: DeserializeOwned>(path: impl AsRef<Path>) -> Result<T> 
 pub fn write_file(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> Result<()> {
     let path = path.as_ref();
 
-    create_parent_dirs(path)?;
-
     fs::write(path, contents)
         .with_context(|| format!("Couldn't write to file {}", path.display()))
 }
 
-fn create_parent_dirs(destination: impl AsRef<Path>) -> Result<()> {
+pub fn create_parent_dirs(destination: impl AsRef<Path>) -> Result<()> {
     let destination = destination.as_ref();
 
     if let Some(path) = destination.parent() {

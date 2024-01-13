@@ -1,9 +1,9 @@
 use eframe::{egui, epaint::Vec2};
 use gdsfx_data::paths;
 use gdsfx_library::sorting::Sorting;
+use settings::Settings;
 
 use crate::tabs::Tab;
-pub use crate::settings::SETTINGS;
 
 mod layout;
 mod tabs;
@@ -16,12 +16,12 @@ mod settings;
 // → see gdsfx-app/build/i18n
 gdsfx_build::include!("i18n.rs");
 
-#[derive(Debug, Default, Clone)]
+#[derive(Default)]
 struct GdSfx {
     tab: Tab,
     search_query: String,
     sorting: Sorting,
-    // selected_sfx: Option<LibraryEntry>,
+    settings: Settings,
 }
 
 impl GdSfx {
@@ -36,7 +36,14 @@ impl GdSfx {
             ..Default::default()
         };
         
-        eframe::run_native(paths::runtime::APP_NAME, options, Box::new(|_cc| Box::<GdSfx>::default()))
+        eframe::run_native(paths::runtime::APP_NAME, options, Box::new(Self::load))
+    }
+
+    fn load(_cc: &eframe::CreationContext) -> Box<dyn eframe::App> {
+        Box::new(Self {
+            settings: Settings::load_or_default(),
+            ..Default::default()
+        })
     }
 }
 
@@ -50,9 +57,6 @@ impl eframe::App for GdSfx {
 
 fn main() -> eframe::Result<()> {
     hide_console_window();
-
-    settings::initialize();
-    rust_i18n::set_locale(&SETTINGS.lock().locale);
 
     GdSfx::run()
 }

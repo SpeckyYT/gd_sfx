@@ -1,16 +1,16 @@
 use std::{path::PathBuf, env};
 
 use directories::ProjectDirs;
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 pub const APP_NAME: &str = "GDSFX";
 
-lazy_static! {
-    pub static ref PROJECT_DIRS: ProjectDirs = ProjectDirs::from("one", "Specky", APP_NAME)
-        .expect("No home directory found");
-}
+pub static PROJECT_DIRS: Lazy<ProjectDirs> = Lazy::new(|| {
+    ProjectDirs::from("one", "Specky", APP_NAME)
+        .expect("No home directory found")
+});
 
-pub fn try_get_gd_folder() -> Option<PathBuf> {
+pub static GD_FOLDER: Lazy<Option<PathBuf>> = Lazy::new(|| {
     if cfg!(target_os = "windows") {
         return Some(PathBuf::from(&env::var_os("localappdata")?).join("GeometryDash"))
     }
@@ -37,4 +37,4 @@ pub fn try_get_gd_folder() -> Option<PathBuf> {
     }
     
     None
-}
+});

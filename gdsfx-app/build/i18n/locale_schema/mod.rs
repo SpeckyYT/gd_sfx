@@ -57,6 +57,7 @@ pub fn build() {
         .context("Couldn't serialize locale schema")
         .unwrap();
 
+    gdsfx_data::create_parent_dirs(&destination_file).unwrap();
     gdsfx_data::write_file(destination_file, formatted_template).unwrap();
 }
 

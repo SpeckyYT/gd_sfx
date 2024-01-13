@@ -1,4 +1,7 @@
-use lazy_static::lazy_static;
+use std::{path::PathBuf, fs, sync::OnceLock};
+
+use gdsfx_data::paths;
+use once_cell::sync::Lazy;
 use stats::Centiseconds;
 
 use crate::credits::Credit;
@@ -10,14 +13,7 @@ pub mod tools;
 
 mod credits;
 mod requests;
-
-lazy_static! {
-    static ref PARSE_RESULT: (LibraryEntry, Vec<Credit>) = fetch_library();
-
-    // fuck
-    pub static ref LIBRARY: LibraryEntry = PARSE_RESULT.0;
-    pub static ref SFX_CREDITS: Vec<Credit> = PARSE_RESULT.1;
-}
+mod parse;
 
 pub type EntryId = u32;
 
@@ -33,9 +29,19 @@ pub enum EntryKind {
     Sound { bytes: i64, duration: Centiseconds },
 }
 
-fn fetch_library() -> (LibraryEntry, Vec<Credit>) {
-    // request
-    // parse
-    // idfk
-    panic!()
+static SFX_LIBRARY_FILE: Lazy<Option<PathBuf>> = Lazy::new(|| {
+    paths::runtime::GD_FOLDER.as_ref()
+        .map(|path| path.join("sfxlibrary.dat"))
+});
+
+pub static SFX_LIBRARY: OnceLock<LibraryEntry> = OnceLock::new();
+pub static SFX_CREDITS: OnceLock<Vec<Credit>> = OnceLock::new();
+
+fn load_library() {
+    // TODO let data = requests::fetch_library_data().or_else(try_read_library_file);
+}
+
+fn try_read_library_file() -> Option<Vec<u8>> {
+    SFX_LIBRARY_FILE.as_ref()
+        .and_then(|file| fs::read(file).ok())
 }

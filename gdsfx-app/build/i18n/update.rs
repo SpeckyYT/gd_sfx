@@ -9,7 +9,7 @@ pub fn build() -> TokenStream {
         #[macro_use]
         extern crate rust_i18n;
 
-        // if the build script reruns it forces this proc macro to rerun too 
+        // if the build script reruns, it forces this proc macro to rerun too 
         i18n!(#locales_dir, fallback = "en_US");
     }
 }
