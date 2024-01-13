@@ -1,4 +1,4 @@
-use std::{sync::OnceLock, path::PathBuf, fs, collections::HashMap};
+use std::{path::PathBuf, fs, collections::HashMap};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
@@ -15,13 +15,14 @@ mod credits;
 mod requests;
 mod parse;
 
-pub type EntryId = u32;
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+pub struct EntryId(u32);
 
 type Bytes = Vec<u8>;
 
 #[derive(Debug)]
 pub struct Library {
-    root: LibraryEntry,
+    root_id: EntryId,
     entries: HashMap<EntryId, LibraryEntry>,
 
     credits: Vec<Credit>,
@@ -29,11 +30,11 @@ pub struct Library {
 
 impl Library {
     pub fn get_root(&self) -> &LibraryEntry {
-        &self.root
+        self.get_entry(self.root_id)
     }
 
-    pub fn get_entry(&self, id: EntryId) -> Option<&LibraryEntry> {
-        self.entries.get(&id)
+    pub fn get_entry(&self, id: EntryId) -> &LibraryEntry {
+        self.entries.get(&id).expect("Entries shouldn't contain any non-existent IDs")
     }
 
     pub fn get_credits(&self) -> &Vec<Credit> {
@@ -67,18 +68,14 @@ fn try_read_file() -> Option<Bytes> {
         .and_then(|path| fs::read(path).ok())
 }
 
-pub fn get_library() -> &'static Library {
-    static LIBRARY_DATA: OnceLock<Library> = OnceLock::new();
+pub fn load_library() -> Library {
+    let bytes = try_read_file()
+    // TODO check sfx version
+        .or_else(requests::fetch_library_data)
+        .unwrap();
 
-    LIBRARY_DATA.get_or_init(|| {
-        let bytes = try_read_file()
-        // TODO check sfx version
-            .or_else(requests::fetch_library_data)
-            .unwrap();
+    let bytes = gdsfx_data::encoding::decode(&bytes);
+    let string = std::str::from_utf8(&bytes).unwrap();
 
-        let bytes = gdsfx_data::encoding::decode(&bytes);
-        let string = std::str::from_utf8(&bytes).unwrap();
-    
-        parse::parse_library_string(string)
-    })
+    parse::parse_library_string(string)
 }

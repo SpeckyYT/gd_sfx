@@ -1,11 +1,11 @@
 use strum::EnumIter;
 
-mod library;
-mod favorites;
-mod tools;
-mod settings;
-mod stats;
-mod credits;
+pub mod library;
+pub mod favorites;
+pub mod tools;
+pub mod settings;
+pub mod stats;
+pub mod credits;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
 pub enum Tab {

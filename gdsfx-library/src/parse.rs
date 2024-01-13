@@ -2,7 +2,7 @@ use std::{str::FromStr, collections::HashMap};
 
 use anyhow::anyhow;
 
-use crate::{LibraryEntry, Credit, EntryKind, stats::Centiseconds, Library};
+use crate::{LibraryEntry, Credit, EntryKind, stats::Centiseconds, Library, EntryId};
 
 pub(crate) fn parse_library_string(string: &str) -> Library {
     let (library_string, credits_string) = string
@@ -32,9 +32,9 @@ impl FromStr for LibraryEntry {
             .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
 
         let entry = Self {
-            id: id.parse()?,
+            id: EntryId(id.parse()?),
             name: name.to_string(),
-            parent_id: parent_id.parse()?,
+            parent_id: EntryId(parent_id.parse()?),
 
             kind: match kind {
                 "0" => EntryKind::Sound {
@@ -79,7 +79,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
     }
 
     Library {
-        root: entries.into_iter().next().expect("No library entries"),
+        root_id: entries.into_iter().next().expect("No library entries").id,
         entries: map,
         credits
     }

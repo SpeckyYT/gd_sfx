@@ -1,13 +1,12 @@
 use eframe::{egui, epaint::Vec2};
 use gdsfx_data::paths;
-use gdsfx_library::sorting::Sorting;
+use gdsfx_library::{sorting::Sorting, Library, LibraryEntry};
 use settings::Settings;
 
 use crate::tabs::Tab;
 
 mod layout;
 mod tabs;
-mod elements;
 
 mod settings;
 
@@ -16,9 +15,10 @@ mod settings;
 // → see gdsfx-app/build/i18n
 gdsfx_build::include!("i18n.rs");
 
-#[derive(Default)]
 struct GdSfx {
     selected_tab: Tab,
+    library: Library,
+    selected_sfx: Option<LibraryEntry>,
     search_query: String,
     sorting: Sorting,
     settings: Settings,
@@ -46,8 +46,12 @@ impl GdSfx {
 
     fn load(_cc: &eframe::CreationContext) -> Box<dyn eframe::App> {
         Box::new(Self {
+            selected_tab: Tab::default(),
+            library: gdsfx_library::load_library(),
+            selected_sfx: None,
+            search_query: String::new(),
+            sorting: Sorting::default(),
             settings: Settings::load_or_default(),
-            ..Default::default()
         })
     }
 }
