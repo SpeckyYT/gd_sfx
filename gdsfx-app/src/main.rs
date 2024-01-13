@@ -18,21 +18,26 @@ gdsfx_build::include!("i18n.rs");
 
 #[derive(Default)]
 struct GdSfx {
-    tab: Tab,
-    search_query: String,
-    sorting: Sorting,
-    settings: Settings,
+    pub selected_tab: Tab,
+    pub search_query: String,
+    pub sorting: Sorting,
+    pub settings: Settings,
 }
 
 impl GdSfx {
     fn run() -> eframe::Result<()> {
         let options = eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default()
-                // TODO constants
-                .with_inner_size(Vec2 { x: 800.0, y: 600.0 })
-                .with_min_inner_size(Vec2 { x: 560.0, y: 420.0 }),
-    
+            viewport: egui::ViewportBuilder {
+                inner_size: Some(Vec2 { x: 800.0, y: 600.0 }),
+                min_inner_size: Some(Vec2 { x: 560.0, y: 420.0 }),
+                resizable: Some(true),
+
+                ..Default::default()
+            },
             follow_system_theme: false,
+            default_theme: eframe::Theme::Dark,
+            hardware_acceleration: eframe::HardwareAcceleration::Preferred,
+
             ..Default::default()
         };
         
@@ -48,9 +53,10 @@ impl GdSfx {
 }
 
 impl eframe::App for GdSfx {
-    fn update(&mut self, _ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // top_panel::render(self, ctx);
-        // left_window::render(self, ctx);
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        use layout::*;
+        top_panel::render(self, ctx);
+        left_window::render(self, ctx);
         // right_window::render(self, ctx);
     }
 }
