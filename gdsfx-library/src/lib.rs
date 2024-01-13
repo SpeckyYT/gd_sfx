@@ -1,8 +1,11 @@
-use std::{path::PathBuf, fs, collections::HashMap, ops::Deref, fmt};
+use std::{path::PathBuf, fs, collections::HashMap, fmt, sync::Arc};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
+use requests::fetch_sfx_data;
 use stats::Centiseconds;
+use lazy_static::lazy_static;
+use eframe::epaint::mutex::Mutex;
 
 pub mod favorites;
 pub mod sorting;
@@ -87,4 +90,43 @@ pub fn load_library() -> Library {
     let string = std::str::from_utf8(&bytes).unwrap();
 
     parse::parse_library_string(string)
+}
+
+lazy_static!{
+    pub static ref CACHED_SFX: Arc<Mutex<HashMap<EntryId, Vec<u8>>>> = Default::default();
+}
+
+impl LibraryEntry {
+    pub fn get_file_data(&self) -> Option<Vec<u8>> {
+        match CACHED_SFX.lock().get(&self.id) {
+            Some(data) => Some(data.clone()),
+            None => {
+                let data = match self.file_path().map(|path| fs::read(path)) {
+                    Some(Ok(data)) => data,
+                    Some(Err(_)) | None => {
+                        match fetch_sfx_data(self) {
+                            None => return None,
+                            Some(data) => {
+                                if let Some(path) = self.file_path() {
+                                    let _ = fs::write(path, &data);
+                                }
+
+                                data
+                            },
+                        }
+                    },
+                };
+
+                CACHED_SFX.lock().insert(self.id, data.clone());
+
+                Some(data)
+            },
+        }
+    }
+    pub fn file_path(&self) -> Option<PathBuf> {
+        paths::runtime::GD_FOLDER.as_ref().map(|v| v.join(self.filename()))
+    }
+    pub fn filename(&self) -> String {
+        format!("s{}.ogg", self.id.0)
+    }
 }

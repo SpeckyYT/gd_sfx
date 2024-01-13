@@ -2,7 +2,7 @@ use once_cell::sync::Lazy;
 use reqwest::{blocking::Client, header::*};
 use url::Url;
 
-use crate::Bytes;
+use crate::{Bytes, LibraryEntry};
 
 static CLIENT: Lazy<Client> = Lazy::new(Client::default);
 
@@ -39,6 +39,17 @@ pub(crate) fn fetch_library_data() -> Option<Bytes> {
     const SFX_LIBRARY_ENDPOINT: &str = "sfxlibrary.dat";
 
     let url = SFX_URL_PATH.join(SFX_LIBRARY_ENDPOINT).unwrap();
+    CLIENT
+        .get(url.as_str())
+        .send().ok()?
+        .bytes()
+        .map(|bytes| bytes.to_vec()).ok()
+}
+
+pub(crate) fn fetch_sfx_data(entry: &LibraryEntry) -> Option<Bytes> {
+    const SFX_LIBRARY_ENDPOINT: &str = "sfxlibrary.dat";
+
+    let url = SFX_URL_PATH.join(&entry.filename()).unwrap();
     CLIENT
         .get(url.as_str())
         .send().ok()?

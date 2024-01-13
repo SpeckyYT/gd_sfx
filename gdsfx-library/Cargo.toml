@@ -7,8 +7,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+eframe = { workspace = true }
 gdsfx-data = { path = "../gdsfx-data" }
 id_tree = { workspace = true }
+lazy_static = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true }
 url = { workspace = true }

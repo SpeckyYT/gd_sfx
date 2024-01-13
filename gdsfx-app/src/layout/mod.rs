@@ -41,8 +41,15 @@ pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
     let entry_selected = sound.hovered();
 
     if sound.clicked() {
-        gdsfx_audio::stop_all();
-        // gdsfx_audio::play_sound(&entry);
+        let audio_settings = gdsfx.audio_settings;
+        let entry = entry.clone();
+
+        std::thread::spawn(move || {
+            if let Some(data) = entry.get_file_data() {
+                gdsfx_audio::stop_all();
+                gdsfx_audio::play_sound(data, audio_settings);
+            }
+        });
     }
 
     sound.context_menu(|ui| {
