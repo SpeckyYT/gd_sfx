@@ -1,6 +1,6 @@
-use std::{collections::HashMap, thread, sync::Arc};
+use std::{collections::HashMap, thread, sync::Arc, io::Cursor, time::Instant};
 
-use eframe::{egui, epaint::mutex::Mutex};
+use eframe::{egui::{self, IconData}, epaint::mutex::Mutex};
 use gdsfx_audio::AudioSettings;
 use gdsfx_data::paths;
 use gdsfx_library::{sorting::Sorting, Library, LibraryEntry, EntryId, EntryKind};
@@ -8,6 +8,8 @@ use gdsfx_library::{sorting::Sorting, Library, LibraryEntry, EntryId, EntryKind}
 use crate::{tabs::Tab, settings::Settings, layout};
 
 type SfxCache = HashMap<EntryId, Vec<u8>>;
+
+const NORMAL_ICON: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/normal.bin"));
 
 pub struct GdSfx {
     pub selected_tab: Tab,
@@ -43,6 +45,11 @@ impl GdSfx {
                 inner_size: Some(layout::DEFAULT_WINDOW_SIZE),
                 min_inner_size: Some(layout::DEFAULT_WINDOW_SIZE * layout::MIN_SCALE_FACTOR),
                 resizable: Some(true),
+                icon: Some(Arc::new(IconData {
+                    rgba: NORMAL_ICON.to_vec(),
+                    width: 256,
+                    height: 256,
+                })),
 
                 ..Default::default()
             },

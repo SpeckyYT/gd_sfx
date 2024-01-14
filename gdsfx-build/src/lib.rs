@@ -31,3 +31,10 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
         .with_context(|| format!("Couldn't write to file {}", path.display()))
         .unwrap();
 }
+
+pub fn write_output_bytes(path: impl AsRef<Path>, bytes: Vec<u8>) {
+    let out_dir = env::var_os("OUT_DIR").unwrap();
+    let path = Path::new(&out_dir).join(path);
+
+    fs::write(&path, bytes).unwrap();
+}
