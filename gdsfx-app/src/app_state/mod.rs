@@ -3,9 +3,9 @@ use gdsfx_library::LibraryEntry;
 
 use crate::tabs::Tab;
 
-use settings::Settings;
+use settings::PersistentSettings;
 
-use self::search::SearchSettings;
+use self::{search::SearchSettings, favorites::Favorites};
 
 pub mod favorites;
 pub mod settings;
@@ -15,14 +15,16 @@ pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,
 
-    pub settings: Settings,
+    pub settings: PersistentSettings,
+    pub favorites: Favorites,
+
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 }
 
 impl AppState {
     pub fn load() -> Self {
-        let settings = Settings::load_or_default();
+        let settings = PersistentSettings::load_or_default();
         rust_i18n::set_locale(&settings.locale);
 
         Self {
@@ -30,6 +32,8 @@ impl AppState {
             selected_sfx: None,
 
             settings,
+            favorites: Favorites::load_or_default(),
+
             search_settings: SearchSettings::default(),
             audio_settings: AudioSettings::default(),
         }

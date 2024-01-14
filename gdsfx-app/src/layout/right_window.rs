@@ -23,17 +23,17 @@ pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryMana
                 ui.add_space(25.0);
     
                 let download_button = Button::new(t!("sound.button.download"));
-                if ui.add_enabled(!entry.file_exists(), download_button).clicked() {
-                    library_manager.download_sound(&entry);
+                if ui.add_enabled(!entry.file_exists(app_state.settings.gd_folder.as_ref()), download_button).clicked() {
+                    library_manager.download_sound(&entry, app_state);
                 }
     
                 let delete_button = Button::new(t!("sound.button.delete"));
-                if ui.add_enabled(entry.file_exists(), delete_button).clicked() {
-                    entry.try_delete_file();
+                if ui.add_enabled(entry.file_exists(app_state.settings.gd_folder.as_ref()), delete_button).clicked() {
+                    entry.try_delete_file(app_state.settings.gd_folder.as_ref());
                 }
     
                 if ui.button(t!("sound.button.play")).clicked() {
-                    library_manager.play_sound(&entry, app_state.audio_settings);
+                    library_manager.play_sound(&entry, app_state);
                 }
     
                 if ui.button(t!("sound.button.stop")).clicked() {

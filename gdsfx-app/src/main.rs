@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, path::Path};
 
 use app_state::AppState;
 use eframe::{*, egui::{ViewportBuilder, IconData}};
@@ -65,10 +65,12 @@ impl GdSfx {
     }
 
     fn load(_cc: &eframe::CreationContext) -> Box<dyn eframe::App> {
-        Box::new(Self {
-            app_state: AppState::load(),
-            library_manager: LibraryManager::load(),
-        })
+        let app_state = AppState::load();
+
+        let gd_folder = Path::new(&app_state.settings.gd_folder);
+        let library_manager = LibraryManager::load(gd_folder);
+
+        Box::new(Self { app_state, library_manager })
     }
 }
 

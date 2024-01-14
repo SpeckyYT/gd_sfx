@@ -20,7 +20,7 @@ fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &Lib
     match entry.kind {
         EntryKind::Category => {
             let is_enabled = library_manager.is_matching_entry(entry, &app_state.search_settings);
-            
+
             if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
                 return // don't render at all
             }
@@ -31,7 +31,7 @@ fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &Lib
                 if !is_enabled || collapse_all {
                     collapsing = collapsing.open(Some(false));
                 }
-                
+
                 collapsing.show(ui, |ui| {
                     for child in library_manager.library.get_children(entry) {
                         render_recursive(ui, app_state, library_manager, child, collapse_all);

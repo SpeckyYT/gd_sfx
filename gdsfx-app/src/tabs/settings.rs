@@ -29,7 +29,15 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.checkbox(&mut app_state.settings.play_sfx_on_click, t!("settings.play_sfx_on_click"));
     
     ui.add_space(10.0);
+    set_locale(ui, app_state);
 
+    ui.add_space(10.0);
+    ui.text_edit_singleline(&mut app_state.settings.gd_folder);
+
+    let _ = app_state.settings.try_save_if_changed();
+}
+
+fn set_locale(ui: &mut Ui, app_state: &mut AppState) {
     ComboBox::from_label(t!("settings.language"))
         .selected_text(t!("language.name"))
         .show_ui(ui, |ui| {
@@ -37,8 +45,6 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
                 ui.selectable_value(&mut app_state.settings.locale, locale.to_string(), t!("language.name", locale = locale));
             }
         });
-
-        app_state.settings.try_save_if_changed().unwrap(); // TODO error modal? or just dont unwrap
 
     rust_i18n::set_locale(&app_state.settings.locale);
 }

@@ -2,8 +2,6 @@ use std::{ops::Range, path::PathBuf};
 
 use anyhow::Result;
 use educe::Educe;
-use eframe::epaint::ahash::HashSet;
-use gdsfx_library::EntryId;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
 use strum::EnumIter;
@@ -17,9 +15,9 @@ static SETTINGS_FILE: Lazy<PathBuf> = Lazy::new(|| {
 
 #[derive(Educe, Serialize, Deserialize, Debug)]
 #[educe(Default, Clone, PartialEq)]
-pub struct Settings {
-    #[educe(Default = paths::runtime::GD_FOLDER.clone())]
-    pub gd_folder: Option<PathBuf>,
+pub struct PersistentSettings {
+    #[educe(Default = get_gd_folder())]
+    pub gd_folder: String,
 
     pub search_filter_mode: SearchFilterMode,
 
@@ -34,11 +32,9 @@ pub struct Settings {
     #[educe(Default = 0..14500)]
     pub download_ids_range: Range<u32>,
 
-    pub favorites: HashSet<EntryId>,
-
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
-    last_state: Option<Box<Settings>>,
+    last_state: Option<Box<PersistentSettings>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
@@ -55,11 +51,18 @@ pub enum SfxSelectMode {
     Click,
 }
 
+fn get_gd_folder() -> String {
+    paths::runtime::GD_FOLDER
+        .as_ref()
+        .map(|path| path.display().to_string())
+        .unwrap_or_default()
+}
+
 fn ignore_option<T>(_: &Option<T>) -> Option<T> { None }
 
-impl Settings {
+impl PersistentSettings {
     pub fn load_or_default() -> Self {
-        let mut settings: Settings = gdsfx_data::read_json_file(&*SETTINGS_FILE)
+        let mut settings: PersistentSettings = gdsfx_data::read_json_file(&*SETTINGS_FILE)
             .unwrap_or_default();
 
         settings.set_last_state();
@@ -87,18 +90,6 @@ impl Settings {
     fn set_last_state(&mut self) {
         self.last_state = Some(Box::new(self.clone()))
     }
-
-    pub fn is_favorite(&self, id: EntryId) -> bool {
-        self.favorites.contains(&id)
-    }
-
-    pub fn add_favorite(&mut self, id: EntryId) {
-        self.favorites.insert(id);
-    }
-
-    pub fn remove_favorite(&mut self, id: EntryId) {
-        self.favorites.remove(&id);
-    }
 }
 
 #[cfg(test)]
@@ -107,7 +98,7 @@ mod test {
 
     #[test]
     fn test_last_state() {
-        let mut settings = Settings::default();
+        let mut settings = PersistentSettings::default();
         assert_eq!(settings.last_state, None);
         
         settings.set_last_state();
@@ -123,7 +114,7 @@ mod test {
 
     #[test]
     fn test_change_detection() {
-        let mut settings = Settings::default();
+        let mut settings = PersistentSettings::default();
         settings.set_last_state();
         assert!(!settings.has_changed());
 

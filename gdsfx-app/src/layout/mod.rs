@@ -52,7 +52,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
         return // don't render filtered buttons at all
     }
 
-    let button = ui.button(match app_state.settings.is_favorite(entry.id) {
+    let button = ui.button(match app_state.favorites.has_favorite(entry.id) {
         true => format!("⭐ {}", entry.name),
         false => entry.name.to_string(),
     });
@@ -65,27 +65,27 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
     }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        library_manager.play_sound(entry, app_state.audio_settings);
+        library_manager.play_sound(entry, app_state);
     }
 
     button.context_menu(|ui: &mut Ui| {
-        if app_state.settings.is_favorite(entry.id) {
+        if app_state.favorites.has_favorite(entry.id) {
             if ui.button(t!("sound.button.favorite.remove")).clicked() {
-                app_state.settings.remove_favorite(entry.id);
+                app_state.favorites.remove_favorite(entry.id);
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.favorite.add")).clicked() {
-            app_state.settings.add_favorite(entry.id);
+            app_state.favorites.add_favorite(entry.id);
             ui.close_menu();
         }
 
-        if entry.file_exists() {
+        if entry.file_exists(app_state.settings.gd_folder.as_ref()) {
             if ui.button(t!("sound.button.delete")).clicked() {
-                entry.try_delete_file();
+                entry.try_delete_file(app_state.settings.gd_folder.as_ref());
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.download")).clicked() {
-            library_manager.download_sound(entry);
+            library_manager.download_sound(entry, app_state);
             ui.close_menu();
         }
     });
