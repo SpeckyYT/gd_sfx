@@ -10,13 +10,12 @@ mod library_manager;
 
 mod layout;
 mod tabs;
+mod icon;
 
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated
 // → see gdsfx-app/build/i18n
 gdsfx_build::get_output!(include!("i18n.rs"));
-
-const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("normal.bin"));
 
 struct GdSfx {
     app_state: AppState,
@@ -36,7 +35,7 @@ impl eframe::App for GdSfx {
 impl GdSfx {
     fn run() -> eframe::Result<()> {
         let icon = IconData {
-            rgba: ICON_BYTES.to_vec(),
+            rgba: icon::NORMAL_ICON_BYTES.to_vec(),
             width: 256,
             height: 256,
         };
