@@ -1,10 +1,8 @@
-use std::{path::PathBuf, fs, collections::HashMap, fmt, sync::Arc, ops::Deref};
+use std::{path::PathBuf, collections::HashMap, fmt, fs, ops::Deref};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
 use stats::Centiseconds;
-use lazy_static::lazy_static;
-use eframe::epaint::mutex::Mutex;
 
 pub mod favorites;
 pub mod sorting;
@@ -84,58 +82,67 @@ fn try_read_file() -> Option<Bytes> {
     });
 
     SFX_LIBRARY_PATH.as_ref()
-        .and_then(|path| fs::read(path).ok())
+        .and_then(|path| gdsfx_data::read_file(path).ok())
 }
 
 pub fn load_library() -> Library {
-    let bytes = try_read_file()
-    // TODO check sfx version
-        .or_else(requests::fetch_library_data)
-        .unwrap();
-
-    let bytes = gdsfx_data::encoding::decode(&bytes);
-    let string = std::str::from_utf8(&bytes).unwrap();
-
-    parse::parse_library_string(string)
+    try_read_file()
+        .map(parse::parse_library_from_bytes)
+        .filter(|library| {
+            requests::fetch_library_version()
+                .map(|version| version.to_string() == library.get_root().name)
+                .unwrap_or(false)
+        })
+        .unwrap_or_else(|| {
+            let bytes = requests::fetch_library_data().unwrap();
+            parse::parse_library_from_bytes(bytes)
+        })
 }
 
 impl LibraryEntry {
-    pub fn get_file_data(&self) -> Option<Vec<u8>> {
-        lazy_static! {
-            static ref CACHED_SFX: Arc<Mutex<HashMap<EntryId, Vec<u8>>>> = Default::default();
-        }
-
-        match CACHED_SFX.lock().get(&self.id) {
-            Some(data) => Some(data.clone()),
-            None => {
-                let data = match self.get_file_path().map(fs::read) {
-                    Some(Ok(data)) => data,
-                    Some(Err(_)) | None => {
-                        match requests::fetch_sfx_data(self) {
-                            None => return None,
-                            Some(data) => {
-                                if let Some(path) = self.get_file_path() {
-                                    let _ = fs::write(path, &data);
-                                }
-
-                                data
-                            },
-                        }
-                    },
-                };
-
-                CACHED_SFX.lock().insert(self.id, data.clone());
-
-                Some(data)
-            },
-        }
-    }
-    
-    pub fn get_file_path(&self) -> Option<PathBuf> {
-        paths::runtime::GD_FOLDER.as_ref().map(|v| v.join(self.get_file_name()))
-    }
-
     pub fn get_file_name(&self) -> String {
         format!("s{}.ogg", self.id)
+    }
+
+    pub fn try_get_file_path(&self) -> Option<PathBuf> {
+        paths::runtime::GD_FOLDER.as_ref()
+            .map(|path| path.join(self.get_file_name()))
+    }
+
+    pub fn file_exists(&self) -> bool {
+        self.try_get_file_path()
+            .map(|path| path.exists())
+            .unwrap_or(false)
+    }
+
+    pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) -> Option<Bytes> {
+        cache.get(&self.id).cloned().or_else(|| {
+            let bytes = self
+                .try_get_file_path()
+                .and_then(|path| gdsfx_data::read_file(path).ok())
+                .or_else(|| requests::fetch_sfx_data(self).ok());
+
+            if let Some(bytes) = bytes.as_ref() {
+                cache.insert(self.id, bytes.clone());
+            }
+
+            bytes
+        })
+    }
+
+    pub fn try_store_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) {
+        if !self.file_exists() {
+            if let Some(path) = self.try_get_file_path() {
+                if let Some(bytes) = self.try_get_bytes(cache) {
+                    let _ = gdsfx_data::write_file(path, bytes);
+                }
+            }
+        }
+    }
+
+    pub fn try_delete_file(&self) {
+        if let Some(path) = self.try_get_file_path() {
+            let _ = fs::remove_file(path);
+        }
     }
 }

@@ -1,12 +1,12 @@
 use eframe::egui::{Context, SidePanel, ScrollArea};
 
-use crate::{GdSfx, tabs};
+use crate::{GdSfx, layout, tabs};
 
 pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
     SidePanel::left("left_panel")
-        // .min_width(MIN_LIBRARY_WIDTH)
-        // .max_width(RIGHT_PANEL_WIDTH)
-        // .default_width(DEFAULT_LIBRARY_WIDTH)
+        .min_width(layout::MIN_LIBRARY_WIDTH)
+        .max_width(layout::RIGHT_PANEL_WIDTH)
+        .default_width(layout::DEFAULT_LIBRARY_WIDTH)
         .show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
                 use tabs::*;

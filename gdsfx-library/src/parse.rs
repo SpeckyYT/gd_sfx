@@ -2,9 +2,12 @@ use std::{str::FromStr, collections::HashMap};
 
 use anyhow::anyhow;
 
-use crate::{LibraryEntry, Credit, EntryKind, stats::Centiseconds, Library, EntryId};
+use crate::{*, stats::Centiseconds};
 
-pub(crate) fn parse_library_string(string: &str) -> Library {
+pub(crate) fn parse_library_from_bytes(bytes: Bytes) -> Library {
+    let bytes = gdsfx_data::encoding::decode(&bytes);
+    let string = std::str::from_utf8(&bytes).unwrap();
+
     let (library_string, credits_string) = string
         .split_once('|')
         .unwrap_or((string, ""));
@@ -48,6 +51,32 @@ impl FromStr for LibraryEntry {
         };
 
         Ok(entry)
+    }
+}
+
+impl ToString for LibraryEntry {
+    fn to_string(&self) -> String {
+        let kind = match self.kind {
+            // TODO logic for this and the match kind above should be combined
+            EntryKind::Sound { .. } => "0",
+            EntryKind::Category { .. } => "1",
+        };
+
+        let (bytes, duration) = match &self.kind {
+            EntryKind::Sound { bytes, duration } => (*bytes, duration.0),
+            _ => (0, 0),
+        };
+
+        let parts = [
+            self.id.to_string(),
+            self.name.to_string(),
+            kind.to_string(),
+            self.parent_id.to_string(),
+            bytes.to_string(),
+            duration.to_string(),
+        ];
+        
+        parts.join(",")
     }
 }
 

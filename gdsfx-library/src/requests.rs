@@ -1,3 +1,4 @@
+use anyhow::Result;
 use once_cell::sync::Lazy;
 use reqwest::{blocking::Client, header::*};
 use url::Url;
@@ -24,33 +25,39 @@ fn get_cdn_url() -> Url {
 
 static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx/").unwrap());
 
-pub(crate) fn fetch_library_version() -> Option<usize> {
+pub(crate) fn fetch_library_version() -> Result<usize> {
     const SFX_VERSION_ENDPOINT: &str = "sfxlibrary_version.txt";
 
     let url = SFX_URL_PATH.join(SFX_VERSION_ENDPOINT).unwrap();
-    CLIENT
+    let version = CLIENT
         .get(url.as_str())
-        .send().ok()?
-        .text().ok()?
-        .parse().ok()
+        .send()?
+        .text()?
+        .parse()?;
+
+    Ok(version)
 }
 
-pub(crate) fn fetch_library_data() -> Option<Bytes> {
+pub(crate) fn fetch_library_data() -> Result<Bytes> {
     const SFX_LIBRARY_ENDPOINT: &str = "sfxlibrary.dat";
 
     let url = SFX_URL_PATH.join(SFX_LIBRARY_ENDPOINT).unwrap();
-    CLIENT
+    let library_data = CLIENT
         .get(url.as_str())
-        .send().ok()?
-        .bytes()
-        .map(|bytes| bytes.to_vec()).ok()
+        .send()?
+        .bytes()?
+        .to_vec();
+
+    Ok(library_data)
 }
 
-pub(crate) fn fetch_sfx_data(entry: &LibraryEntry) -> Option<Bytes> {
+pub(crate) fn fetch_sfx_data(entry: &LibraryEntry) -> Result<Bytes> {
     let url = SFX_URL_PATH.join(&entry.get_file_name()).unwrap();
-    CLIENT
+    let sfx_data = CLIENT
         .get(url.as_str())
-        .send().ok()?
-        .bytes()
-        .map(|bytes| bytes.to_vec()).ok()
+        .send()?
+        .bytes()?
+        .to_vec();
+
+    Ok(sfx_data)
 }

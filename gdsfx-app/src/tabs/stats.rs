@@ -3,7 +3,7 @@ use eframe::egui::Ui;
 use crate::GdSfx;
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    let library = gdsfx_library::load_library().get_root();
+    let library = gdsfx.library.get_root();
     // let Stats { bytes, duration, files } = stats::get_sound_stats(library);
 
     ui.heading(t!("stats.library"));

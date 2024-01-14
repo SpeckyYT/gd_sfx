@@ -1,4 +1,4 @@
-use eframe::egui::Ui;
+use eframe::{egui::Ui, epaint::Vec2};
 use gdsfx_library::{LibraryEntry, sorting::Sorting};
 
 use crate::GdSfx;
@@ -6,6 +6,16 @@ use crate::GdSfx;
 pub mod top_panel;
 pub mod left_window;
 pub mod right_window;
+
+pub const MIN_LIBRARY_WIDTH: f32 = 200.0;
+pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
+pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
+
+pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
+pub const TOTAL_HEIGHT: f32 = 600.0; // enough to display all categories
+
+pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
+pub const MIN_SCALE_FACTOR: f32 = 0.7;
 
 pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.heading(t!("search"));
@@ -34,25 +44,18 @@ pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
 }
 
 pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
-    if !gdsfx.is_enabled_entry(entry.clone()) { return }
+    // don't render filtered buttons at all
+    if !gdsfx.is_matching_entry(entry.clone()) { return }
 
-    let sound = ui.button(&entry.name); // TODO with favorites star
+    let button = ui.button(&entry.name); // TODO with favorites star
 
-    let entry_selected = sound.hovered();
+    let entry_selected = button.hovered();
 
-    if sound.clicked() {
-        let audio_settings = gdsfx.audio_settings;
-        let entry = entry.clone();
-
-        std::thread::spawn(move || {
-            if let Some(data) = entry.get_file_data() {
-                gdsfx_audio::stop_all();
-                gdsfx_audio::play_sound(data, audio_settings);
-            }
-        });
+    if button.clicked() {
+        gdsfx.play_sound(&entry);
     }
 
-    sound.context_menu(|ui| {
+    button.context_menu(|ui| {
         // if settings::has_favourite(entry.id()) {
         //     if ui.button(t!("sound.button.favorite.remove")).clicked() {
         //         settings::remove_favourite(entry.id());
@@ -63,15 +66,15 @@ pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
         //     ui.close_menu();
         // }
 
-        // if entry.exists() {
-        //     if ui.button(t!("sound.button.delete")).clicked() {
-        //         entry.delete();
-        //         ui.close_menu();
-        //     }
-        // } else if ui.button(t!("sound.button.download")).clicked() {
-        //     entry.download_and_store();
-        //     ui.close_menu();
-        // }
+        if entry.file_exists() {
+            if ui.button(t!("sound.button.delete")).clicked() {
+                entry.try_delete_file();
+                ui.close_menu();
+            }
+        } else if ui.button(t!("sound.button.download")).clicked() {
+            gdsfx.download_sound(&entry);
+            ui.close_menu();
+        }
     });
 
     if entry_selected {

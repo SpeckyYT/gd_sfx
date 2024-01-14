@@ -14,6 +14,13 @@ pub fn read_dir(path: impl AsRef<Path>) -> Result<impl Iterator<Item = DirEntry>
         .with_context(|| format!("Couldn't read directory {}", path.display()))
 }
 
+pub fn read_file(path: impl AsRef<Path>) -> Result<Vec<u8>> {
+    let path = path.as_ref();
+
+    fs::read(path)
+        .with_context(|| format!("Couldn't read file {}", path.display()))
+}
+
 pub fn read_json_file<T: DeserializeOwned>(path: impl AsRef<Path>) -> Result<T> {
     let path = path.as_ref();
 

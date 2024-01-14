@@ -1,21 +1,24 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, thread, sync::Arc};
 
-use eframe::{egui, epaint::Vec2};
+use eframe::{egui, epaint::mutex::Mutex};
 use gdsfx_audio::AudioSettings;
 use gdsfx_data::paths;
 use gdsfx_library::{sorting::Sorting, Library, LibraryEntry, EntryId, EntryKind};
 
 use crate::{tabs::Tab, settings::Settings, layout};
 
+type SfxCache = HashMap<EntryId, Vec<u8>>;
+
 pub struct GdSfx {
     pub selected_tab: Tab,
 
     pub library: Library,
     pub selected_sfx: Option<LibraryEntry>,
+    sfx_cache: Arc<Mutex<SfxCache>>,
 
     pub search_query: String,
-    enabled_entries: HashMap<EntryId, bool>,
     pub sorting: Sorting,
+    matching_entries: HashMap<EntryId, bool>,
 
     pub settings: Settings,
     pub audio_settings: AudioSettings,
@@ -29,7 +32,7 @@ impl eframe::App for GdSfx {
         left_window::render(self, ctx);
         right_window::render(self, ctx);
 
-        self.enabled_entries.clear();
+        self.matching_entries.clear();
     }
 }
 
@@ -37,8 +40,8 @@ impl GdSfx {
     pub fn run() -> eframe::Result<()> {
         let options = eframe::NativeOptions {
             viewport: egui::ViewportBuilder {
-                inner_size: Some(Vec2 { x: 800.0, y: 600.0 }),
-                min_inner_size: Some(Vec2 { x: 560.0, y: 420.0 }),
+                inner_size: Some(layout::DEFAULT_WINDOW_SIZE),
+                min_inner_size: Some(layout::DEFAULT_WINDOW_SIZE * layout::MIN_SCALE_FACTOR),
                 resizable: Some(true),
 
                 ..Default::default()
@@ -59,35 +62,59 @@ impl GdSfx {
 
         Box::new(Self {
             selected_tab: Tab::default(),
+
             library: gdsfx_library::load_library(),
             selected_sfx: None,
+            sfx_cache: Default::default(),
+
             search_query: String::new(),
-            enabled_entries: HashMap::new(),
             sorting: Sorting::default(),
+            matching_entries: HashMap::new(),
+
             settings,
             audio_settings: AudioSettings::default(),
         })
     }
 
-    pub fn is_enabled_entry(&mut self, entry: LibraryEntry) -> bool {
-        if let Some(&enabled) = self.enabled_entries.get(&entry.id) {
+    pub fn is_matching_entry(&mut self, entry: LibraryEntry) -> bool {
+        if let Some(&enabled) = self.matching_entries.get(&entry.id) {
             return enabled
         }
 
         let enabled = match &entry.kind {
             EntryKind::Category { children } => {
                 children.iter().any(|&child| {
-                    self.is_enabled_entry(self.library.get_entry(child).clone())
+                    self.is_matching_entry(self.library.get_entry(child).clone())
                 })
             },
     
             EntryKind::Sound { .. } => {
-                let search = self.search_query.to_ascii_lowercase();
+                let search = self.search_query.to_lowercase();
                 entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search
             }
         };
 
-        self.enabled_entries.insert(entry.id, enabled);
+        self.matching_entries.insert(entry.id, enabled);
         enabled
+    }
+
+    pub fn play_sound(&mut self, entry: &LibraryEntry) {
+        let audio_settings = self.audio_settings;
+        let cache = self.sfx_cache.clone();
+        let entry = entry.clone();
+
+        thread::spawn(move || {
+            let bytes = entry.try_get_bytes(&mut cache.lock());
+            if let Some(bytes) = bytes {
+                gdsfx_audio::stop_all();
+                gdsfx_audio::play_sound(bytes, audio_settings);
+            }
+        });
+    }
+
+    pub fn download_sound(&mut self, entry: &LibraryEntry) {
+        let cache = self.sfx_cache.clone();
+        let entry = entry.clone();
+        thread::spawn(move || entry.try_store_bytes(&mut cache.lock()));
     }
 }
