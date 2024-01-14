@@ -5,6 +5,9 @@ use anyhow::Context;
 pub use proc_macro2::TokenStream;
 pub use build_script::cargo_rerun_if_changed;
 
+pub const ICON_WIDTH: u32 = 256;
+pub const ICON_HEIGHT: u32 = 256;
+
 #[macro_export]
 macro_rules! get_output {
     ( $macro:ident!($file:expr) ) => {
