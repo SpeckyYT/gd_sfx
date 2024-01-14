@@ -4,7 +4,7 @@ use gdsfx_library::EntryKind;
 use crate::{library_manager::LibraryManager, app_state::AppState};
 
 pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryManager) {
-    if let Some(entry) = app_state.selected_sfx.clone() {
+    if let Some(entry) = &app_state.selected_sfx {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             CentralPanel::default().show(ctx, |ui| {
                 ui.heading(&entry.name);
@@ -27,7 +27,7 @@ pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryMana
     
                 let download_button = Button::new(t!("sound.button.download"));
                 if ui.add_enabled(!file_exists, download_button).clicked() {
-                    library_manager.download_sound(&entry, app_state);
+                    library_manager.download_sound(entry, app_state);
                 }
     
                 let delete_button = Button::new(t!("sound.button.delete"));
@@ -36,7 +36,7 @@ pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryMana
                 }
     
                 if ui.button(t!("sound.button.play")).clicked() {
-                    library_manager.play_sound(&entry, app_state);
+                    library_manager.play_sound(entry, app_state);
                 }
     
                 if ui.button(t!("sound.button.stop")).clicked() {

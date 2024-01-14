@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc, thread, path::{PathBuf, Path}};
+use std::{collections::HashMap, sync::Arc, thread, path::Path};
 
 use eframe::epaint::mutex::Mutex;
 use gdsfx_library::{EntryId, EntryKind, Library, LibraryEntry};
@@ -40,13 +40,12 @@ impl LibraryManager {
     }
 
     pub fn play_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let entry = entry.clone();
-        let audio_settings = app_state.audio_settings;
-        let gd_folder = PathBuf::from(&app_state.settings.gd_folder);
+        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
         let cache = self.sfx_cache.clone();
+        let audio_settings = app_state.audio_settings;
 
         thread::spawn(move || {
-            let bytes = entry.create_file_handler(&gd_folder).try_get_bytes(&mut cache.lock());
+            let bytes = file_handler.try_get_bytes(&mut cache.lock());
             if let Some(bytes) = bytes {
                 gdsfx_audio::stop_all();
                 gdsfx_audio::play_sound(bytes, audio_settings);
@@ -55,13 +54,9 @@ impl LibraryManager {
     }
 
     pub fn download_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let entry = entry.clone();
-        let gd_folder = PathBuf::from(&app_state.settings.gd_folder);
+        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
         let cache = self.sfx_cache.clone();
 
-        thread::spawn(move || {
-            entry.create_file_handler(&gd_folder)
-                .try_store_bytes(&mut cache.lock())
-        });
+        thread::spawn(move || file_handler.try_store_bytes(&mut cache.lock()));
     }
 }

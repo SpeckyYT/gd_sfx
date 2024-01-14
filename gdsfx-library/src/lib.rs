@@ -101,18 +101,18 @@ impl LibraryEntry {
 
     pub fn create_file_handler(&self, gd_folder: impl AsRef<Path>) -> LibraryEntryFileHandler {
         LibraryEntryFileHandler {
-            entry: self,
-            path: gd_folder.as_ref().join(self.get_file_name())
+            entry: self.clone(),
+            path: gd_folder.as_ref().join(self.get_file_name()),
         }
     }
 }
 
-pub struct LibraryEntryFileHandler<'a> {
-    entry: &'a LibraryEntry,
+pub struct LibraryEntryFileHandler {
+    entry: LibraryEntry,
     path: PathBuf,
 }
 
-impl<'a> LibraryEntryFileHandler<'a> {
+impl LibraryEntryFileHandler {
     pub fn file_exists(&self) -> bool {
         self.path.exists()
     }
@@ -120,7 +120,7 @@ impl<'a> LibraryEntryFileHandler<'a> {
     pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) -> Option<Bytes> {
         cache.get(&self.entry.id).cloned().or_else(|| {
             let bytes = gdsfx_files::read_file(&self.path).ok()
-                .or_else(|| requests::fetch_sfx_data(self.entry).ok());
+                .or_else(|| requests::fetch_sfx_data(&self.entry).ok());
 
             if let Some(bytes) = bytes.as_ref() {
                 cache.insert(self.entry.id, bytes.clone());
