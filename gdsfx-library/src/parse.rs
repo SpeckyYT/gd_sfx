@@ -24,6 +24,11 @@ pub(crate) fn parse_library_from_bytes(bytes: Bytes) -> Library {
     build_library(entries, credits)
 }
 
+impl EntryKind {
+    const SOUND_KEY: &'static str = "0";
+    const CATEGORY_KEY: &'static str = "1";
+}
+
 impl FromStr for LibraryEntry {
     type Err = anyhow::Error;
 
@@ -40,11 +45,11 @@ impl FromStr for LibraryEntry {
             parent_id: parent_id.parse()?,
 
             kind: match kind {
-                "0" => EntryKind::Sound {
+                EntryKind::SOUND_KEY => EntryKind::Sound {
                     bytes: parts[4].parse()?,
                     duration: Centiseconds(parts[5].parse()?),
                 },
-                "1" => EntryKind::Category,
+                EntryKind::CATEGORY_KEY => EntryKind::Category,
 
                 _ => anyhow::bail!("Unknown library entry type")
             }
@@ -57,13 +62,12 @@ impl FromStr for LibraryEntry {
 impl ToString for LibraryEntry {
     fn to_string(&self) -> String {
         let kind = match self.kind {
-            // TODO logic for this and the match kind above should be combined
-            EntryKind::Sound { .. } => "0",
-            EntryKind::Category => "1",
+            EntryKind::Sound { .. } => EntryKind::SOUND_KEY,
+            EntryKind::Category => EntryKind::CATEGORY_KEY,
         };
 
-        let (bytes, duration) = match &self.kind {
-            EntryKind::Sound { bytes, duration } => (*bytes, duration.0),
+        let (bytes, duration) = match self.kind {
+            EntryKind::Sound { bytes, duration } => (bytes, duration.0),
             _ => (0, 0),
         };
 

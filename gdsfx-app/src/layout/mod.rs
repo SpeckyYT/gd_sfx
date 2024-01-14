@@ -23,10 +23,14 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.text_edit_singleline(&mut search_settings.search_query);
     
     ui.horizontal(|ui| {
-        ui.menu_button(Sorting::localize_enum(), |ui| {
+        let label = format!("{}: {}", Sorting::localize_enum(), search_settings.sorting_mode.localize_variant());
+        ui.menu_button(label, |ui| {
             for mode in Sorting::iter() {
-                let response = ui.radio_value(&mut search_settings.sorting_mode, mode, mode.localize_variant());
-                if response.clicked() {
+                let radio_button = ui.radio_value(
+                    &mut search_settings.sorting_mode,
+                    mode, mode.localize_variant()
+                );
+                if radio_button.clicked() {
                     ui.close_menu();
                 }
             }

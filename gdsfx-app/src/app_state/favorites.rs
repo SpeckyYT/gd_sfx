@@ -53,9 +53,4 @@ impl Favorites {
             self.0.insert(id);
         }
     }
-
-    pub fn clear_favorites(&mut self) {
-        self.0.clear();
-        let _ = self.try_save();
-    }
 }

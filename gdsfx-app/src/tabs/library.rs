@@ -9,7 +9,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryMa
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
 
     let root = library_manager.library.get_root();
-    for child in library_manager.library.get_children(root) {
+    let mut children = library_manager.library.get_children(root).collect::<Vec<_>>();
+    app_state.search_settings.sorting_mode.sort_entries(&mut children);
+
+    for child in children {
         render_recursive(ui, app_state, library_manager, child, collapse_all);
     }
 
@@ -33,7 +36,10 @@ fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &Lib
                 }
 
                 collapsing.show(ui, |ui| {
-                    for child in library_manager.library.get_children(entry) {
+                    let mut children = library_manager.library.get_children(entry).collect::<Vec<_>>();
+                    app_state.search_settings.sorting_mode.sort_entries(&mut children);
+
+                    for child in children {
                         render_recursive(ui, app_state, library_manager, child, collapse_all);
                     }
                 });

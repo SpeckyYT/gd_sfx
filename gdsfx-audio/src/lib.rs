@@ -79,6 +79,10 @@ pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) {
     *PLAYERS.lock() -= 1;
 }
 
+pub fn is_playing_audio() -> bool {
+    *PLAYERS.lock() > 0
+}
+
 pub fn stop_all() {
     for _ in 0..*PLAYERS.lock() {
         AUDIO_MESSAGES.sender.send(Instant::now()).unwrap();

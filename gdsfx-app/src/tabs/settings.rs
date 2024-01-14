@@ -40,7 +40,10 @@ fn set_locale(ui: &mut Ui, app_state: &mut AppState) {
         .selected_text(t!("language.name"))
         .show_ui(ui, |ui| {
             for locale in rust_i18n::available_locales!() {
-                ui.selectable_value(&mut app_state.settings.locale, locale.to_string(), t!("language.name", locale = locale));
+                ui.selectable_value(
+                    &mut app_state.settings.locale,
+                    locale.to_string(), t!("language.name", locale = locale)
+                );
             }
         });
 

@@ -34,12 +34,15 @@ pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryMana
                 if ui.add_enabled(file_exists, delete_button).clicked() {
                     file_handler.try_delete_file();
                 }
+
+                ui.add_space(10.0);
     
                 if ui.button(t!("sound.button.play")).clicked() {
                     library_manager.play_sound(entry, app_state);
                 }
     
-                if ui.button(t!("sound.button.stop")).clicked() {
+                let stop_button = Button::new(t!("sound.button.stop"));
+                if ui.add_enabled(gdsfx_audio::is_playing_audio(), stop_button).clicked() {
                     gdsfx_audio::stop_all();
                 }
             });

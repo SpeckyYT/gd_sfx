@@ -6,25 +6,23 @@ use crate::{layout, app_state::AppState, library_manager::LibraryManager};
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager) {
     layout::add_search_area(ui, &mut app_state.search_settings);
 
-    if ui.button(t!("favorites.remove_all")).clicked() {
-        app_state.favorites.clear_favorites();
-    }
+    let mut sounds = get_sounds_recursive(library_manager, library_manager.library.get_root());
+    app_state.search_settings.sorting_mode.sort_entries(&mut sounds);
 
-    render_recursive(ui, app_state, library_manager, library_manager.library.get_root());
+    for sound in sounds {
+        if app_state.favorites.has_favorite(sound.id) {
+            layout::add_sfx_button(ui, app_state, library_manager, sound);
+        }
+    }
 }
 
-fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry) {
+fn get_sounds_recursive<'a>(library_manager: &'a LibraryManager, entry: &'a LibraryEntry) -> Vec<&'a LibraryEntry> {
     match &entry.kind {
         EntryKind::Category => {
-            for child in library_manager.library.get_children(entry) {
-                render_recursive(ui, app_state, library_manager, child);
-            }
+            library_manager.library.get_children(entry)
+                .flat_map(|entry| get_sounds_recursive(library_manager, entry))
+                .collect()
         }
-
-        EntryKind::Sound { .. } => {
-            if app_state.favorites.has_favorite(entry.id) {
-                layout::add_sfx_button(ui, app_state, library_manager, entry);
-            }
-        }
+        EntryKind::Sound { .. } => vec![entry],
     }
 }
