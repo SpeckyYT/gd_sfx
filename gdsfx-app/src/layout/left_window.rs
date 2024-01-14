@@ -13,7 +13,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState, library_manager: &Library
                 
                 match app_state.selected_tab {
                     Tab::Library => library::render(ui, app_state, library_manager),
-                    Tab::Favourites => favorites::render(ui, app_state, library_manager),
+                    Tab::Favorites => favorites::render(ui, app_state, library_manager),
                     Tab::Tools => tools::render(ui, ctx),
                     Tab::Settings => settings::render(ui, app_state),
                     Tab::Stats => stats::render(ui, library_manager),

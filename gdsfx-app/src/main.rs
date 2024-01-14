@@ -11,6 +11,8 @@ mod library_manager;
 mod layout;
 mod tabs;
 
+mod i18n;
+
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated
 // → see gdsfx-app/build/i18n

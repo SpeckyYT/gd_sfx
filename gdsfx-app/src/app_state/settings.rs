@@ -6,7 +6,7 @@ use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
 use strum::EnumIter;
 
-use crate::paths;
+use crate::{paths, localized_enum};
 
 static SETTINGS_FILE: Lazy<PathBuf> = Lazy::new(|| {
     paths::runtime::PROJECT_DIRS.config_local_dir()
@@ -37,18 +37,22 @@ pub struct PersistentSettings {
     last_state: Option<Box<PersistentSettings>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
-pub enum SearchFilterMode {
-    #[default]
-    GrayOut,
-    Hide,
+localized_enum! {
+    #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
+    pub enum SearchFilterMode = "settings.search_filter_mode" {
+        #[default]
+        GrayOut = "gray_out",
+        Hide = "hide",
+    }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
-pub enum SfxSelectMode {
-    #[default]
-    Hover,
-    Click,
+localized_enum! {
+    #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
+    pub enum SfxSelectMode = "settings.sfx_select_mode" {
+        #[default]
+        Hover = "hover",
+        Click = "click",
+    }
 }
 
 fn get_gd_folder() -> String {

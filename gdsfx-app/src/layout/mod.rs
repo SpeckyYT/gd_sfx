@@ -1,7 +1,8 @@
 use eframe::{egui::Ui, epaint::Vec2};
 use gdsfx_library::LibraryEntry;
+use strum::IntoEnumIterator;
 
-use crate::{app_state::{AppState, settings::*, search::{SearchSettings, Sorting}}, library_manager::LibraryManager};
+use crate::{app_state::{AppState, settings::*, search::{SearchSettings, Sorting}}, library_manager::LibraryManager, i18n::LocalizedEnum};
 
 pub mod top_panel;
 pub mod left_window;
@@ -22,19 +23,9 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.text_edit_singleline(&mut search_settings.search_query);
     
     ui.horizontal(|ui| {
-        ui.menu_button(t!("search.sorting"), |ui| {
-            for (alternative, text) in [
-                (Sorting::Default,   t!("sorting.default")),
-                (Sorting::NameInc,   t!("sorting.name.ascending")),
-                (Sorting::NameDec,   t!("sorting.name.descending")),
-                (Sorting::LengthInc, t!("sorting.length.ascending")),
-                (Sorting::LengthDec, t!("sorting.length.descending")),
-                (Sorting::IdInc,     t!("sorting.id.ascending")),
-                (Sorting::IdDec,     t!("sorting.id.descending")),
-                (Sorting::SizeInc,   t!("sorting.size.ascending")),
-                (Sorting::SizeDec,   t!("sorting.size.descending")),
-            ] {
-                let response = ui.radio_value(&mut search_settings.sorting_mode, alternative, text);
+        ui.menu_button(Sorting::localize_enum(), |ui| {
+            for mode in Sorting::iter() {
+                let response = ui.radio_value(&mut search_settings.sorting_mode, mode, mode.localize_variant());
                 if response.clicked() {
                     ui.close_menu();
                 }
