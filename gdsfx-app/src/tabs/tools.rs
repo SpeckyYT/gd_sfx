@@ -6,7 +6,10 @@ use once_cell::sync::Lazy;
 
 const MAX_ID_RANGE: u32 = 100000;
 
-static DOWNLOAD_PROGRESS: Lazy<Arc<Mutex<Option<(u128, u128)>>>> = Lazy::new(|| Arc::new(Mutex::new(None)));
+type LazyAss = Lazy<Arc<Mutex<Option<(u128, u128)>>>>;
+
+static DOWNLOAD_PROGRESS: LazyAss = Lazy::new(|| Arc::new(Mutex::new(None)));
+static DELETE_PROGRESS: LazyAss = Lazy::new(|| Arc::new(Mutex::new(None)));
 
 static BRUTEFORCE_RANGE: Lazy<Arc<Mutex<(u32, u32)>>> = Lazy::new(|| Arc::new(Mutex::new((0,14500))));
 
@@ -43,15 +46,26 @@ pub fn render(ui: &mut Ui, ctx: &Context) {
 
     ui.add_space(10.0);
 
-    if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
-        println!("deletin");
+    let delete_modal = delete_modal(ctx);
+
+    let is_delete_enabled = DELETE_PROGRESS.lock().is_none();
+
+    if let Some((a,b)) = *DELETE_PROGRESS.lock() {
+        ui.add(ProgressBar::new(a as f32 / b as f32));
     }
+
+    ui.add_enabled_ui(is_delete_enabled, |ui| {
+        if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
+            *DELETE_PROGRESS.lock() = Some((69,420)); // TODO: INSERT HERE DELETER
+            delete_modal.open();
+        }
+    });
 }
 
 fn download_modal(ctx: &Context) -> Modal {
     create_modal(
         t!("tools.download.title"),
-        "download",
+        "tools_download",
         ctx,
         |ui, modal| {
             ui.heading(t!("tools.progress"));
@@ -63,9 +77,7 @@ fn download_modal(ctx: &Context) -> Modal {
             }
         },
         |ui, modal| {
-            if modal.caution_button(ui, t!("tools.download.close")).clicked() {
-                modal.close();
-            }
+            modal.caution_button(ui, t!("tools.download.close"));
         },
     )
 }
@@ -73,18 +85,18 @@ fn download_modal(ctx: &Context) -> Modal {
 fn confirm_download_modal(ctx: &Context) -> Modal {
     create_modal(
         t!("tools.download.title"),
-        "confirm_download",
+        "tools_confirm_download",
         ctx,
         |ui, _modal| {
             let mut range = BRUTEFORCE_RANGE.lock();
 
-            ui.label("From ID");
+            ui.label(t!("tools.download.from_id"));
             ui.add(Slider::new(&mut range.0, 0..=MAX_ID_RANGE));
             range.1 = range.1.max(range.0);
 
             ui.add_space(10.0);
 
-            ui.label("To ID");
+            ui.label(t!("tools.download.to_id"));
             ui.add(Slider::new(&mut range.1, 0..=MAX_ID_RANGE));
             range.0 = range.0.min(range.1);
         },
@@ -94,6 +106,26 @@ fn confirm_download_modal(ctx: &Context) -> Modal {
                 download_modal(ctx).open();
             }
             modal.caution_button(ui, t!("tools.download.close"));
+        },
+    )
+}
+
+fn delete_modal(ctx: &Context) -> Modal {
+    create_modal(
+        t!("tools.delete.title"),
+        "tools_delete",
+        ctx,
+        |ui, modal| {
+            ui.heading(t!("tools.progress"));
+
+            if let Some((a,b)) = *DELETE_PROGRESS.lock() {
+                ui.add(ProgressBar::new(a as f32 / b as f32));
+            } else {
+                modal.close();
+            }
+        },
+        |ui, modal| {
+            modal.caution_button(ui, t!("tools.delete.close"));
         },
     )
 }
