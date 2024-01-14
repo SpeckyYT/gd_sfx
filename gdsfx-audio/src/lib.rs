@@ -9,12 +9,6 @@ use lazy_static::lazy_static;
 use parking_lot::Mutex;
 use rodio::{Decoder, OutputStream, Sink};
 
-// pub visibility required by lazy_static
-pub struct Channel<T> {
-    sender: Sender<T>,
-    receiver: Receiver<T>,
-}
-
 #[derive(Debug, Clone, Copy)]
 pub struct AudioSettings {
     volume: f32,
@@ -30,6 +24,12 @@ impl Default for AudioSettings {
             pitch: 0.0,
         }
     }
+}
+
+// pub visibility required by lazy_static
+pub struct Channel<T> {
+    sender: Sender<T>,
+    receiver: Receiver<T>,
 }
 
 impl<T> From<(Sender<T>, Receiver<T>)> for Channel<T> {

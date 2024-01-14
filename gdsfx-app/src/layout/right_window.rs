@@ -1,10 +1,10 @@
 use eframe::egui::{Context, CentralPanel, Button};
 use gdsfx_library::EntryKind;
 
-use crate::GdSfx;
+use crate::{library_manager::LibraryManager, app_state::AppState};
 
-pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
-    if let Some(entry) = gdsfx.selected_sfx.clone() {
+pub fn render(ctx: &Context, app_state: &AppState, library_manager: &LibraryManager) {
+    if let Some(entry) = app_state.selected_sfx.clone() {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             CentralPanel::default().show(ctx, |ui| {
                 ui.heading(&entry.name);
@@ -24,7 +24,7 @@ pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
     
                 let download_button = Button::new(t!("sound.button.download"));
                 if ui.add_enabled(!entry.file_exists(), download_button).clicked() {
-                    gdsfx.download_sound(&entry);
+                    library_manager.download_sound(&entry);
                 }
     
                 let delete_button = Button::new(t!("sound.button.delete"));
@@ -33,7 +33,7 @@ pub fn render(gdsfx: &mut GdSfx, ctx: &Context) {
                 }
     
                 if ui.button(t!("sound.button.play")).clicked() {
-                    gdsfx.play_sound(&entry);
+                    library_manager.play_sound(&entry, app_state.audio_settings);
                 }
     
                 if ui.button(t!("sound.button.stop")).clicked() {

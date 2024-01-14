@@ -1,17 +1,16 @@
-use std::{path::PathBuf, collections::HashMap, fmt, fs, ops::Deref};
+use std::{path::PathBuf, collections::HashMap, fs};
 
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
 use stats::Centiseconds;
-use serde::{Deserialize, Serialize};
 
-pub mod favorites;
-pub mod sorting;
 pub mod stats;
 pub mod tools;
 
 mod requests;
 mod parse;
+
+pub type EntryId = u32;
 
 type Bytes = Vec<u8>;
 
@@ -19,6 +18,7 @@ type Bytes = Vec<u8>;
 pub struct Library {
     root_id: EntryId,
     entries: HashMap<EntryId, LibraryEntry>,
+    child_map: HashMap<EntryId, Vec<EntryId>>,
 
     credits: Vec<Credit>,
 
@@ -28,19 +28,23 @@ pub struct Library {
 
 impl Library {
     pub fn get_root(&self) -> &LibraryEntry {
-        self.get_entry(self.root_id)
+        self.entries.get(&self.root_id).unwrap()
     }
 
-    pub fn get_entry(&self, id: EntryId) -> &LibraryEntry {
-        self.entries.get(&id).expect("Entries shouldn't contain any non-existent IDs")
-    }
-
-    pub fn get_entries(&self) -> &HashMap<EntryId, LibraryEntry> {
-        &self.entries
+    pub fn get_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {
+        self.child_map
+            .get(&entry.id)
+            .into_iter()
+            .flatten()
+            .flat_map(|id| self.entries.get(id))
     }
 
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
+    }
+
+    pub fn get_total_entries(&self) -> usize {
+        self.entries.len()
     }
 
     pub fn get_total_bytes(&self) -> i64 {
@@ -62,25 +66,8 @@ pub struct LibraryEntry {
 
 #[derive(Debug, Clone)]
 pub enum EntryKind {
-    Category { children: Vec<EntryId> },
+    Category,
     Sound { bytes: i64, duration: Centiseconds },
-}
-
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Deserialize, Serialize)]
-pub struct EntryId(u32);
-
-impl fmt::Display for EntryId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl Deref for EntryId {
-    type Target = u32;
-    
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
 }
 
 #[derive(Debug)]

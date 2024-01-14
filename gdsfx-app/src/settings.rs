@@ -23,7 +23,7 @@ pub struct Settings {
 
     pub search_filter_mode: SearchFilterMode,
 
-    pub sfx_select_mode: SFXSelectMode,
+    pub sfx_select_mode: SfxSelectMode,
 
     #[educe(Default = true)]
     pub play_sfx_on_click: bool,
@@ -49,7 +49,7 @@ pub enum SearchFilterMode {
 }
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
-pub enum SFXSelectMode {
+pub enum SfxSelectMode {
     #[default]
     Hover,
     Click,

@@ -1,22 +1,22 @@
 use eframe::egui::Ui;
 
-use crate::GdSfx;
+use crate::library_manager::LibraryManager;
 
 // this build output file contains the following function:
 // ```
 // fn get_link(name: &str) -> Option<&str> { ... }
 // ```
 // see gdsfx-app/build/credits.rs
-gdsfx_build::include!("credits.rs");
+gdsfx_build::get_output!(include!("credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
-pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
+pub fn render(ui: &mut Ui, library_manager: &LibraryManager) {
     ui.heading(t!("credits.sfx"));
 
     ui.add_space(10.0);
 
-    for credits in gdsfx.library.get_credits() {
+    for credits in library_manager.library.get_credits() {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 

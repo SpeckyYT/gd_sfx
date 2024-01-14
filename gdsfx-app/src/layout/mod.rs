@@ -1,7 +1,7 @@
 use eframe::{egui::Ui, epaint::Vec2};
-use gdsfx_library::{LibraryEntry, sorting::Sorting};
+use gdsfx_library::LibraryEntry;
 
-use crate::{GdSfx, settings::SFXSelectMode};
+use crate::{settings::SfxSelectMode, sorting::Sorting, app_state::AppState, library_manager::LibraryManager};
 
 pub mod top_panel;
 pub mod left_window;
@@ -17,9 +17,9 @@ pub const TOTAL_HEIGHT: f32 = 600.0; // enough to display all categories
 pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
 pub const MIN_SCALE_FACTOR: f32 = 0.7;
 
-pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
+pub fn add_search_area(ui: &mut Ui, app_state: &mut AppState) {
     ui.heading(t!("search"));
-    ui.text_edit_singleline(&mut gdsfx.search_query);
+    ui.text_edit_singleline(&mut app_state.search_query);
 
     ui.menu_button(t!("sort.button"), |ui| {
         for (alternative, text) in [
@@ -33,7 +33,7 @@ pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
             (Sorting::SizeInc,   t!("sort.size.ascending")),
             (Sorting::SizeDec,   t!("sort.size.descending")),
         ] {
-            let response = ui.radio_value(&mut gdsfx.sorting, alternative, text);
+            let response = ui.radio_value(&mut app_state.sorting_mode, alternative, text);
             if response.clicked() {
                 ui.close_menu();
             }
@@ -43,32 +43,32 @@ pub fn add_search_area(ui: &mut Ui, gdsfx: &mut GdSfx) {
     ui.separator();
 }
 
-pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
+pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: LibraryEntry) {
     // don't render filtered buttons at all
-    if !gdsfx.is_matching_entry(entry.clone()) { return }
+    if !library_manager.is_matching_entry(&entry, &app_state.search_query) { return }
 
-    let button = ui.button(match gdsfx.settings.is_favorite(entry.id) {
+    let button = ui.button(match app_state.settings.is_favorite(entry.id) {
         true => format!("⭐ {}", entry.name),
         false => entry.name.to_string(),
     });
 
-    let entry_selected = match gdsfx.settings.sfx_select_mode {
-        SFXSelectMode::Hover => button.hovered(),
-        SFXSelectMode::Click => button.clicked(),
+    let entry_selected = match app_state.settings.sfx_select_mode {
+        SfxSelectMode::Hover => button.hovered(),
+        SfxSelectMode::Click => button.clicked(),
     };
 
-    if button.clicked() && gdsfx.settings.play_sfx_on_click {
-        gdsfx.play_sound(&entry);
+    if button.clicked() && app_state.settings.play_sfx_on_click {
+        library_manager.play_sound(&entry, app_state.audio_settings);
     }
 
     button.context_menu(|ui: &mut Ui| {
-        if gdsfx.settings.is_favorite(entry.id) {
+        if app_state.settings.is_favorite(entry.id) {
             if ui.button(t!("sound.button.favorite.remove")).clicked() {
-                gdsfx.settings.remove_favorite(entry.id);
+                app_state.settings.remove_favorite(entry.id);
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.favorite.add")).clicked() {
-            gdsfx.settings.add_favorite(entry.id);
+            app_state.settings.add_favorite(entry.id);
             ui.close_menu();
         }
 
@@ -78,12 +78,12 @@ pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.download")).clicked() {
-            gdsfx.download_sound(&entry);
+            library_manager.download_sound(&entry);
             ui.close_menu();
         }
     });
 
     if entry_selected {
-        gdsfx.selected_sfx = Some(entry);
+        app_state.selected_sfx = Some(entry);
     }
 }

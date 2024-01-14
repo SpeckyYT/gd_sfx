@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::env;
 use std::path::Path;
 
 use anyhow::Context;
@@ -6,20 +6,18 @@ pub use proc_macro2::TokenStream;
 pub use build_script::cargo_rerun_if_changed;
 
 #[macro_export]
-macro_rules! include {
-    ( $file:expr ) => {
-        include!(concat!(env!("OUT_DIR"), "/", $file));
+macro_rules! get_output {
+    ( $macro:ident!($file:expr) ) => {
+        $macro!(concat!(env!("OUT_DIR"), "/", $file));
     }
 }
 
-pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
+pub fn write_output_rust(path: impl AsRef<Path>, tokens: TokenStream) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let path = Path::new(&out_dir).join(path);
     
     // write unformatted token stream first...
-    fs::write(&path, tokens.to_string())
-        .with_context(|| format!("Couldn't write to file {}", path.display()))
-        .unwrap();
+    gdsfx_data::write_file(&path, tokens.to_string()).unwrap();
 
     // ...so that it can be inspected if parsing the token stream fails...
     let parsed = syn::parse2(tokens)
@@ -27,14 +25,11 @@ pub fn write_output_file(path: impl AsRef<Path>, tokens: TokenStream) {
         .unwrap();
     
     // ...before finally writing the formatted version to the file
-    fs::write(&path, prettyplease::unparse(&parsed))
-        .with_context(|| format!("Couldn't write to file {}", path.display()))
-        .unwrap();
+    gdsfx_data::write_file(&path, prettyplease::unparse(&parsed)).unwrap();
 }
 
-pub fn write_output_bytes(path: impl AsRef<Path>, bytes: Vec<u8>) {
+pub fn write_output_bytes(path: impl AsRef<Path>, bytes: impl AsRef<[u8]>) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let path = Path::new(&out_dir).join(path);
-
-    fs::write(&path, bytes).unwrap();
+    gdsfx_data::write_file(path, bytes).unwrap();
 }

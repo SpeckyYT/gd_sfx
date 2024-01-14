@@ -1,46 +1,44 @@
 use eframe::egui::{Ui, CollapsingHeader};
 use gdsfx_library::{LibraryEntry, EntryKind};
 
-use crate::{GdSfx, layout, settings::SearchFilterMode};
+use crate::{layout, settings::SearchFilterMode, library_manager::LibraryManager, app_state::AppState};
 
-pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    layout::add_search_area(ui, gdsfx);
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager) {
+    layout::add_search_area(ui, app_state);
 
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
 
-    let root = gdsfx.library.get_root().clone();
-    if let EntryKind::Category { children } = root.kind {
-        for child in children {
-            render_recursive(ui, gdsfx, gdsfx.library.get_entry(child).clone(), collapse_all)
-        }
+    let root = library_manager.library.get_root();
+    for child in library_manager.library.get_children(root) {
+        render_recursive(ui, app_state, library_manager, child.clone(), collapse_all);
     }
 
     // TODO do unlisted fuckery
 }
 
-fn render_recursive(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry, collapse: bool) {
+fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: LibraryEntry, collapse_all: bool) {
     match entry.kind {
-        EntryKind::Category { ref children } => {
-            let is_enabled = gdsfx.is_matching_entry(entry.clone());
+        EntryKind::Category => {
+            let is_enabled = library_manager.is_matching_entry(&entry, &app_state.search_query);
             
-            if !is_enabled && gdsfx.settings.search_filter_mode == SearchFilterMode::Hide {
+            if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
                 return // don't render at all
             }
 
             ui.add_enabled_ui(is_enabled, |ui| {
                 let mut collapsing = CollapsingHeader::new(&entry.name);
 
-                if !is_enabled || collapse {
-                    collapsing = collapsing.open(Some(false)); // closes it
+                if !is_enabled || collapse_all {
+                    collapsing = collapsing.open(Some(false));
                 }
                 
                 collapsing.show(ui, |ui| {
-                    for &child in children {
-                        render_recursive(ui, gdsfx, gdsfx.library.get_entry(child).clone(), collapse);
+                    for child in library_manager.library.get_children(&entry) {
+                        render_recursive(ui, app_state, library_manager, child.clone(), collapse_all);
                     }
                 });
             });
         }
-        EntryKind::Sound { .. } => layout::add_sfx_button(ui, gdsfx, entry),
+        EntryKind::Sound { .. } => layout::add_sfx_button(ui, app_state, library_manager, entry.clone()),
     }
 }

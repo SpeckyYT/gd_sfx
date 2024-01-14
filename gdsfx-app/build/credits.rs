@@ -24,5 +24,5 @@ pub fn build() {
         }
     };
 
-    gdsfx_build::write_output_file(OUTPUT_FILE, tokens);
+    gdsfx_build::write_output_rust(OUTPUT_FILE, tokens);
 }

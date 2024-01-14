@@ -20,7 +20,7 @@ pub fn build() {
     tokens.extend(update::build());
     tokens.extend(translators::build());
 
-    gdsfx_build::write_output_file(OUTPUT_FILE, tokens);
+    gdsfx_build::write_output_rust(OUTPUT_FILE, tokens);
 
     // also generate new locale schema whenever a locale changes
     locale_schema::build();

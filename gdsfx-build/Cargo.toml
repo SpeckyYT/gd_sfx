@@ -9,6 +9,7 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 build_script = { workspace = true }
+gdsfx-data = { path = "../gdsfx-data" }
 prettyplease = { workspace = true }
 proc-macro2 = { workspace = true }
 syn = { workspace = true }

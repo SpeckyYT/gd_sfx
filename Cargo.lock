@@ -1471,6 +1471,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "build_script",
+ "gdsfx-data",
  "prettyplease",
  "proc-macro2",
  "syn 2.0.48",

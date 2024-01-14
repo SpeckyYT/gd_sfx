@@ -35,16 +35,16 @@ impl FromStr for LibraryEntry {
             .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
 
         let entry = Self {
-            id: EntryId(id.parse()?),
+            id: id.parse()?,
             name: name.to_string(),
-            parent_id: EntryId(parent_id.parse()?),
+            parent_id: parent_id.parse()?,
 
             kind: match kind {
                 "0" => EntryKind::Sound {
                     bytes: parts[4].parse()?,
                     duration: Centiseconds(parts[5].parse()?),
                 },
-                "1" => EntryKind::Category { children: Vec::new() },
+                "1" => EntryKind::Category,
 
                 _ => anyhow::bail!("Unknown library entry type")
             }
@@ -59,7 +59,7 @@ impl ToString for LibraryEntry {
         let kind = match self.kind {
             // TODO logic for this and the match kind above should be combined
             EntryKind::Sound { .. } => "0",
-            EntryKind::Category { .. } => "1",
+            EntryKind::Category => "1",
         };
 
         let (bytes, duration) = match &self.kind {
@@ -95,28 +95,31 @@ impl FromStr for Credit {
 }
 
 fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
-    let mut map = entries.iter()
-        .map(|entry| (entry.id, entry.clone()))
-        .collect::<HashMap<_, _>>();
+    let root_id = entries.first().expect("No library entries").id;
+
+    let mut entry_map = HashMap::new();
+    let mut child_map = HashMap::new();
 
     let mut total_bytes = 0;
     let mut total_duration = 0;
 
-    for entry in &entries {
+    for entry in entries {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             total_bytes += *bytes;
             total_duration += duration.0;
         }
-        map.entry(entry.parent_id).and_modify(|parent| {
-            if let EntryKind::Category { children } = &mut parent.kind {
-                children.push(entry.id);
-            }
-        });
+        
+        child_map.entry(entry.parent_id)
+            .or_insert(Vec::new())
+            .push(entry.id);
+
+        entry_map.insert(entry.id, entry);
     }
 
     Library {
-        root_id: entries.into_iter().next().expect("No library entries").id,
-        entries: map,
+        root_id,
+        entries: entry_map,
+        child_map,
         credits,
 
         total_bytes,
