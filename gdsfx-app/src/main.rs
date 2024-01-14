@@ -7,13 +7,9 @@ use library_manager::LibraryManager;
 
 mod app_state;
 mod library_manager;
-mod settings;
-mod favorites;
 
 mod layout;
 mod tabs;
-
-mod sorting;
 
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated
@@ -32,28 +28,30 @@ impl eframe::App for GdSfx {
         use layout::*;
         
         top_panel::render(ctx, &mut self.app_state);
-        left_window::render(ctx, self);
+        left_window::render(ctx, &mut self.app_state, &self.library_manager);
         right_window::render(ctx, &self.app_state, &self.library_manager);
-
-        // self.matching_entries.borrow_mut().clear(); // filter entries again on every frame TODO
     }
 }
 
 impl GdSfx {
     fn run() -> eframe::Result<()> {
-        let options = NativeOptions {
-            viewport: ViewportBuilder {
-                inner_size: Some(layout::DEFAULT_WINDOW_SIZE),
-                min_inner_size: Some(layout::DEFAULT_WINDOW_SIZE * layout::MIN_SCALE_FACTOR),
-                resizable: Some(true),
-                icon: Some(Arc::new(IconData {
-                    rgba: ICON_BYTES.to_vec(),
-                    width: 256,
-                    height: 256,
-                })),
+        let icon = IconData {
+            rgba: ICON_BYTES.to_vec(),
+            width: 256,
+            height: 256,
+        };
 
-                ..Default::default()
-            },
+        let viewport = ViewportBuilder {
+            inner_size: Some(layout::DEFAULT_WINDOW_SIZE),
+            min_inner_size: Some(layout::DEFAULT_WINDOW_SIZE * layout::MIN_SCALE_FACTOR),
+            resizable: Some(true),
+            icon: Some(Arc::new(icon)),
+
+            ..Default::default()
+        };
+
+        let options = NativeOptions {
+            viewport,
             follow_system_theme: false,
             default_theme: Theme::Dark,
             hardware_acceleration: HardwareAcceleration::Preferred,

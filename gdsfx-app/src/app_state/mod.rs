@@ -1,7 +1,12 @@
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::LibraryEntry;
 
-use crate::{tabs::Tab, sorting::Sorting, settings::Settings};
+use crate::{tabs::Tab, library_manager::sorting::Sorting};
+
+use settings::Settings;
+
+pub mod favorites;
+pub mod settings;
 
 pub struct AppState {
     pub selected_tab: Tab,

@@ -1,7 +1,7 @@
 use eframe::{egui::Ui, epaint::Vec2};
 use gdsfx_library::LibraryEntry;
 
-use crate::{settings::SfxSelectMode, sorting::Sorting, app_state::AppState, library_manager::LibraryManager};
+use crate::{app_state::{AppState, settings::*}, library_manager::{LibraryManager, sorting::Sorting}};
 
 pub mod top_panel;
 pub mod left_window;
@@ -40,25 +40,30 @@ pub fn add_search_area(ui: &mut Ui, app_state: &mut AppState) {
         }
     });
 
+    // TODO add filter for downloaded sounds only
+
     ui.separator();
 }
 
-pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: LibraryEntry) {
-    // don't render filtered buttons at all
-    if !library_manager.is_matching_entry(&entry, &app_state.search_query) { return }
+pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry) {
+    if !library_manager.is_matching_entry(entry, app_state) {
+        return // don't render filtered buttons at all
+    }
 
     let button = ui.button(match app_state.settings.is_favorite(entry.id) {
         true => format!("⭐ {}", entry.name),
         false => entry.name.to_string(),
     });
 
-    let entry_selected = match app_state.settings.sfx_select_mode {
+    if match app_state.settings.sfx_select_mode {
         SfxSelectMode::Hover => button.hovered(),
         SfxSelectMode::Click => button.clicked(),
-    };
+    } {
+        app_state.selected_sfx = Some(entry.clone());
+    }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        library_manager.play_sound(&entry, app_state.audio_settings);
+        library_manager.play_sound(entry, app_state.audio_settings);
     }
 
     button.context_menu(|ui: &mut Ui| {
@@ -78,12 +83,8 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.download")).clicked() {
-            library_manager.download_sound(&entry);
+            library_manager.download_sound(entry);
             ui.close_menu();
         }
     });
-
-    if entry_selected {
-        app_state.selected_sfx = Some(entry);
-    }
 }

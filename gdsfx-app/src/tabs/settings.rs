@@ -1,7 +1,7 @@
 use eframe::egui::{Ui, ComboBox};
 use strum::IntoEnumIterator;
 
-use crate::{settings::{SfxSelectMode, SearchFilterMode}, app_state::AppState};
+use crate::app_state::{AppState, settings::*};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.heading(t!("settings"));

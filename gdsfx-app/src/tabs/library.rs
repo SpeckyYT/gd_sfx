@@ -1,7 +1,7 @@
 use eframe::egui::{Ui, CollapsingHeader};
 use gdsfx_library::{LibraryEntry, EntryKind};
 
-use crate::{layout, settings::SearchFilterMode, library_manager::LibraryManager, app_state::AppState};
+use crate::{layout, library_manager::LibraryManager, app_state::{AppState, settings::SearchFilterMode}};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager) {
     layout::add_search_area(ui, app_state);
@@ -10,16 +10,16 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryMa
 
     let root = library_manager.library.get_root();
     for child in library_manager.library.get_children(root) {
-        render_recursive(ui, app_state, library_manager, child.clone(), collapse_all);
+        render_recursive(ui, app_state, library_manager, child, collapse_all);
     }
 
     // TODO do unlisted fuckery
 }
 
-fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: LibraryEntry, collapse_all: bool) {
+fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry, collapse_all: bool) {
     match entry.kind {
         EntryKind::Category => {
-            let is_enabled = library_manager.is_matching_entry(&entry, &app_state.search_query);
+            let is_enabled = library_manager.is_matching_entry(entry, app_state);
             
             if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
                 return // don't render at all
@@ -33,12 +33,12 @@ fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &Lib
                 }
                 
                 collapsing.show(ui, |ui| {
-                    for child in library_manager.library.get_children(&entry) {
-                        render_recursive(ui, app_state, library_manager, child.clone(), collapse_all);
+                    for child in library_manager.library.get_children(entry) {
+                        render_recursive(ui, app_state, library_manager, child, collapse_all);
                     }
                 });
             });
         }
-        EntryKind::Sound { .. } => layout::add_sfx_button(ui, app_state, library_manager, entry.clone()),
+        EntryKind::Sound { .. } => layout::add_sfx_button(ui, app_state, library_manager, entry),
     }
 }
