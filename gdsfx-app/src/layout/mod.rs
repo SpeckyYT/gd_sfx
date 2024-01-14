@@ -1,7 +1,7 @@
 use eframe::{egui::Ui, epaint::Vec2};
 use gdsfx_library::{LibraryEntry, sorting::Sorting};
 
-use crate::GdSfx;
+use crate::{GdSfx, settings::SFXSelectMode};
 
 pub mod top_panel;
 pub mod left_window;
@@ -47,24 +47,30 @@ pub fn add_sfx_button(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
     // don't render filtered buttons at all
     if !gdsfx.is_matching_entry(entry.clone()) { return }
 
-    let button = ui.button(&entry.name); // TODO with favorites star
+    let button = ui.button(match gdsfx.settings.is_favorite(entry.id) {
+        true => format!("⭐ {}", entry.name),
+        false => entry.name.to_string(),
+    });
 
-    let entry_selected = button.hovered();
+    let entry_selected = match gdsfx.settings.sfx_select_mode {
+        SFXSelectMode::Hover => button.hovered(),
+        SFXSelectMode::Click => button.clicked(),
+    };
 
-    if button.clicked() {
+    if button.clicked() && gdsfx.settings.play_sfx_on_click {
         gdsfx.play_sound(&entry);
     }
 
-    button.context_menu(|ui| {
-        // if settings::has_favourite(entry.id()) {
-        //     if ui.button(t!("sound.button.favorite.remove")).clicked() {
-        //         settings::remove_favourite(entry.id());
-        //         ui.close_menu();
-        //     }
-        // } else if ui.button(t!("sound.button.favorite.add")).clicked() {
-        //     settings::add_favourite(entry.id());
-        //     ui.close_menu();
-        // }
+    button.context_menu(|ui: &mut Ui| {
+        if gdsfx.settings.is_favorite(entry.id) {
+            if ui.button(t!("sound.button.favorite.remove")).clicked() {
+                gdsfx.settings.remove_favorite(entry.id);
+                ui.close_menu();
+            }
+        } else if ui.button(t!("sound.button.favorite.add")).clicked() {
+            gdsfx.settings.add_favorite(entry.id);
+            ui.close_menu();
+        }
 
         if entry.file_exists() {
             if ui.button(t!("sound.button.delete")).clicked() {

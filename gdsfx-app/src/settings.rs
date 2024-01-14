@@ -2,6 +2,8 @@ use std::{ops::Range, path::PathBuf};
 
 use anyhow::Result;
 use educe::Educe;
+use eframe::epaint::ahash::HashSet;
+use gdsfx_library::EntryId;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
 use strum::EnumIter;
@@ -31,6 +33,8 @@ pub struct Settings {
 
     #[educe(Default = 0..14500)]
     pub download_ids_range: Range<u32>,
+
+    pub favorites: HashSet<EntryId>,
 
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
@@ -82,6 +86,18 @@ impl Settings {
 
     fn set_last_state(&mut self) {
         self.last_state = Some(Box::new(self.clone()))
+    }
+
+    pub fn is_favorite(&self, id: EntryId) -> bool {
+        self.favorites.contains(&id)
+    }
+
+    pub fn add_favorite(&mut self, id: EntryId) {
+        self.favorites.insert(id);
+    }
+
+    pub fn remove_favorite(&mut self, id: EntryId) {
+        self.favorites.remove(&id);
     }
 }
 

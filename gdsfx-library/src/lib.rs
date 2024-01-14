@@ -3,6 +3,7 @@ use std::{path::PathBuf, collections::HashMap, fmt, fs, ops::Deref};
 use gdsfx_data::paths;
 use once_cell::sync::Lazy;
 use stats::Centiseconds;
+use serde::{Deserialize, Serialize};
 
 pub mod favorites;
 pub mod sorting;
@@ -50,7 +51,7 @@ pub enum EntryKind {
     Sound { bytes: i64, duration: Centiseconds },
 }
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Deserialize, Serialize)]
 pub struct EntryId(u32);
 
 impl fmt::Display for EntryId {

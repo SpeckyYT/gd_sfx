@@ -1497,6 +1497,7 @@ dependencies = [
  "gdsfx-data",
  "once_cell",
  "reqwest",
+ "serde",
  "url",
 ]
 

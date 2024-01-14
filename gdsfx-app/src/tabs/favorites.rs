@@ -16,9 +16,9 @@ fn render_recursive(ui: &mut Ui, gdsfx: &mut GdSfx, entry: LibraryEntry) {
             }
         },
         EntryKind::Sound { bytes, duration } => {
-            // if settings::has_favourite(id) {
-            //     gui::add_sfx_button(ui, gdsfx, entry);
-            // }
+            if gdsfx.settings.is_favorite(entry.id) {
+                layout::add_sfx_button(ui, gdsfx, entry);
+            }
         },
     }
 }
