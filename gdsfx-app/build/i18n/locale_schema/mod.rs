@@ -1,7 +1,7 @@
 use std::path::{PathBuf, Path};
 
 use anyhow::Context;
-use gdsfx_data::paths;
+use gdsfx_files::paths;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value, Map};
 
@@ -41,7 +41,7 @@ pub fn build() {
         .context("Incorrect JSON in locale schema template")
         .unwrap();
 
-    let source_locale: LocaleFormat = gdsfx_data::read_json_file(paths::build::LOCALE_SCHEMA_SOURCE_FILE).unwrap();
+    let source_locale: LocaleFormat = gdsfx_files::read_json_file(paths::build::LOCALE_SCHEMA_SOURCE_FILE).unwrap();
 
     for key in source_locale.keys() {
         // skip already defined properties
@@ -57,12 +57,12 @@ pub fn build() {
         .context("Couldn't serialize locale schema")
         .unwrap();
 
-    gdsfx_data::create_parent_dirs(&destination_file).unwrap();
-    gdsfx_data::write_file(destination_file, formatted_template).unwrap();
+    gdsfx_files::create_parent_dirs(&destination_file).unwrap();
+    gdsfx_files::write_file(destination_file, formatted_template).unwrap();
 }
 
 fn find_locale_schema_settings() -> JSONSchemaSettings {
-    let project_settings: ProjectSettings = gdsfx_data::read_json_file(paths::build::PROJECT_SETTINGS_FILE).unwrap();
+    let project_settings: ProjectSettings = gdsfx_files::read_json_file(paths::build::PROJECT_SETTINGS_FILE).unwrap();
 
     project_settings.schemas.into_iter()
         .find(|schema| {

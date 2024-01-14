@@ -26,6 +26,25 @@ pub struct Library {
 }
 
 impl Library {
+    pub fn load(gd_folder: impl AsRef<Path>) -> Self {
+        const SFX_LIBRARY_FILE: &str = "sfxlibrary.dat";
+    
+        let file = gd_folder.as_ref().join(SFX_LIBRARY_FILE);
+    
+        gdsfx_files::read_file(&file).ok()
+            .map(parse::parse_library_from_bytes)
+            .filter(|library| {
+                requests::fetch_library_version()
+                    .map(|version| version.to_string() == library.get_root().name)
+                    .unwrap_or(false)
+            })
+            .unwrap_or_else(|| {
+                let bytes = requests::fetch_library_data().unwrap();
+                let _ = gdsfx_files::write_file(&file, &bytes);
+                parse::parse_library_from_bytes(bytes)
+            })
+    }
+
     pub fn get_root(&self) -> &LibraryEntry {
         self.entries.get(&self.root_id).unwrap()
     }
@@ -75,69 +94,51 @@ pub struct Credit {
     pub link: String,
 }
 
-pub fn load_library(gd_folder: &Path) -> Library {
-    const SFX_LIBRARY_FILE: &str = "sfxlibrary.dat";
-
-    let file = gd_folder.join(SFX_LIBRARY_FILE);
-
-    gdsfx_data::read_file(&file).ok()
-        .map(parse::parse_library_from_bytes)
-        .filter(|library| {
-            requests::fetch_library_version()
-                .map(|version| version.to_string() == library.get_root().name)
-                .unwrap_or(false)
-        })
-        .unwrap_or_else(|| {
-            let bytes = requests::fetch_library_data().unwrap();
-            let _ = gdsfx_data::write_file(&file, &bytes);
-            parse::parse_library_from_bytes(bytes)
-        })
-}
-
-// TODO this gd_folder spam is really stupid
 impl LibraryEntry {
-    pub fn get_file_name(&self) -> String {
+    fn get_file_name(&self) -> String {
         format!("s{}.ogg", self.id)
     }
 
-    pub fn try_get_file_path(&self, gd_folder: &Path) -> Option<PathBuf> {
-        Some(gd_folder.join(self.get_file_name()))
+    pub fn create_file_handler(&self, gd_folder: impl AsRef<Path>) -> LibraryEntryFileHandler {
+        LibraryEntryFileHandler {
+            entry: self,
+            path: gd_folder.as_ref().join(self.get_file_name())
+        }
+    }
+}
+
+pub struct LibraryEntryFileHandler<'a> {
+    entry: &'a LibraryEntry,
+    path: PathBuf,
+}
+
+impl<'a> LibraryEntryFileHandler<'a> {
+    pub fn file_exists(&self) -> bool {
+        self.path.exists()
     }
 
-    pub fn file_exists(&self, gd_folder: &Path) -> bool {
-        self.try_get_file_path(gd_folder)
-            .map(|path| path.exists())
-            .unwrap_or(false)
-    }
-
-    pub fn try_get_bytes(&self, gd_folder: &Path, cache: &mut HashMap<EntryId, Bytes>) -> Option<Bytes> {
-        cache.get(&self.id).cloned().or_else(|| {
-            let bytes = self
-                .try_get_file_path(gd_folder)
-                .and_then(|path| gdsfx_data::read_file(path).ok())
-                .or_else(|| requests::fetch_sfx_data(self).ok());
+    pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) -> Option<Bytes> {
+        cache.get(&self.entry.id).cloned().or_else(|| {
+            let bytes = gdsfx_files::read_file(&self.path).ok()
+                .or_else(|| requests::fetch_sfx_data(self.entry).ok());
 
             if let Some(bytes) = bytes.as_ref() {
-                cache.insert(self.id, bytes.clone());
+                cache.insert(self.entry.id, bytes.clone());
             }
 
             bytes
         })
     }
 
-    pub fn try_store_bytes(&self, gd_folder: &Path, cache: &mut HashMap<EntryId, Bytes>) {
-        if !self.file_exists(gd_folder) {
-            if let Some(path) = self.try_get_file_path(gd_folder) {
-                if let Some(bytes) = self.try_get_bytes(gd_folder, cache) {
-                    let _ = gdsfx_data::write_file(path, bytes);
-                }
+    pub fn try_store_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) {
+        if !self.file_exists() {
+            if let Some(bytes) = self.try_get_bytes(cache) {
+                let _ = gdsfx_files::write_file(&self.path, bytes);
             }
         }
     }
 
-    pub fn try_delete_file(&self, gd_folder: &Path) {
-        if let Some(path) = self.try_get_file_path(gd_folder) {
-            let _ = fs::remove_file(path);
-        }
+    pub fn try_delete_file(&self) {
+        let _ = fs::remove_file(&self.path);
     }
 }

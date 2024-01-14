@@ -3,7 +3,7 @@ members = [
     "gdsfx-app",
     "gdsfx-audio",
     "gdsfx-build",
-    "gdsfx-data",
+    "gdsfx-files",
     "gdsfx-library",
 ]
 resolver = "2"

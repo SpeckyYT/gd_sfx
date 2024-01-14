@@ -1,5 +1,5 @@
 use gdsfx_build::TokenStream;
-use gdsfx_data::paths;
+use gdsfx_files::paths;
 
 mod update;
 mod translators;
@@ -11,7 +11,7 @@ pub fn build() {
     // if a file is added to or removed from the locales directory...
     gdsfx_build::cargo_rerun_if_changed(paths::build::LOCALES_DIR);
     // ...or any file in it is changed
-    gdsfx_data::read_dir(paths::build::LOCALES_DIR).unwrap()
+    gdsfx_files::read_dir(paths::build::LOCALES_DIR).unwrap()
         .map(|file| file.path())
         .for_each(gdsfx_build::cargo_rerun_if_changed);
 

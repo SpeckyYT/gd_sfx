@@ -1,7 +1,7 @@
 use std::{collections::HashSet, path::PathBuf};
 
 use anyhow::Result;
-use gdsfx_data::paths;
+use gdsfx_files::paths;
 use gdsfx_library::EntryId;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
@@ -24,14 +24,14 @@ impl Default for Favorites {
 
 impl Favorites {
     pub fn load_or_default() -> Self {
-        gdsfx_data::read_json_file(&*FAVORITES_FILE).unwrap_or_default()
+        gdsfx_files::read_json_file(&*FAVORITES_FILE).unwrap_or_default()
     }
 
     fn try_save(&self) -> Result<()> {
         let json_data = serde_json::to_string(self).expect("derived serialization shouldn't fail");
 
-        gdsfx_data::create_parent_dirs(&*FAVORITES_FILE)?;
-        gdsfx_data::write_file(&*FAVORITES_FILE, json_data)?;
+        gdsfx_files::create_parent_dirs(&*FAVORITES_FILE)?;
+        gdsfx_files::write_file(&*FAVORITES_FILE, json_data)?;
 
         Ok(())
     }

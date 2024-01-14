@@ -13,9 +13,9 @@ pub struct LibraryManager {
 }
 
 impl LibraryManager {
-    pub fn load(gd_folder: &Path) -> Self {
+    pub fn load(gd_folder: impl AsRef<Path>) -> Self {
         Self {
-            library: gdsfx_library::load_library(gd_folder),
+            library: Library::load(gd_folder),
             sfx_cache: Default::default(),
         }
     }
@@ -46,7 +46,7 @@ impl LibraryManager {
         let cache = self.sfx_cache.clone();
 
         thread::spawn(move || {
-            let bytes = entry.try_get_bytes(&gd_folder, &mut cache.lock());
+            let bytes = entry.create_file_handler(&gd_folder).try_get_bytes(&mut cache.lock());
             if let Some(bytes) = bytes {
                 gdsfx_audio::stop_all();
                 gdsfx_audio::play_sound(bytes, audio_settings);
@@ -59,6 +59,9 @@ impl LibraryManager {
         let gd_folder = PathBuf::from(&app_state.settings.gd_folder);
         let cache = self.sfx_cache.clone();
 
-        thread::spawn(move || entry.try_store_bytes(&gd_folder, &mut cache.lock()));
+        thread::spawn(move || {
+            entry.create_file_handler(&gd_folder)
+                .try_store_bytes(&mut cache.lock())
+        });
     }
 }

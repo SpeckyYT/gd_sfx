@@ -1,8 +1,8 @@
-use std::{sync::Arc, path::Path};
+use std::sync::Arc;
 
 use app_state::AppState;
 use eframe::{*, egui::{ViewportBuilder, IconData}};
-use gdsfx_data::paths;
+use gdsfx_files::paths;
 use library_manager::LibraryManager;
 
 mod app_state;
@@ -68,9 +68,7 @@ impl GdSfx {
 
     fn load(_cc: &eframe::CreationContext) -> Box<dyn eframe::App> {
         let app_state = AppState::load();
-
-        let gd_folder = Path::new(&app_state.settings.gd_folder);
-        let library_manager = LibraryManager::load(gd_folder);
+        let library_manager = LibraryManager::load(&app_state.settings.gd_folder);
 
         Box::new(Self { app_state, library_manager })
     }

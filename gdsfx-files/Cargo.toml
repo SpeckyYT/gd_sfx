@@ -1,5 +1,5 @@
 [package]
-name = "gdsfx-data"
+name = "gdsfx-files"
 description = "Crate responsible for managing files and directories needed to build and run GDSFX."
 version = "0.1.0"
 edition = "2021"

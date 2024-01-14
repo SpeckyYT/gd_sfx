@@ -14,7 +14,7 @@ eframe = { workspace = true }
 egui-modal = { workspace = true }
 gdsfx-audio = { path = "../gdsfx-audio" }
 gdsfx-build = { path = "../gdsfx-build" }
-gdsfx-data = { path = "../gdsfx-data" }
+gdsfx-files = { path = "../gdsfx-files" }
 gdsfx-library = { path = "../gdsfx-library" }
 once_cell = { workspace = true }
 pretty-bytes = { workspace = true }
@@ -29,7 +29,7 @@ winapi = { workspace = true }
 [build-dependencies]
 anyhow = { workspace = true }
 gdsfx-build = { path = "../gdsfx-build" }
-gdsfx-data = { path = "../gdsfx-data" }
+gdsfx-files = { path = "../gdsfx-files" }
 quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

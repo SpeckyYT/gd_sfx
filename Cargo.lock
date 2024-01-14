@@ -1442,7 +1442,7 @@ dependencies = [
  "egui-modal",
  "gdsfx-audio",
  "gdsfx-build",
- "gdsfx-data",
+ "gdsfx-files",
  "gdsfx-library",
  "image",
  "once_cell",
@@ -1471,14 +1471,14 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "build_script",
- "gdsfx-data",
+ "gdsfx-files",
  "prettyplease",
  "proc-macro2",
  "syn 2.0.48",
 ]
 
 [[package]]
-name = "gdsfx-data"
+name = "gdsfx-files"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -1496,7 +1496,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "eframe",
- "gdsfx-data",
+ "gdsfx-files",
  "once_cell",
  "reqwest",
  "serde",

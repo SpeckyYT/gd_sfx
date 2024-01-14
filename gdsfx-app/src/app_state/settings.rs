@@ -66,7 +66,7 @@ fn ignore_option<T>(_: &Option<T>) -> Option<T> { None }
 
 impl PersistentSettings {
     pub fn load_or_default() -> Self {
-        let mut settings: PersistentSettings = gdsfx_data::read_json_file(&*SETTINGS_FILE)
+        let mut settings: PersistentSettings = gdsfx_files::read_json_file(&*SETTINGS_FILE)
             .unwrap_or_default();
 
         settings.set_last_state();
@@ -77,8 +77,8 @@ impl PersistentSettings {
         if self.has_changed() {
             let json_data = serde_json::to_string(self).expect("derived serialization shouldn't fail");
             
-            gdsfx_data::create_parent_dirs(&*SETTINGS_FILE)?;
-            gdsfx_data::write_file(&*SETTINGS_FILE, json_data)?;
+            gdsfx_files::create_parent_dirs(&*SETTINGS_FILE)?;
+            gdsfx_files::write_file(&*SETTINGS_FILE, json_data)?;
 
             self.set_last_state();
         }

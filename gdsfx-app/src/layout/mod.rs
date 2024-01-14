@@ -70,9 +70,11 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
             ui.close_menu();
         }
 
-        if entry.file_exists(app_state.settings.gd_folder.as_ref()) {
+        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
+
+        if file_handler.file_exists() {
             if ui.button(t!("sound.button.delete")).clicked() {
-                entry.try_delete_file(app_state.settings.gd_folder.as_ref());
+                file_handler.try_delete_file();
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.button.download")).clicked() {

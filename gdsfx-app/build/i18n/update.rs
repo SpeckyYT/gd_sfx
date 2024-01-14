@@ -1,5 +1,5 @@
 use gdsfx_build::TokenStream;
-use gdsfx_data::paths;
+use gdsfx_files::paths;
 use quote::quote;
 
 pub fn build() -> TokenStream {
