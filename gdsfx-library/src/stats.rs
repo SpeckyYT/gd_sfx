@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Centiseconds(pub i64);
 
 impl fmt::Display for Centiseconds {

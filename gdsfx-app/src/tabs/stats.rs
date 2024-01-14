@@ -1,18 +1,21 @@
+use std::time::Instant;
+
 use eframe::egui::Ui;
+use gdsfx_library::EntryKind;
 
 use crate::GdSfx;
+use pretty_bytes::converter::convert as pretty_bytes;
 
 pub fn render(ui: &mut Ui, gdsfx: &mut GdSfx) {
-    let library = gdsfx.library.get_root();
     // let Stats { bytes, duration, files } = stats::get_sound_stats(library);
 
     ui.heading(t!("stats.library"));
 
     ui.add_space(10.0);
 
-    // ui.label(t!("stats.library.files", files = files));
-    // ui.label(t!("stats.library.size", size = pretty_bytes::converter::convert(bytes as f64)));
-    // ui.label(t!("stats.library.duration", duration = util::stringify_duration(duration as i64)));
+    ui.label(t!("stats.library.files", files = gdsfx.library.get_entries().len()));
+    ui.label(t!("stats.library.size", size = pretty_bytes(gdsfx.library.get_total_bytes() as f64)));
+    ui.label(t!("stats.library.duration", duration = gdsfx.library.get_total_duration()));
 
     ui.add_space(20.0);
 

@@ -99,7 +99,14 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         .map(|entry| (entry.id, entry.clone()))
         .collect::<HashMap<_, _>>();
 
+    let mut total_bytes = 0;
+    let mut total_duration = 0;
+
     for entry in &entries {
+        if let EntryKind::Sound { bytes, duration } = &entry.kind {
+            total_bytes += *bytes;
+            total_duration += duration.0;
+        }
         map.entry(entry.parent_id).and_modify(|parent| {
             if let EntryKind::Category { children } = &mut parent.kind {
                 children.push(entry.id);
@@ -110,6 +117,9 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
     Library {
         root_id: entries.into_iter().next().expect("No library entries").id,
         entries: map,
-        credits
+        credits,
+
+        total_bytes,
+        total_duration: Centiseconds(total_duration),
     }
 }

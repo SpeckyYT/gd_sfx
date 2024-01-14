@@ -21,6 +21,9 @@ pub struct Library {
     entries: HashMap<EntryId, LibraryEntry>,
 
     credits: Vec<Credit>,
+
+    total_bytes: i64,
+    total_duration: Centiseconds,
 }
 
 impl Library {
@@ -32,8 +35,20 @@ impl Library {
         self.entries.get(&id).expect("Entries shouldn't contain any non-existent IDs")
     }
 
+    pub fn get_entries(&self) -> &HashMap<EntryId, LibraryEntry> {
+        &self.entries
+    }
+
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
+    }
+
+    pub fn get_total_bytes(&self) -> i64 {
+        self.total_bytes
+    }
+
+    pub fn get_total_duration(&self) -> Centiseconds {
+        self.total_duration
     }
 }
 
