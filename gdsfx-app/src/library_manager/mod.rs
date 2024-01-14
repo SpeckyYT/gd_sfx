@@ -2,11 +2,9 @@ use std::{collections::HashMap, sync::Arc, thread};
 
 use eframe::epaint::mutex::Mutex;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{Library, EntryId, LibraryEntry, EntryKind};
+use gdsfx_library::{EntryId, EntryKind, Library, LibraryEntry};
 
-use crate::app_state::AppState;
-
-pub mod sorting;
+use crate::app_state::search::SearchSettings;
 
 type SfxCache = HashMap<EntryId, Vec<u8>>;
 
@@ -23,17 +21,21 @@ impl LibraryManager {
         }
     }
 
-    pub fn is_matching_entry(&self, entry: &LibraryEntry, app_state: &AppState) -> bool {
+    pub fn is_matching_entry(&self, entry: &LibraryEntry, search_settings: &SearchSettings) -> bool {
         match &entry.kind {
             EntryKind::Category => {
                 self.library
                     .get_children(entry)
-                    .any(|child| self.is_matching_entry(child, app_state))
-            },
-    
+                    .any(|child| self.is_matching_entry(child, search_settings))
+            }
+
             EntryKind::Sound { .. } => {
-                let search = app_state.search_query.to_lowercase();
-                entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search
+                let search = search_settings.search_query.to_lowercase();
+
+                // TODO: stats system for storing which files have been downloaded
+                (!search_settings.filter_downloaded /* || entry.file_exists() */)
+                    && entry.name.to_lowercase().contains(&search)
+                    || entry.id.to_string() == search
             }
         }
     }

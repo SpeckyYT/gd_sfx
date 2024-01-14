@@ -1,7 +1,7 @@
 use eframe::{egui::Ui, epaint::Vec2};
 use gdsfx_library::LibraryEntry;
 
-use crate::{app_state::{AppState, settings::*}, library_manager::{LibraryManager, sorting::Sorting}};
+use crate::{app_state::{AppState, settings::*, search::{SearchSettings, Sorting}}, library_manager::LibraryManager};
 
 pub mod top_panel;
 pub mod left_window;
@@ -17,36 +17,38 @@ pub const TOTAL_HEIGHT: f32 = 600.0; // enough to display all categories
 pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
 pub const MIN_SCALE_FACTOR: f32 = 0.7;
 
-pub fn add_search_area(ui: &mut Ui, app_state: &mut AppState) {
+pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.heading(t!("search"));
-    ui.text_edit_singleline(&mut app_state.search_query);
-
-    ui.menu_button(t!("sort.button"), |ui| {
-        for (alternative, text) in [
-            (Sorting::Default,   t!("sort.default")),
-            (Sorting::NameInc,   t!("sort.name.ascending")),
-            (Sorting::NameDec,   t!("sort.name.descending")),
-            (Sorting::LengthInc, t!("sort.length.ascending")),
-            (Sorting::LengthDec, t!("sort.length.descending")),
-            (Sorting::IdInc,     t!("sort.id.ascending")),
-            (Sorting::IdDec,     t!("sort.id.descending")),
-            (Sorting::SizeInc,   t!("sort.size.ascending")),
-            (Sorting::SizeDec,   t!("sort.size.descending")),
-        ] {
-            let response = ui.radio_value(&mut app_state.sorting_mode, alternative, text);
-            if response.clicked() {
-                ui.close_menu();
+    ui.text_edit_singleline(&mut search_settings.search_query);
+    
+    ui.horizontal(|ui| {
+        ui.menu_button(t!("search.sorting"), |ui| {
+            for (alternative, text) in [
+                (Sorting::Default,   t!("sorting.default")),
+                (Sorting::NameInc,   t!("sorting.name.ascending")),
+                (Sorting::NameDec,   t!("sorting.name.descending")),
+                (Sorting::LengthInc, t!("sorting.length.ascending")),
+                (Sorting::LengthDec, t!("sorting.length.descending")),
+                (Sorting::IdInc,     t!("sorting.id.ascending")),
+                (Sorting::IdDec,     t!("sorting.id.descending")),
+                (Sorting::SizeInc,   t!("sorting.size.ascending")),
+                (Sorting::SizeDec,   t!("sorting.size.descending")),
+            ] {
+                let response = ui.radio_value(&mut search_settings.sorting_mode, alternative, text);
+                if response.clicked() {
+                    ui.close_menu();
+                }
             }
-        }
-    });
+        });
 
-    // TODO add filter for downloaded sounds only
+        ui.checkbox(&mut search_settings.filter_downloaded, t!("search.filter_downloaded"));
+    });
 
     ui.separator();
 }
 
 pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry) {
-    if !library_manager.is_matching_entry(entry, app_state) {
+    if !library_manager.is_matching_entry(entry, &app_state.search_settings) {
         return // don't render filtered buttons at all
     }
 

@@ -4,7 +4,7 @@ use gdsfx_library::{LibraryEntry, EntryKind};
 use crate::{layout, library_manager::LibraryManager, app_state::{AppState, settings::SearchFilterMode}};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager) {
-    layout::add_search_area(ui, app_state);
+    layout::add_search_area(ui, &mut app_state.search_settings);
 
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
 
@@ -19,7 +19,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryMa
 fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry, collapse_all: bool) {
     match entry.kind {
         EntryKind::Category => {
-            let is_enabled = library_manager.is_matching_entry(entry, app_state);
+            let is_enabled = library_manager.is_matching_entry(entry, &app_state.search_settings);
             
             if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
                 return // don't render at all

@@ -4,7 +4,7 @@ use gdsfx_library::{LibraryEntry, EntryKind};
 use crate::{layout, app_state::AppState, library_manager::LibraryManager};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager) {
-    layout::add_search_area(ui, app_state);
+    layout::add_search_area(ui, &mut app_state.search_settings);
     render_recursive(ui, app_state, library_manager, library_manager.library.get_root());
 }
 

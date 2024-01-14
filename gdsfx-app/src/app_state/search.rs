@@ -1,3 +1,10 @@
+#[derive(Default)]
+pub struct SearchSettings {
+    pub search_query: String,
+    pub sorting_mode: Sorting,
+    pub filter_downloaded: bool,
+}
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub enum Sorting {
     #[default]
