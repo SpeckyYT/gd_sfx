@@ -64,13 +64,12 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
     }
 
     button.context_menu(|ui: &mut Ui| {
-        if app_state.favorites.has_favorite(entry.id) {
-            if ui.button(t!("sound.button.favorite.remove")).clicked() {
-                app_state.favorites.remove_favorite(entry.id);
-                ui.close_menu();
-            }
-        } else if ui.button(t!("sound.button.favorite.add")).clicked() {
-            app_state.favorites.add_favorite(entry.id);
+        let favorite_button_label = match app_state.favorites.has_favorite(entry.id) {
+            false => t!("sound.button.favorite.add"),
+            true => t!("sound.button.favorite.remove"),
+        };
+        if ui.button(favorite_button_label).clicked() {
+            app_state.favorites.toggle_favorite(entry.id);
             ui.close_menu();
         }
 

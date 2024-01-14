@@ -33,7 +33,7 @@ impl eframe::App for GdSfx {
         
         top_panel::render(ctx, &mut self.app_state);
         left_window::render(ctx, &mut self.app_state, &self.library_manager);
-        right_window::render(ctx, &self.app_state, &self.library_manager);
+        right_window::render(ctx, &mut self.app_state, &self.library_manager);
     }
 }
 

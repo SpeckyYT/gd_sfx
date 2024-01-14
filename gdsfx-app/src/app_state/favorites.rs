@@ -40,17 +40,17 @@ impl Favorites {
         self.0.contains(&id)
     }
 
-    pub fn add_favorite(&mut self, id: EntryId) {
-        if self.0.insert(id) && self.try_save().is_err() {
-            // undo on failure
+    pub fn toggle_favorite(&mut self, id: EntryId) {
+        // clippy says i shouldnt use boolean short circuiting :(
+        if !self.0.insert(id) {
             self.0.remove(&id);
         }
-    }
 
-    pub fn remove_favorite(&mut self, id: EntryId) {
-        if self.0.remove(&id) && self.try_save().is_err() {
+        if self.try_save().is_err() {
             // undo on failure
-            self.0.insert(id);
+            if !self.0.remove(&id) {
+                self.0.insert(id);
+            }
         }
     }
 }
