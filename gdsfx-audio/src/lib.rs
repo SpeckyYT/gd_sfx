@@ -12,7 +12,7 @@ use kittyaudio::{Frame, Mixer, interpolate_frame, Sound};
 
 #[derive(Debug, Clone, Copy)]
 pub struct AudioSettings {
-    pub volume: f32,
+    pub volume: f32, // 0..=2
     pub speed: f32, // -12..=12
     pub pitch: f32, // -12..=12
 }
@@ -48,12 +48,9 @@ pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) {
     *PLAYERS.lock() += 1;
     let start_time = Instant::now();
 
-    // i have no idea what this does so im just gonna leave it
-    // ok zoomer
-
     if settings.pitch != 0.0 || settings.speed != 1.0 {
-        let pitch_correction = 2f32.powf(settings.pitch / 12.0);
-        let speed_correction = 1.0 / 2f32.powf(settings.speed / 12.0);
+        let pitch_correction = 2_f32.powf(settings.pitch / 12.0);
+        let speed_correction = 1.0 / 2_f32.powf(settings.speed / 12.0);
         let pitch_correction = pitch_correction / speed_correction;
 
         let mut mixer = Mixer::new();

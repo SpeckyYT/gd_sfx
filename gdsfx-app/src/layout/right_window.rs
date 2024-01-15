@@ -1,19 +1,23 @@
 use eframe::{egui::{Context, CentralPanel, Button, Slider}, epaint::Color32};
+use gdsfx_audio::AudioSettings;
 use gdsfx_library::EntryKind;
 
 use crate::backend::AppState;
 
+// TODO can we make this less of a list of ui elements
+// and instead maybe put some stuff on the right side of the screen
+// also make sure everything fits on the ui
 pub fn render(ctx: &Context, app_state: &mut AppState) {
     if let Some(entry) = app_state.selected_sfx.clone() {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             CentralPanel::default().show(ctx, |ui| {
                 ui.heading(&entry.name);
     
-                ui.add_space(25.0);
+                ui.add_space(10.0);
     
                 ui.code(entry.to_string());
     
-                ui.add_space(25.0);
+                ui.add_space(10.0);
     
                 ui.heading(t!("sound.info.id", id = entry.id));
                 ui.heading(t!("sound.info.category.id", id = entry.parent_id));
@@ -49,14 +53,22 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
                     gdsfx_audio::stop_all();
                 }
 
-                ui.label("volum");
-                ui.add(Slider::new(&mut app_state.audio_settings.volume, 0.0..=1.0));
+                ui.add_space(10.0);
+
+                ui.label(t!("sound.speed"));
+                ui.add(Slider::new(&mut app_state.audio_settings.speed, -12.0..=12.0));
                 
-                ui.label("pitc");
+                ui.label(t!("sound.pitch"));
                 ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12.0..=12.0));
 
-                ui.label("speed");
-                ui.add(Slider::new(&mut app_state.audio_settings.speed, -12.0..=12.0));
+                ui.label(t!("sound.volume"));
+                ui.add(Slider::new(&mut app_state.audio_settings.volume, 0.0..=2.0));
+
+                ui.add_space(10.0);
+
+                if ui.button(t!("sound.reset")).clicked() {
+                    app_state.audio_settings = AudioSettings::default();
+                }
 
                 ui.add_space(10.0);
 
