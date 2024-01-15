@@ -73,7 +73,7 @@ impl GdSfx {
         egui_extras::install_image_loaders(&ctx.egui_ctx);
 
         let app_state = AppState::load();
-        let library = gdsfx_library::Library::load(&app_state.settings.gd_folder);
+        let library = Library::load(&app_state.settings.gd_folder);
 
         Box::new(Self { app_state, library })
     }
