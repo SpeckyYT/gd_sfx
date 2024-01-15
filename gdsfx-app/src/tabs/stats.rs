@@ -1,24 +1,24 @@
 use eframe::egui::Ui;
-use gdsfx_library::Library;
+use crate::Library;
 use pretty_bytes::converter::convert as pretty_bytes;
 
-pub fn render(ui: &mut Ui, library: &Library) {
+pub fn render(ui: &mut Ui, library: Library) {
     ui.heading(t!("stats.library"));
 
     ui.add_space(10.0);
 
-    let total_files = library.get_total_entries();
+    let total_files = library.lock().get_total_entries();
     ui.label(t!("stats.library.files", files = total_files));
 
-    let total_bytes = pretty_bytes(library.get_total_bytes() as f64);
+    let total_bytes = pretty_bytes(library.lock().get_total_bytes() as f64);
     ui.label(t!("stats.library.size", size = total_bytes));
 
-    let total_duration = library.get_total_duration();
+    let total_duration = library.lock().get_total_duration();
     ui.label(t!("stats.library.duration", duration = total_duration));
 
     ui.add_space(5.0);
 
-    let library_version = &library.get_root().name;
+    let library_version = &library.lock().get_root().name;
     ui.label(t!("stats.library.version", version = library_version));
 
     ui.add_space(20.0);
