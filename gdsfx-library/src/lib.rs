@@ -4,7 +4,6 @@ use anyhow::Result;
 use stats::Centiseconds;
 
 pub mod stats;
-pub mod tools;
 
 mod requests;
 mod parse;
@@ -73,6 +72,21 @@ impl Library {
             .into_iter()
             .flatten()
             .flat_map(|id| self.entries.get(id))
+    }
+
+    pub fn get_all_sounds(&self) -> Vec<&LibraryEntry> {
+        fn get_sounds_recursive<'a>(library: &'a Library, entry: &'a LibraryEntry) -> Vec<&'a LibraryEntry> {
+            match &entry.kind {
+                EntryKind::Category => {
+                    library
+                        .get_children(entry)
+                        .flat_map(|entry| get_sounds_recursive(library, entry))
+                        .collect()
+                }
+                EntryKind::Sound { .. } => vec![entry],
+            }
+        }
+        get_sounds_recursive(self, self.get_root())
     }
 
     pub fn get_credits(&self) -> &Vec<Credit> {

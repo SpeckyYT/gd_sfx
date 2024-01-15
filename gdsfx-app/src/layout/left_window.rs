@@ -1,8 +1,9 @@
 use eframe::egui::{Context, SidePanel, ScrollArea};
+use gdsfx_library::Library;
 
-use crate::{layout, tabs, backend::AppState, Library};
+use crate::{layout, tabs, backend::AppState};
 
-pub fn render(ctx: &Context, app_state: &mut AppState, library: Library) {
+pub fn render(ctx: &Context, app_state: &mut AppState, library: &Library) {
     SidePanel::left("left_panel")
         .min_width(layout::MIN_LIBRARY_WIDTH)
         .max_width(layout::RIGHT_PANEL_WIDTH)

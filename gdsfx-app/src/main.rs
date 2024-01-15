@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use backend::AppState;
-use eframe::{*, egui::{ViewportBuilder, IconData}, epaint::mutex::Mutex};
+use eframe::{*, egui::{ViewportBuilder, IconData}};
 use gdsfx_files::paths;
+use gdsfx_library::Library;
 
 mod backend;
 mod layout;
@@ -24,8 +25,6 @@ gdsfx_build::get_output!(include!("i18n.rs"));
 // → see gdsfx-app/build/icon.rs
 const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("icon.bin"));
 
-pub type Library = Arc<Mutex<gdsfx_library::Library>>;
-
 struct GdSfx {
     app_state: AppState,
     library: Library,
@@ -36,7 +35,7 @@ impl eframe::App for GdSfx {
         use layout::*;
         
         top_panel::render(ctx, &mut self.app_state);
-        left_window::render(ctx, &mut self.app_state, self.library.clone());
+        left_window::render(ctx, &mut self.app_state, &self.library);
         right_window::render(ctx, &mut self.app_state);
     }
 }
@@ -76,7 +75,7 @@ impl GdSfx {
         let app_state = AppState::load();
         let library = gdsfx_library::Library::load(&app_state.settings.gd_folder);
 
-        Box::new(Self { app_state, library: Arc::new(Mutex::new(library)) })
+        Box::new(Self { app_state, library })
     }
 }
 

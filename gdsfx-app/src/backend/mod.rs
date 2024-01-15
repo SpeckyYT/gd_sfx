@@ -2,12 +2,12 @@ use std::{thread, sync::Arc};
 
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{LibraryEntry, EntryId, EntryKind};
+use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind};
 use quick_cache::sync::Cache;
 use search::SearchSettings;
 use settings::PersistentSettings;
 
-use crate::{tabs::Tab, Library};
+use crate::tabs::Tab;
 
 pub mod favorites;
 pub mod settings;
@@ -46,10 +46,10 @@ impl AppState {
         }
     }
 
-    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: Library) -> bool {
+    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: &Library) -> bool {
         match &entry.kind {
             EntryKind::Category => {
-                library.lock()
+                library
                     .get_children(entry)
                     .any(|child| self.is_matching_entry(child, library))
             }
@@ -88,12 +88,14 @@ impl AppState {
 
     pub fn download_sound(&self, entry: &LibraryEntry) {
         let cache = self.sfx_cache.clone();
-        let id = entry.id;
+        let entry = entry.clone();
 
         if let Some(file_handler) = entry.create_file_handler(&self.settings.gd_folder) {
             thread::spawn(move || {
                 file_handler.try_write_bytes(|| {
-                    cache.get_or_insert_with(&id, || file_handler.try_read_bytes())
+                    cache.get_or_insert_with(&entry.id, || {
+                        file_handler.try_read_bytes().or_else(|_| entry.try_get_bytes())
+                    })
                 });
             });
         }
