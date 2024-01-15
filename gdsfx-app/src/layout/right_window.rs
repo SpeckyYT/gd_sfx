@@ -66,8 +66,10 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
 
                 ui.add_space(10.0);
 
-                if ui.button(t!("sound.reset")).clicked() {
-                    app_state.audio_settings = AudioSettings::default();
+                let reset_button = Button::new(t!("sound.reset"));
+                let default_audio_settings = AudioSettings::default();
+                if ui.add_enabled(app_state.audio_settings != default_audio_settings, reset_button).clicked() {
+                    app_state.audio_settings = default_audio_settings;
                 }
 
                 ui.add_space(10.0);

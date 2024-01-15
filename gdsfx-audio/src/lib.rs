@@ -10,19 +10,19 @@ use parking_lot::Mutex;
 use rodio::{Decoder, OutputStream, Sink};
 use kittyaudio::{Frame, Mixer, interpolate_frame, Sound};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AudioSettings {
-    pub volume: f32, // 0..=2
     pub speed: f32, // -12..=12
     pub pitch: f32, // -12..=12
+    pub volume: f32, // 0..=2
 }
 
 impl Default for AudioSettings {
     fn default() -> Self {
         Self {
-            volume: 1.0,
-            speed: 1.0,
+            speed: 0.0,
             pitch: 0.0,
+            volume: 1.0,
         }
     }
 }
