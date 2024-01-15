@@ -1,6 +1,6 @@
 [package]
 name = "gdsfx-build"
-description = "Utility functions for running GDSFX build scripts."
+description = "Utilities for GDSFX build scripts."
 version = "0.1.0"
 edition = "2021"
 

@@ -1,12 +1,8 @@
 use eframe::{egui::{Ui, TextEdit}, epaint::Vec2};
-use gdsfx_library::LibraryEntry;
+use gdsfx_library::{LibraryEntry, Library};
 use strum::IntoEnumIterator;
 
-use crate::{
-    app_state::{AppState, settings::*, search::{SearchSettings, Sorting}},
-    library_manager::LibraryManager,
-    i18n::LocalizedEnum
-};
+use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum};
 
 pub mod top_panel;
 pub mod left_window;
@@ -47,8 +43,8 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.separator();
 }
 
-pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &LibraryManager, entry: &LibraryEntry) {
-    if !library_manager.is_matching_entry(entry, &app_state.search_settings) {
+pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, entry: &LibraryEntry) {
+    if !app_state.is_matching_entry(entry, library) {
         return // don't render filtered buttons at all
     }
 
@@ -65,7 +61,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
     }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        library_manager.play_sound(entry, app_state);
+        app_state.play_sound(entry, app_state);
     }
 
     button.context_menu(|ui: &mut Ui| {
@@ -86,7 +82,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
                 ui.close_menu();
             }
         } else if ui.button(t!("sound.download")).clicked() {
-            library_manager.download_sound(entry, app_state);
+            app_state.download_sound(entry, app_state);
             ui.close_menu();
         }
     });

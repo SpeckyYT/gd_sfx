@@ -2,7 +2,7 @@ use eframe::{egui::{Ui, ComboBox, Button, Layout, WidgetText}, emath::Align};
 use egui_modal::ModalStyle;
 use strum::IntoEnumIterator;
 
-use crate::{app_state::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum};
+use crate::{backend::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.heading(t!("settings"));

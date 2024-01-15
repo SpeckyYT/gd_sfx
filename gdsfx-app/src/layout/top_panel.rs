@@ -1,7 +1,7 @@
 use eframe::egui::{Context, TopBottomPanel};
 use strum::IntoEnumIterator;
 
-use crate::{tabs::Tab, app_state::AppState, i18n::LocalizedEnum};
+use crate::{tabs::Tab, backend::AppState, i18n::LocalizedEnum};
 
 pub fn render(ctx: &Context, app_state: &mut AppState) {
     TopBottomPanel::top("top_panel").show(ctx, |ui| {

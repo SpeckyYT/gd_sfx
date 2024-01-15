@@ -1,8 +1,9 @@
 use eframe::egui::{Context, SidePanel, ScrollArea};
+use gdsfx_library::Library;
 
-use crate::{layout, tabs, app_state::AppState, library_manager::LibraryManager};
+use crate::{layout, tabs, backend::AppState};
 
-pub fn render(ctx: &Context, app_state: &mut AppState, library_manager: &LibraryManager) {
+pub fn render(ctx: &Context, app_state: &mut AppState, library: &Library) {
     SidePanel::left("left_panel")
         .min_width(layout::MIN_LIBRARY_WIDTH)
         .max_width(layout::RIGHT_PANEL_WIDTH)
@@ -12,12 +13,12 @@ pub fn render(ctx: &Context, app_state: &mut AppState, library_manager: &Library
                 use tabs::*;
                 
                 match app_state.selected_tab {
-                    Tab::Library => library::render(ui, app_state, library_manager),
-                    Tab::Favorites => favorites::render(ui, app_state, library_manager),
+                    Tab::Library => library::render(ui, app_state, library),
+                    Tab::Favorites => favorites::render(ui, app_state, library),
                     Tab::Tools => tools::render(ui, ctx),
                     Tab::Settings => settings::render(ui, app_state),
-                    Tab::Stats => stats::render(ui, library_manager),
-                    Tab::Credits => credits::render(ui, library_manager),
+                    Tab::Stats => stats::render(ui, library),
+                    Tab::Credits => credits::render(ui, library),
                 }
             });
         });

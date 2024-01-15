@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 eframe = { workspace = true }
-serde = { workspace = true }
 gdsfx-files = { path = "../gdsfx-files" }
 once_cell = { workspace = true }
 reqwest = { workspace = true }

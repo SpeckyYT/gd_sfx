@@ -4,7 +4,7 @@ use anyhow::anyhow;
 
 use crate::{*, stats::Centiseconds};
 
-pub(crate) fn parse_library_from_bytes(bytes: Bytes) -> Library {
+pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Library {
     let bytes = gdsfx_files::encoding::decode(&bytes);
     let string = std::str::from_utf8(&bytes).unwrap();
 

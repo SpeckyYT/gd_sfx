@@ -11,8 +11,6 @@ mod parse;
 
 pub type EntryId = u32;
 
-type Bytes = Vec<u8>;
-
 #[derive(Debug)]
 pub struct Library {
     root_id: EntryId,
@@ -23,6 +21,26 @@ pub struct Library {
 
     total_bytes: i64,
     total_duration: Centiseconds,
+}
+
+#[derive(Debug, Clone)]
+pub struct LibraryEntry {
+    pub id: EntryId,
+    pub name: String,
+    pub parent_id: EntryId,
+    pub kind: EntryKind,
+}
+
+#[derive(Debug, Clone)]
+pub enum EntryKind {
+    Category,
+    Sound { bytes: i64, duration: Centiseconds },
+}
+
+#[derive(Debug)]
+pub struct Credit {
+    pub name: String,
+    pub link: String,
 }
 
 impl Library {
@@ -74,26 +92,6 @@ impl Library {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct LibraryEntry {
-    pub id: EntryId,
-    pub name: String,
-    pub parent_id: EntryId,
-    pub kind: EntryKind,
-}
-
-#[derive(Debug, Clone)]
-pub enum EntryKind {
-    Category,
-    Sound { bytes: i64, duration: Centiseconds },
-}
-
-#[derive(Debug)]
-pub struct Credit {
-    pub name: String,
-    pub link: String,
-}
-
 impl LibraryEntry {
     fn get_file_name(&self) -> String {
         format!("s{}.ogg", self.id)
@@ -117,7 +115,7 @@ impl LibraryEntryFileHandler {
         self.path.exists()
     }
 
-    pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) -> Option<Bytes> {
+    pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Vec<u8>>) -> Option<Vec<u8>> {
         cache.get(&self.entry.id).cloned().or_else(|| {
             let bytes = gdsfx_files::read_file(&self.path).ok()
                 .or_else(|| requests::fetch_sfx_data(&self.entry).ok());
@@ -130,7 +128,7 @@ impl LibraryEntryFileHandler {
         })
     }
 
-    pub fn try_store_bytes(&self, cache: &mut HashMap<EntryId, Bytes>) {
+    pub fn try_store_bytes(&self, cache: &mut HashMap<EntryId, Vec<u8>>) {
         if !self.file_exists() {
             if let Some(bytes) = self.try_get_bytes(cache) {
                 let _ = gdsfx_files::write_file(&self.path, bytes);

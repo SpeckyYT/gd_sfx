@@ -60,7 +60,7 @@
     "settings.sfx_select_mode.click": "Click",
     "settings.play_sfx_on_click": "Play SFX on click",
     "settings.language": "Language",
-    "settings.gd_folder": "GD folder",
+    "settings.gd_folder": "Geometry Dash folder",
     "settings.reset": "Reset settings",
     "settings.reset.instruction": "Triple click to confirm",
 
