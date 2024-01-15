@@ -61,6 +61,7 @@
     "settings.play_sfx_on_click": "Play SFX on click",
     "settings.language": "Language",
     "settings.gd_folder": "Geometry Dash folder",
+    "settings.gd_folder.not_found": "Specify a valid Geometry Dash folder path in the settings in order to download SFX.",
     "settings.reset": "Reset settings",
     "settings.reset.instruction": "Triple click to confirm",
 

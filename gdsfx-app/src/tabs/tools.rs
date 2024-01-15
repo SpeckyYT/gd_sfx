@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use eframe::{egui::{Ui, Context, RichText, ProgressBar, Slider}, epaint::{mutex::Mutex, Color32}};
+use eframe::{egui::{Ui, Context, ProgressBar, Slider}, epaint::{mutex::Mutex, Color32}};
 use egui_modal::Modal;
 use once_cell::sync::Lazy;
 
@@ -17,15 +17,17 @@ pub fn render(ui: &mut Ui, ctx: &Context) {
 
     ui.add_space(10.0);
 
-    ui.label(RichText::new(t!("tools.warning.long_time")).color(Color32::KHAKI));
-    ui.label(RichText::new(t!("tools.warning.program_not_usable")).color(Color32::KHAKI));
+    ui.colored_label(Color32::KHAKI, t!("tools.warning.long_time"));
+    ui.colored_label(Color32::KHAKI, t!("tools.warning.program_not_usable"));
+
+    let download_select_range_modal = download_range_select_modal(ctx);
 
     let is_tool_running = TOOL_PROGRESS.lock().is_some();
 
     ui.add_space(10.0);
-    
+
     if let Some((a,b)) = *TOOL_PROGRESS.lock() {
-        ui.label(format!("{} – {}", t!("placeholder"), t!("tools.progress")));
+        ui.label(format!("{} – {}", t!("placeholder"), t!("tools.progress"))); // TODO show the task which is being run
         ui.add(ProgressBar::new(a as f32 / b as f32));
     } else {
         ui.label(t!("tools.instruction"));
@@ -38,7 +40,7 @@ pub fn render(ui: &mut Ui, ctx: &Context) {
             *TOOL_PROGRESS.lock() = Some((69, 420)); // TODO: INSERT HERE DOWNLOADER
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
-            download_range_select_modal(ctx).open();
+            download_select_range_modal.open();
         }
     });
 

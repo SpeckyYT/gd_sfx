@@ -78,16 +78,16 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
             ui.close_menu();
         }
 
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
-
-        if file_handler.file_exists() {
-            if ui.button(t!("sound.delete")).clicked() {
-                file_handler.try_delete_file();
+        if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
+            if file_handler.file_exists() {
+                if ui.button(t!("sound.delete")).clicked() {
+                    file_handler.try_delete_file();
+                    ui.close_menu();
+                }
+            } else if ui.button(t!("sound.download")).clicked() {
+                app_state.download_sound(entry, app_state);
                 ui.close_menu();
             }
-        } else if ui.button(t!("sound.download")).clicked() {
-            app_state.download_sound(entry, app_state);
-            ui.close_menu();
         }
     });
 }

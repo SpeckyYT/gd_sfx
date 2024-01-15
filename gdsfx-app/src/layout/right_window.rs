@@ -1,4 +1,4 @@
-use eframe::egui::{Context, CentralPanel, Button};
+use eframe::{egui::{Context, CentralPanel, Button}, epaint::Color32};
 use gdsfx_library::EntryKind;
 
 use crate::backend::AppState;
@@ -22,19 +22,22 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
     
                 ui.add_space(25.0);
 
-                let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
-                let file_exists = file_handler.file_exists();
+                if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
+                    let file_exists = file_handler.file_exists();
     
-                let download_button = Button::new(t!("sound.download"));
-                if ui.add_enabled(!file_exists, download_button).clicked() {
-                    app_state.download_sound(&entry, app_state);
+                    let download_button = Button::new(t!("sound.download"));
+                    if ui.add_enabled(!file_exists, download_button).clicked() {
+                        app_state.download_sound(&entry, app_state);
+                    }
+        
+                    let delete_button = Button::new(t!("sound.delete"));
+                    if ui.add_enabled(file_exists, delete_button).clicked() {
+                        file_handler.try_delete_file();
+                    }
+                } else {
+                    ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
                 }
-    
-                let delete_button = Button::new(t!("sound.delete"));
-                if ui.add_enabled(file_exists, delete_button).clicked() {
-                    file_handler.try_delete_file();
-                }
-
+                
                 ui.add_space(10.0);
     
                 if ui.button(t!("sound.play")).clicked() {

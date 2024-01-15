@@ -97,11 +97,15 @@ impl LibraryEntry {
         format!("s{}.ogg", self.id)
     }
 
-    pub fn create_file_handler(&self, gd_folder: impl AsRef<Path>) -> LibraryEntryFileHandler {
-        LibraryEntryFileHandler {
-            entry: self.clone(),
-            path: gd_folder.as_ref().join(self.get_file_name()),
-        }
+    pub fn create_file_handler(&self, gd_folder: impl AsRef<Path>) -> Option<LibraryEntryFileHandler> {
+        let path = gd_folder.as_ref();
+        
+        (path.is_absolute() && path.is_dir()).then(|| {
+            LibraryEntryFileHandler {
+                entry: self.clone(),
+                path: path.join(self.get_file_name()),
+            }
+        })
     }
 }
 
@@ -120,9 +124,9 @@ impl LibraryEntryFileHandler {
             .or_else(|_| requests::fetch_sfx_data(&self.entry))
     }
 
-    pub fn try_store_bytes(&self, get_bytes: impl FnOnce() -> Option<Vec<u8>>) {
+    pub fn try_store_bytes(&self, get_bytes: impl FnOnce() -> Result<Vec<u8>>) {
         if !self.file_exists() {
-            if let Some(bytes) = get_bytes() {
+            if let Ok(bytes) = get_bytes() {
                 let _ = gdsfx_files::write_file(&self.path, bytes);
             }
         }

@@ -67,26 +67,28 @@ impl AppState {
     pub fn play_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
         let cache = self.sfx_cache.clone();
         let id = entry.id;
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
         let audio_settings = app_state.audio_settings;
 
-        thread::spawn(move || {
-            if let Ok(bytes) = cache.get_or_insert_with(&id, || file_handler.try_get_bytes()) {
-                gdsfx_audio::stop_all();
-                gdsfx_audio::play_sound(bytes, audio_settings);
-            }
-        });
+        if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
+            thread::spawn(move || {
+                if let Ok(bytes) = cache.get_or_insert_with(&id, || file_handler.try_get_bytes()) {
+                    gdsfx_audio::stop_all();
+                    gdsfx_audio::play_sound(bytes, audio_settings);
+                }
+            });
+        }   
     }
 
     pub fn download_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
         let cache = self.sfx_cache.clone();
         let id = entry.id;
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
 
-        thread::spawn(move || {
-            file_handler.try_store_bytes(|| {
-                cache.get_or_insert_with(&id, || file_handler.try_get_bytes()).ok()
+        if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
+            thread::spawn(move || {
+                file_handler.try_store_bytes(|| {
+                    cache.get_or_insert_with(&id, || file_handler.try_get_bytes())
+                });
             });
-        });
+        }
     }
 }
