@@ -6,7 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bot = { git = "https://github.com/zeozeozeo/zcb3/", version = "0.1.0" }
 crossbeam-channel = { workspace = true }
+kittyaudio = "0.1.7"
 lazy_static = { workspace = true }
 parking_lot = { workspace = true }
 rodio = { workspace = true }

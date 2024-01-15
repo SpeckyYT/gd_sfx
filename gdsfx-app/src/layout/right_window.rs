@@ -1,4 +1,4 @@
-use eframe::{egui::{Context, CentralPanel, Button}, epaint::Color32};
+use eframe::{egui::{Context, CentralPanel, Button, Slider}, epaint::Color32};
 use gdsfx_library::EntryKind;
 
 use crate::backend::AppState;
@@ -48,6 +48,15 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
                 if ui.add_enabled(gdsfx_audio::is_playing_audio(), stop_button).clicked() {
                     gdsfx_audio::stop_all();
                 }
+
+                ui.label("volum");
+                ui.add(Slider::new(&mut app_state.audio_settings.volume, 0.0..=1.0));
+                
+                ui.label("pitc");
+                ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12.0..=12.0));
+
+                ui.label("speed");
+                ui.add(Slider::new(&mut app_state.audio_settings.speed, 0.0..=1.0));
 
                 ui.add_space(10.0);
 

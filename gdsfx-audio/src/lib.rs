@@ -8,12 +8,13 @@ use crossbeam_channel::{Receiver, Sender};
 use lazy_static::lazy_static;
 use parking_lot::Mutex;
 use rodio::{Decoder, OutputStream, Sink};
+use kittyaudio::{Frame, Mixer, interpolate_frame, Sound};
 
 #[derive(Debug, Clone, Copy)]
 pub struct AudioSettings {
-    volume: f32,
-    speed: f32,
-    pitch: f32, // -12..12
+    pub volume: f32,
+    pub speed: f32,
+    pub pitch: f32, // -12..12
 }
 
 impl Default for AudioSettings {
@@ -50,28 +51,51 @@ pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) {
     // i have no idea what this does so im just gonna leave it
     // ok zoomer
 
-    let (_stream, handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&handle).unwrap();
-
-    let sfx_data = Decoder::new(Cursor::new(ogg)).unwrap();
-
-    sink.set_volume(settings.volume);
-
     if settings.pitch != 0.0 || settings.speed != 1.0 {
         let pitch_correction = 2f32.powf(settings.pitch / 12.0);
         let pitch_correction = pitch_correction / settings.speed;
 
-        println!("TODO: pitch should be corrected by {}", pitch_correction);
+        let mut mixer = Mixer::new();
+        mixer.init();
 
-        sink.set_speed(settings.speed);
-    }
+        // println!("{:?}", bot::AudioSegment::from_bytes(ogg.clone()));
 
-    sink.append(sfx_data);
+        if let Ok(mut audio_segment) = bot::AudioSegment::from_bytes(ogg) {
+            let initial_sample_rate = audio_segment.sample_rate;
+            let new_rate = (initial_sample_rate as f32 * pitch_correction) as u32;
 
-    while !sink.empty() {
-        if let Ok(received_time) = AUDIO_MESSAGES.receiver.try_recv() {
-            if received_time > start_time {
-                sink.stop();
+            audio_segment.resample(new_rate);
+            audio_segment.set_volume(settings.volume);
+
+            let frames = audio_segment.frames.iter().map(|frame| {
+                Frame::new(frame.left, frame.right)
+            })
+            .collect::<Vec<Frame>>();
+
+            mixer.play(Sound::from_frames(initial_sample_rate, &frames));
+
+            while !mixer.is_finished() {
+                if let Ok(received_time) = AUDIO_MESSAGES.receiver.try_recv() {
+                    if received_time > start_time {
+                        mixer.backend().stop_stream();
+                        break;
+                    }
+                }
+            }
+        }
+    } else {
+        let (_stream, handle) = OutputStream::try_default().unwrap();
+        let sink = Sink::try_new(&handle).unwrap();
+        let sfx_data = Decoder::new(Cursor::new(ogg)).unwrap();
+        sink.set_volume(settings.volume);
+        sink.append(sfx_data);
+
+        while !sink.empty() {
+            if let Ok(received_time) = AUDIO_MESSAGES.receiver.try_recv() {
+                if received_time > start_time {
+                    sink.stop();
+                    break;
+                }
             }
         }
     }
@@ -86,5 +110,60 @@ pub fn is_playing_audio() -> bool {
 pub fn stop_all() {
     for _ in 0..*PLAYERS.lock() {
         AUDIO_MESSAGES.sender.send(Instant::now()).unwrap();
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct AudioSegment {
+    pub sample_rate: u32,
+    /// Interleaved channel data. Always [`AudioSegment::NUM_CHANNELS`] channels.
+    pub frames: Vec<Frame>,
+    pub pitch_table: Vec<AudioSegment>,
+}
+
+impl AudioSegment {
+    pub fn resample(&mut self, rate: u32) -> &mut Self {
+        let mut fractional_position = 0.0f64;
+        let mut iter = self.frames.iter();
+        let mut frames = [Frame::ZERO; 4]; // prev, cur, next, next next
+        macro_rules! push_frame {
+            ($frame:expr) => {
+                for i in 0..frames.len() - 1 {
+                    frames[i] = frames[i + 1];
+                }
+                frames[frames.len() - 1] = $frame;
+            };
+        }
+
+        // fill resampler with 3 frames
+        for _ in 0..3 {
+            push_frame!(iter.next().copied().unwrap_or(Frame::ZERO));
+        }
+
+        let mut resampled_frames = Vec::with_capacity(self.frames.len());
+        let dt = rate as f64 / self.sample_rate as f64;
+
+        'outer: loop {
+            resampled_frames.push(interpolate_frame(
+                frames[0],
+                frames[1],
+                frames[2],
+                frames[3],
+                fractional_position as f32,
+            ));
+
+            fractional_position += dt;
+            while fractional_position >= 1.0 {
+                fractional_position -= 1.0;
+                let Some(frame) = iter.next().copied() else {
+                    break 'outer;
+                };
+                push_frame!(frame);
+            }
+        }
+
+        self.sample_rate = rate;
+        self.frames = resampled_frames;
+        self
     }
 }
