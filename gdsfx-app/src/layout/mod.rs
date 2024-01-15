@@ -1,8 +1,8 @@
 use eframe::{egui::{self, *}, epaint::Vec2};
-use gdsfx_library::LibraryEntry;
+use gdsfx_library::{LibraryEntry, Library};
 use strum::IntoEnumIterator;
 
-use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum, Library};
+use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum};
 
 pub mod top_panel;
 pub mod left_window;
@@ -43,7 +43,7 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.separator();
 }
 
-pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: Library, entry: &LibraryEntry) {
+pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, entry: &LibraryEntry) {
     const FAVORITE_ICON: ImageSource = egui::include_image!("../../../assets/twemoji-white-medium-star.png");
 
     if !app_state.is_matching_entry(entry, library) {

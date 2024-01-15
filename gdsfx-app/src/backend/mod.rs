@@ -2,17 +2,16 @@ use std::{thread, sync::Arc};
 
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{LibraryEntry, EntryId, EntryKind};
+use gdsfx_library::{LibraryEntry, EntryId, EntryKind, Library};
 use quick_cache::sync::Cache;
 use search::SearchSettings;
 use settings::PersistentSettings;
 
-use crate::{tabs::Tab, Library};
+use crate::tabs::Tab;
 
 pub mod favorites;
 pub mod settings;
 pub mod search;
-pub mod tools;
 
 pub struct AppState {
     pub selected_tab: Tab,
@@ -46,10 +45,10 @@ impl AppState {
         }
     }
 
-    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: Library) -> bool {
+    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: &Library) -> bool {
         match &entry.kind {
             EntryKind::Category => {
-                library.lock()
+                library
                     .get_children(entry)
                     .any(|child| self.is_matching_entry(child, library))
             }

@@ -1,12 +1,12 @@
 use eframe::egui::Ui;
-use gdsfx_library::{LibraryEntry, EntryKind};
+use gdsfx_library::{LibraryEntry, EntryKind, Library};
 
-use crate::{layout, backend::AppState, Library};
+use crate::{layout, backend::AppState};
 
-pub fn render(ui: &mut Ui, app_state: &mut AppState, library: Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
     layout::add_search_area(ui, &mut app_state.search_settings);
 
-    let mut sounds = get_sounds_recursive(library.clone(), library.lock().get_root());
+    let mut sounds = get_sounds_recursive(library, library.get_root());
     app_state.search_settings.sorting_mode.sort_entries(&mut sounds);
 
     for sound in sounds {
@@ -16,10 +16,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library: Library) {
     }
 }
 
-fn get_sounds_recursive<'a>(library: Library, entry: &'a LibraryEntry) -> Vec<&'a LibraryEntry> {
+fn get_sounds_recursive<'a>(library: &'a Library, entry: &'a LibraryEntry) -> Vec<&'a LibraryEntry> {
     match &entry.kind {
         EntryKind::Category => {
-            library.lock()
+            library
                 .get_children(entry)
                 .flat_map(|entry| get_sounds_recursive(library, entry))
                 .collect()
