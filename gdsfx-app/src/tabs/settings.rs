@@ -1,7 +1,8 @@
-use eframe::egui::{Ui, ComboBox};
+use eframe::{egui::{Ui, ComboBox, Button, Layout, WidgetText}, emath::Align};
+use egui_modal::ModalStyle;
 use strum::IntoEnumIterator;
 
-use crate::{app_state::AppState, i18n::LocalizedEnum};
+use crate::{app_state::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.heading(t!("settings"));
@@ -17,14 +18,29 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     set_locale(ui, app_state);
 
     ui.add_space(10.0);
+    ui.label(t!("settings.gd_folder"));
     ui.text_edit_singleline(&mut app_state.settings.gd_folder);
 
-    let _ = app_state.settings.try_save_if_changed();
+    ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
+        ui.add_space(4.0);
+
+        let default_modal_style = ModalStyle::default();
+        let widget_text = WidgetText::from(t!("settings.reset")).color(default_modal_style.caution_button_text_color);
+        let reset_button = Button::new(widget_text).fill(default_modal_style.caution_button_fill);
+        
+        if ui.add(reset_button).triple_clicked() {
+            app_state.settings = PersistentSettings::default();
+        }
+
+        ui.label(t!("settings.reset.instruction"));
+    });
+
+    app_state.settings.try_save_if_changed();
 }
 
 fn set_enum_setting<T>(ui: &mut Ui, selected: &mut T)
 where
-    T: LocalizedEnum + IntoEnumIterator + PartialEq + Copy
+    T: LocalizedEnum + IntoEnumIterator + PartialEq + Copy,
 {
     ComboBox::from_label(T::localize_enum())
         .selected_text(selected.localize_variant())

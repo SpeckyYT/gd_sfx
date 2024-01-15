@@ -1,8 +1,12 @@
-use eframe::{egui::Ui, epaint::Vec2};
+use eframe::{egui::{Ui, TextEdit}, epaint::Vec2};
 use gdsfx_library::LibraryEntry;
 use strum::IntoEnumIterator;
 
-use crate::{app_state::{AppState, settings::*, search::{SearchSettings, Sorting}}, library_manager::LibraryManager, i18n::LocalizedEnum};
+use crate::{
+    app_state::{AppState, settings::*, search::{SearchSettings, Sorting}},
+    library_manager::LibraryManager,
+    i18n::LocalizedEnum
+};
 
 pub mod top_panel;
 pub mod left_window;
@@ -20,7 +24,8 @@ pub const MIN_SCALE_FACTOR: f32 = 0.7;
 
 pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.heading(t!("search"));
-    ui.text_edit_singleline(&mut search_settings.search_query);
+
+    ui.add(TextEdit::singleline(&mut search_settings.search_query).hint_text(t!("search")));
     
     ui.horizontal(|ui| {
         let label = format!("{}: {}", Sorting::localize_enum(), search_settings.sorting_mode.localize_variant());
@@ -36,7 +41,7 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
             }
         });
 
-        ui.checkbox(&mut search_settings.filter_downloaded, t!("search.filter_downloaded"));
+        ui.checkbox(&mut search_settings.show_downloaded, t!("search.show_downloaded"));
     });
 
     ui.separator();
@@ -65,8 +70,8 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
 
     button.context_menu(|ui: &mut Ui| {
         let favorite_button_label = match app_state.favorites.has_favorite(entry.id) {
-            false => t!("sound.button.favorite.add"),
-            true => t!("sound.button.favorite.remove"),
+            false => t!("sound.favorite.add"),
+            true => t!("sound.favorite.remove"),
         };
         if ui.button(favorite_button_label).clicked() {
             app_state.favorites.toggle_favorite(entry.id);
@@ -76,11 +81,11 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library_manager: &L
         let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
 
         if file_handler.file_exists() {
-            if ui.button(t!("sound.button.delete")).clicked() {
+            if ui.button(t!("sound.delete")).clicked() {
                 file_handler.try_delete_file();
                 ui.close_menu();
             }
-        } else if ui.button(t!("sound.button.download")).clicked() {
+        } else if ui.button(t!("sound.download")).clicked() {
             library_manager.download_sound(entry, app_state);
             ui.close_menu();
         }

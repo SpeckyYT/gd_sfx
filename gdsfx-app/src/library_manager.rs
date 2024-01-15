@@ -32,7 +32,7 @@ impl LibraryManager {
                 let search = search_settings.search_query.to_lowercase();
 
                 // TODO: stats system for storing which files have been downloaded
-                (!search_settings.filter_downloaded /* || entry.file_exists() */)
+                (!search_settings.show_downloaded /* || entry.file_exists() */)
                     && entry.name.to_lowercase().contains(&search)
                     || entry.id.to_string() == search
             }

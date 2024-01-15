@@ -9,7 +9,7 @@ use crate::localized_enum;
 pub struct SearchSettings {
     pub search_query: String,
     pub sorting_mode: Sorting,
-    pub filter_downloaded: bool,
+    pub show_downloaded: bool,
 }
 
 localized_enum! {

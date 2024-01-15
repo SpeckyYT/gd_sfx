@@ -8,10 +8,10 @@ const MAX_ID_RANGE: u32 = 100000;
 
 type LazyAss = Lazy<Arc<Mutex<Option<(u128, u128)>>>>;
 
-static DOWNLOAD_PROGRESS: LazyAss = Lazy::new(|| Arc::new(Mutex::new(None)));
-static DELETE_PROGRESS: LazyAss = Lazy::new(|| Arc::new(Mutex::new(None)));
+static DOWNLOAD_PROGRESS: LazyAss = Lazy::new(Default::default);
+static DELETE_PROGRESS: LazyAss = Lazy::new(Default::default);
 
-static BRUTEFORCE_RANGE: Lazy<Arc<Mutex<(u32, u32)>>> = Lazy::new(|| Arc::new(Mutex::new((0,14500))));
+static BRUTEFORCE_RANGE: Lazy<Arc<Mutex<(u32, u32)>>> = Lazy::new(|| Arc::new(Mutex::new((0, 14500))));
 
 pub fn render(ui: &mut Ui, ctx: &Context) {
     ui.heading(t!("tools"));
@@ -23,36 +23,40 @@ pub fn render(ui: &mut Ui, ctx: &Context) {
 
     ui.label(t!("tools.instruction"));
 
-    ui.add_space(10.0);
-
     let download_modal = download_modal(ctx);
-    let confirm_download_modal = confirm_download_modal(ctx);
+    let download_range_select_modal = download_range_select_modal(ctx);
 
     let is_download_enabled = DOWNLOAD_PROGRESS.lock().is_none();
 
     if let Some((a,b)) = *DOWNLOAD_PROGRESS.lock() {
+        ui.add_space(10.0);
+        ui.label(t!("tools.progress"));
         ui.add(ProgressBar::new(a as f32 / b as f32));
-    } 
+    }
+
+    ui.add_space(10.0);
 
     ui.add_enabled_ui(is_download_enabled, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
             *DOWNLOAD_PROGRESS.lock() = Some((69, 420)); // TODO: INSERT HERE DOWNLOADER
             download_modal.open();
         }
-        if ui.button(t!("tools.download_from_range")).triple_clicked() {
-            confirm_download_modal.open();
+        if ui.button(t!("tools.download_from_range")).clicked() {
+            download_range_select_modal.open();
         }
     });
-
-    ui.add_space(10.0);
 
     let delete_modal = delete_modal(ctx);
 
     let is_delete_enabled = DELETE_PROGRESS.lock().is_none();
 
     if let Some((a,b)) = *DELETE_PROGRESS.lock() {
+        ui.add_space(10.0);
+        ui.label(t!("tools.progress"));
         ui.add(ProgressBar::new(a as f32 / b as f32));
     }
+
+    ui.add_space(10.0);
 
     ui.add_enabled_ui(is_delete_enabled, |ui| {
         if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
@@ -77,35 +81,40 @@ fn download_modal(ctx: &Context) -> Modal {
             }
         },
         |ui, modal| {
-            modal.caution_button(ui, t!("tools.download.close"));
+            modal.caution_button(ui, t!("tools.modal.close"));
         },
     )
 }
 
-fn confirm_download_modal(ctx: &Context) -> Modal {
+fn download_range_select_modal(ctx: &Context) -> Modal {
     create_modal(
-        t!("tools.download.title"),
+        t!("tools.download_from_range"),
         "tools_confirm_download",
         ctx,
         |ui, _modal| {
             let mut range = BRUTEFORCE_RANGE.lock();
 
-            ui.label(t!("tools.download.from_id"));
-            ui.add(Slider::new(&mut range.0, 0..=MAX_ID_RANGE));
+            let from_slider = Slider::new(&mut range.0, 0..=MAX_ID_RANGE)
+                .text(t!("tools.download_from_range.from_id"));
+
+            ui.add(from_slider);
             range.1 = range.1.max(range.0);
 
             ui.add_space(10.0);
 
-            ui.label(t!("tools.download.to_id"));
-            ui.add(Slider::new(&mut range.1, 0..=MAX_ID_RANGE));
+            let to_slider = Slider::new(&mut range.1, 0..=MAX_ID_RANGE)
+                .text(t!("tools.download_from_range.to_id"));
+
+            ui.add(to_slider);
             range.0 = range.0.min(range.1);
         },
         |ui, modal| {
-            if modal.button(ui, t!("tools.download.confirm")).clicked() {
+            if ui.button(t!("tools.modal.confirm")).triple_clicked() {
                 *DOWNLOAD_PROGRESS.lock() = Some((69, 420)); // TODO: INSERT HERE DOWNLOADER
+                modal.close();
                 download_modal(ctx).open();
             }
-            modal.caution_button(ui, t!("tools.download.close"));
+            modal.caution_button(ui, t!("tools.modal.cancel"));
         },
     )
 }
@@ -125,7 +134,7 @@ fn delete_modal(ctx: &Context) -> Modal {
             }
         },
         |ui, modal| {
-            modal.caution_button(ui, t!("tools.delete.close"));
+            modal.caution_button(ui, t!("tools.modal.close"));
         },
     )
 }

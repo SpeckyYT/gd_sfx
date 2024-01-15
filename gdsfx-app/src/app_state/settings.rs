@@ -1,6 +1,5 @@
-use std::{ops::Range, path::PathBuf};
+use std::path::PathBuf;
 
-use anyhow::Result;
 use educe::Educe;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
@@ -28,9 +27,6 @@ pub struct PersistentSettings {
 
     #[educe(Default = String::from("en_US"))]
     pub locale: String,
-
-    #[educe(Default = 0..14500)]
-    pub download_ids_range: Range<u32>,
 
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
@@ -73,16 +69,15 @@ impl PersistentSettings {
         settings
     }
 
-    pub fn try_save_if_changed(&mut self) -> Result<()> {
+    pub fn try_save_if_changed(&mut self) {
         if self.has_changed() {
             let json_data = serde_json::to_string(self).expect("derived serialization shouldn't fail");
             
-            gdsfx_files::create_parent_dirs(&*SETTINGS_FILE)?;
-            gdsfx_files::write_file(&*SETTINGS_FILE, json_data)?;
+            let _ = gdsfx_files::create_parent_dirs(&*SETTINGS_FILE);
+            let _ = gdsfx_files::write_file(&*SETTINGS_FILE, json_data);
 
             self.set_last_state();
         }
-        Ok(())
     }
 
     fn has_changed(&self) -> bool {
