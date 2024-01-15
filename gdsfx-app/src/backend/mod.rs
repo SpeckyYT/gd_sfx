@@ -65,8 +65,8 @@ impl AppState {
     }
 
     pub fn play_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let id = entry.id;
         let cache = self.sfx_cache.clone();
+        let id = entry.id;
         let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
         let audio_settings = app_state.audio_settings;
 
@@ -79,8 +79,8 @@ impl AppState {
     }
 
     pub fn download_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let id = entry.id;
         let cache = self.sfx_cache.clone();
+        let id = entry.id;
         let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
 
         thread::spawn(move || {

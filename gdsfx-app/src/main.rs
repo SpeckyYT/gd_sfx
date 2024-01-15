@@ -69,7 +69,9 @@ impl GdSfx {
         eframe::run_native(paths::runtime::APP_NAME, options, Box::new(Self::load))
     }
 
-    fn load(_cc: &eframe::CreationContext) -> Box<dyn eframe::App> {
+    fn load(ctx: &eframe::CreationContext) -> Box<dyn eframe::App> {
+        egui_extras::install_image_loaders(&ctx.egui_ctx);
+
         let app_state = AppState::load();
         let library = Library::load(&app_state.settings.gd_folder);
 

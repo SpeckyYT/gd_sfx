@@ -20,7 +20,9 @@ directories = "5.0.1"
 educe = "0.5.11"
 eframe = "0.25.0"
 egui-modal = "0.3.2"
+egui_extras = { version = "0.25.0", features = ["image"] }
 flate2 = "1.0.28"
+image = { version = "0.24.8", default_features = false, features = ["png"] }
 lazy_static = "1.4.0"
 once_cell = "1.19.0"
 parking_lot = "0.12.1"

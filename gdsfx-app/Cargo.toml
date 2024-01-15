@@ -12,6 +12,7 @@ anyhow = { workspace = true }
 educe = { workspace = true }
 eframe = { workspace = true }
 egui-modal = { workspace = true }
+egui_extras = { workspace = true }
 gdsfx-audio = { path = "../gdsfx-audio" }
 gdsfx-build = { path = "../gdsfx-build" }
 gdsfx-files = { path = "../gdsfx-files" }
@@ -34,4 +35,4 @@ gdsfx-files = { path = "../gdsfx-files" }
 quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-image = { version = "0.24.8", default_features = false, features = ["png"] }
+image = { workspace = true }
