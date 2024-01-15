@@ -1,8 +1,11 @@
-use std::sync::Arc;
+use std::{sync::Arc, thread};
 
 use eframe::{egui::{Ui, Context, ProgressBar, Slider}, epaint::{mutex::Mutex, Color32}};
 use egui_modal::Modal;
+use crate::Library;
 use once_cell::sync::Lazy;
+
+use crate::backend::{self, AppState};
 
 const MAX_ID_RANGE: u32 = 100000;
 
@@ -12,7 +15,7 @@ static TOOL_PROGRESS: LazyAss = Lazy::new(Default::default);
 
 static BRUTEFORCE_RANGE: Lazy<Arc<Mutex<(u32, u32)>>> = Lazy::new(|| Arc::new(Mutex::new((0, 14500))));
 
-pub fn render(ui: &mut Ui, ctx: &Context) {
+pub fn render(ui: &mut Ui, ctx: &Context, app_state: &AppState, library: Library) {
     ui.heading(t!("tools"));
 
     ui.add_space(10.0);
@@ -37,7 +40,7 @@ pub fn render(ui: &mut Ui, ctx: &Context) {
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            *TOOL_PROGRESS.lock() = Some((69, 420)); // TODO: INSERT HERE DOWNLOADER
+            backend::tools::download_all(library, app_state, TOOL_PROGRESS.clone());
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();
