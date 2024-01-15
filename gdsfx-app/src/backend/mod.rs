@@ -64,11 +64,11 @@ impl AppState {
         }
     }
 
-    pub fn play_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
+    pub fn play_sound(&self, entry: &LibraryEntry) {
         let cache = self.sfx_cache.clone();
         let entry = entry.clone();
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
-        let audio_settings = app_state.audio_settings;
+        let file_handler = entry.create_file_handler(&self.settings.gd_folder);
+        let audio_settings = self.audio_settings;
 
         thread::spawn(move || {
             let bytes = cache.get_or_insert_with(&entry.id, || {
@@ -85,11 +85,11 @@ impl AppState {
         });
     }
 
-    pub fn download_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
+    pub fn download_sound(&self, entry: &LibraryEntry) {
         let cache = self.sfx_cache.clone();
         let id = entry.id;
 
-        if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
+        if let Some(file_handler) = entry.create_file_handler(&self.settings.gd_folder) {
             thread::spawn(move || {
                 file_handler.try_write_bytes(|| {
                     cache.get_or_insert_with(&id, || file_handler.try_read_bytes())

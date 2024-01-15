@@ -27,7 +27,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
     
                     let download_button = Button::new(t!("sound.download"));
                     if ui.add_enabled(!file_exists, download_button).clicked() {
-                        app_state.download_sound(&entry, app_state);
+                        app_state.download_sound(&entry);
                     }
         
                     let delete_button = Button::new(t!("sound.delete"));
@@ -41,7 +41,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
                 ui.add_space(10.0);
     
                 if ui.button(t!("sound.play")).clicked() {
-                    app_state.play_sound(&entry, app_state);
+                    app_state.play_sound(&entry);
                 }
     
                 let stop_button = Button::new(t!("sound.stop"));

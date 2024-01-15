@@ -65,7 +65,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
     }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        app_state.play_sound(entry, app_state);
+        app_state.play_sound(entry);
     }
 
     button.context_menu(|ui: &mut Ui| {
@@ -85,7 +85,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
                     ui.close_menu();
                 }
             } else if ui.button(t!("sound.download")).clicked() {
-                app_state.download_sound(entry, app_state);
+                app_state.download_sound(entry);
                 ui.close_menu();
             }
         }
