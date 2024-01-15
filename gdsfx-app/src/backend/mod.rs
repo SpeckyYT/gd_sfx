@@ -1,9 +1,9 @@
-use std::{sync::Arc, thread, collections::HashMap};
+use std::{thread, sync::Arc};
 
-use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{LibraryEntry, EntryId, EntryKind, Library};
+use quick_cache::sync::Cache;
 use search::SearchSettings;
 use settings::PersistentSettings;
 
@@ -13,9 +13,6 @@ pub mod favorites;
 pub mod settings;
 pub mod search;
 
-type SfxCache = HashMap<EntryId, Vec<u8>>;
-
-#[derive(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,
@@ -26,8 +23,7 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
-    matching_entries_cache: HashMap<EntryId, bool>,
-    sfx_cache: Arc<Mutex<SfxCache>>,
+    sfx_cache: Arc<Cache<EntryId, Vec<u8>>>,
 }
 
 impl AppState {
@@ -36,22 +32,21 @@ impl AppState {
         rust_i18n::set_locale(&settings.locale);
 
         Self {
+            selected_tab: Tab::default(),
+            selected_sfx: None,
+        
             settings,
             favorites: Favorites::load_or_default(),
-            ..Default::default()
+        
+            search_settings: SearchSettings::default(),
+            audio_settings: AudioSettings::default(),
+        
+            sfx_cache: Arc::new(Cache::new(100)),
         }
     }
 
-    pub fn update(&mut self) {
-        self.matching_entries_cache.clear();
-    }
-
-    pub fn is_matching_entry(&mut self, entry: &LibraryEntry, library: &Library) -> bool {
-        if let Some(&matching) = self.matching_entries_cache.get(&entry.id) {
-            return matching
-        }
-
-        let matching = match &entry.kind {
+    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: &Library) -> bool {
+        match &entry.kind {
             EntryKind::Category => {
                 library
                     .get_children(entry)
@@ -62,24 +57,21 @@ impl AppState {
                 let search = self.search_settings.search_query.to_lowercase();
 
                 // TODO: stats system for storing which files have been downloaded
-                (!self.search_settings.show_downloaded /* || entry.file_exists() */)
+                (!self.search_settings.show_downloaded /* || entry.create_file_handler(&self.settings.gd_folder).file_exists() */)
                     && entry.name.to_lowercase().contains(&search)
                     || entry.id.to_string() == search
             }
-        };
-
-        self.matching_entries_cache.insert(entry.id, matching);
-        matching
+        }
     }
 
     pub fn play_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
+        let id = entry.id;
         let cache = self.sfx_cache.clone();
+        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
         let audio_settings = app_state.audio_settings;
 
         thread::spawn(move || {
-            let bytes = file_handler.try_get_bytes(&mut cache.lock());
-            if let Some(bytes) = bytes {
+            if let Ok(bytes) = cache.get_or_insert_with(&id, || file_handler.try_get_bytes()) {
                 gdsfx_audio::stop_all();
                 gdsfx_audio::play_sound(bytes, audio_settings);
             }
@@ -87,9 +79,14 @@ impl AppState {
     }
 
     pub fn download_sound(&self, entry: &LibraryEntry, app_state: &AppState) {
-        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
+        let id = entry.id;
         let cache = self.sfx_cache.clone();
+        let file_handler = entry.create_file_handler(&app_state.settings.gd_folder);
 
-        thread::spawn(move || file_handler.try_store_bytes(&mut cache.lock()));
+        thread::spawn(move || {
+            file_handler.try_store_bytes(|| {
+                cache.get_or_insert_with(&id, || file_handler.try_get_bytes()).ok()
+            });
+        });
     }
 }

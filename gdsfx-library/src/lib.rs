@@ -115,22 +115,14 @@ impl LibraryEntryFileHandler {
         self.path.exists()
     }
 
-    pub fn try_get_bytes(&self, cache: &mut HashMap<EntryId, Vec<u8>>) -> Option<Vec<u8>> {
-        cache.get(&self.entry.id).cloned().or_else(|| {
-            let bytes = gdsfx_files::read_file(&self.path).ok()
-                .or_else(|| requests::fetch_sfx_data(&self.entry).ok());
-
-            if let Some(bytes) = bytes.as_ref() {
-                cache.insert(self.entry.id, bytes.clone());
-            }
-
-            bytes
-        })
+    pub fn try_get_bytes(&self) -> Result<Vec<u8>> {
+        gdsfx_files::read_file(&self.path)
+            .or_else(|_| requests::fetch_sfx_data(&self.entry))
     }
 
-    pub fn try_store_bytes(&self, cache: &mut HashMap<EntryId, Vec<u8>>) {
+    pub fn try_store_bytes(&self, get_bytes: impl FnOnce() -> Option<Vec<u8>>) {
         if !self.file_exists() {
-            if let Some(bytes) = self.try_get_bytes(cache) {
+            if let Some(bytes) = get_bytes() {
                 let _ = gdsfx_files::write_file(&self.path, bytes);
             }
         }
