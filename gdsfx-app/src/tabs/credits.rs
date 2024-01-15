@@ -1,5 +1,5 @@
 use eframe::egui::Ui;
-use gdsfx_library::Library;
+use crate::Library;
 
 // this build output file contains the following function:
 // ```
@@ -10,12 +10,12 @@ gdsfx_build::get_output!(include!("credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
-pub fn render(ui: &mut Ui, library: &Library) {
+pub fn render(ui: &mut Ui, library: Library) {
     ui.heading(t!("credits.sfx"));
 
     ui.add_space(10.0);
 
-    for credits in library.get_credits() {
+    for credits in library.lock().get_credits() {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 
