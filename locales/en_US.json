@@ -69,6 +69,7 @@
     "stats.library.duration": "Total duration: %{duration}",
     "stats.library.files": "Total files: %{files}",
     "stats.library.size": "Total size: %{size}",
+    "stats.library.version": "Library version: %{version}",
     "stats.files": "SFX Files",
     "stats.files.downloaded": "Downloaded SFX files: %{files}",
 

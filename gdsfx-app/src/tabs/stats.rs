@@ -16,6 +16,11 @@ pub fn render(ui: &mut Ui, library: &Library) {
     let total_duration = library.get_total_duration();
     ui.label(t!("stats.library.duration", duration = total_duration));
 
+    ui.add_space(5.0);
+
+    let library_version = &library.get_root().name;
+    ui.label(t!("stats.library.version", version = library_version));
+
     ui.add_space(20.0);
 
     ui.heading(t!("stats.files"));

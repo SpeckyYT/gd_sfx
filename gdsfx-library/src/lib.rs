@@ -57,7 +57,7 @@ impl Library {
                     .unwrap_or(false)
             })
             .unwrap_or_else(|| {
-                let bytes = requests::fetch_library_data().unwrap();
+                let bytes = requests::fetch_library_data().expect("Couldn't get library data");
                 let _ = gdsfx_files::write_file(&file, &bytes);
                 parse::parse_library_from_bytes(bytes)
             })
