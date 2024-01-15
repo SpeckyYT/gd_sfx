@@ -13,8 +13,8 @@ use kittyaudio::{Frame, Mixer, interpolate_frame, Sound};
 #[derive(Debug, Clone, Copy)]
 pub struct AudioSettings {
     pub volume: f32,
-    pub speed: f32,
-    pub pitch: f32, // -12..12
+    pub speed: f32, // -12..=12
+    pub pitch: f32, // -12..=12
 }
 
 impl Default for AudioSettings {
@@ -53,7 +53,8 @@ pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) {
 
     if settings.pitch != 0.0 || settings.speed != 1.0 {
         let pitch_correction = 2f32.powf(settings.pitch / 12.0);
-        let pitch_correction = pitch_correction / settings.speed;
+        let speed_correction = 1.0 / 2f32.powf(settings.speed / 12.0);
+        let pitch_correction = pitch_correction / speed_correction;
 
         let mut mixer = Mixer::new();
         mixer.init();
@@ -72,12 +73,14 @@ pub fn play_sound(ogg: Vec<u8>, settings: AudioSettings) {
             })
             .collect::<Vec<Frame>>();
 
-            mixer.play(Sound::from_frames(initial_sample_rate, &frames));
+            let sound = Sound::from_frames(initial_sample_rate, &frames);
+
+            let sound_handle = mixer.play(sound.clone());
 
             while !mixer.is_finished() {
                 if let Ok(received_time) = AUDIO_MESSAGES.receiver.try_recv() {
                     if received_time > start_time {
-                        mixer.backend().stop_stream();
+                        sound_handle.pause();
                         break;
                     }
                 }

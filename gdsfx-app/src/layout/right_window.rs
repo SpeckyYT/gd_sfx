@@ -56,7 +56,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
                 ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12.0..=12.0));
 
                 ui.label("speed");
-                ui.add(Slider::new(&mut app_state.audio_settings.speed, 0.0..=1.0));
+                ui.add(Slider::new(&mut app_state.audio_settings.speed, -12.0..=12.0));
 
                 ui.add_space(10.0);
 
