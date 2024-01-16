@@ -21,7 +21,7 @@ pub fn download_all(app_state: &AppState, library: &Library, stats: Stats) {
             .for_each(|sound| {
                 app_state.download_sound(sound);
                 if let Some(ref mut stats) = *stats.lock() {
-                    *stats = (stats.0 + 1, stats.1);
+                    stats.0 += 1;
                 }
             });
 
@@ -46,7 +46,7 @@ pub fn download_from_range(app_state: &AppState, stats: Stats, range: RangeInclu
             .map(|handle| handle.join());
 
             if let Some(ref mut stats) = *stats.lock() {
-                *stats = (stats.0 + 1, stats.1);
+                stats.0 += 1;
             }
         });
 
@@ -78,7 +78,7 @@ pub fn delete_all_sfx(app_state: &AppState, stats: Stats) {
                 }
                  
                 if let Some(ref mut stats) = *stats.lock() {
-                    *stats = (stats.0 + 1, stats.1);
+                    stats.0 += 1;
                 }
             });
 

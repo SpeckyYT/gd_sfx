@@ -40,7 +40,7 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &AppState, library: &Librar
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            backend::tools::download_all(&app_state, &library, TOOL_PROGRESS.clone());
+            backend::tools::download_all(app_state, library, TOOL_PROGRESS.clone());
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();
