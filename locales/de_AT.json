@@ -47,9 +47,9 @@
     "tools.delete_all_sfx": "Alle Soundeffekte löschen",
     "tools.delete.title": "Soundeffekte werden gelöscht...",
     "tools.progress": "Fortschritt",
-    "tools.modal.confirm": "Bestätigen",
-    "tools.modal.cancel": "Abbrechen",
-    "tools.modal.close": "Schließen",
+    "tools.confirm": "Bestätigen",
+    "tools.cancel": "Abbrechen",
+    "tools.close": "Schließen",
 
     "settings": "Einstellungen",
     "settings.search_filter_mode": "Suchfiltermodus",

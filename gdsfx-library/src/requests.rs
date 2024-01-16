@@ -1,3 +1,4 @@
+use anyhow::Result;
 use once_cell::sync::Lazy;
 use reqwest::{blocking::{Client, Response}, header::*};
 use url::Url;
@@ -22,9 +23,11 @@ fn get_cdn_url() -> Url {
 
 static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx/").unwrap());
 
-pub(crate) fn request_file(path: &str) -> Option<Response> {
-    CLIENT
+pub(crate) fn request_file(path: &str) -> Result<Response> {
+    let response = CLIENT
         .get(SFX_URL_PATH.join(path).unwrap().as_str())
-        .send().ok()
-        .filter(|response| response.status().is_success())
+        .send()
+        .and_then(|response| response.error_for_status())?;
+
+    Ok(response)
 }

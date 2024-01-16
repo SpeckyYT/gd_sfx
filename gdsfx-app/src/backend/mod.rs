@@ -6,6 +6,7 @@ use gdsfx_audio::AudioSettings;
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
+use tools::ToolProgress;
 
 use crate::tabs::Tab;
 
@@ -14,7 +15,7 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
-#[derive(Default, Clone)]
+#[derive(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,
@@ -25,6 +26,9 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
+    pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+    pub bruteforce_range: (EntryId, EntryId),
+
     sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
 
@@ -33,9 +37,10 @@ impl AppState {
         let settings = PersistentSettings::load_or_default();
         rust_i18n::set_locale(&settings.locale);
 
-        Self {        
+        Self {
             settings,
             favorites: Favorites::load_or_default(),
+            bruteforce_range: (0, 14500),
             ..Default::default()
         }
     }

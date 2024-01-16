@@ -47,9 +47,9 @@
     "tools.delete_all_sfx": "Usuń wszystkie efekty dźwiękowe",
     "tools.delete.title": "Usuwanie...",
     "tools.progress": "Postęp",
-    "tools.modal.confirm": "Potwierdź",
-    "tools.modal.cancel": "Anuluj",
-    "tools.modal.close": "Zamknij",
+    "tools.confirm": "Potwierdź",
+    "tools.cancel": "Anuluj",
+    "tools.close": "Zamknij",
 
     "settings": "Ustawienia",
     "settings.search_filter_mode": "Tryb filtra",

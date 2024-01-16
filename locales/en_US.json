@@ -51,9 +51,9 @@
     "tools.delete_all_sfx": "Delete all SFX",
     "tools.delete.title": "Deleting...",
     "tools.progress": "Progress",
-    "tools.modal.confirm": "Confirm",
-    "tools.modal.cancel": "Cancel",
-    "tools.modal.close": "Close",
+    "tools.confirm": "Confirm",
+    "tools.cancel": "Cancel",
+    "tools.close": "Close",
 
     "settings": "Settings",
     "settings.search_filter_mode": "Search filter mode",

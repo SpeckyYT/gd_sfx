@@ -1,88 +1,82 @@
-use std::{sync::Arc, thread, ops::RangeInclusive, fs};
+use std::{thread, fs};
 
-use eframe::epaint::mutex::Mutex;
-use gdsfx_library::{Library, LibraryEntry, EntryKind, stats::Centiseconds};
+use eframe::egui::{Ui, ProgressBar};
+use gdsfx_library::{EntryId, FileEntry};
 use rayon::prelude::*;
 
 use super::AppState;
 
-type Stats = Arc<Mutex<Option<(u128, u128)>>>;
+#[derive(Default)]
+pub struct ToolProgress {
+    translation_key: &'static str,
+    finished: usize,
+    total: usize,
+}
 
-pub fn download_all(app_state: &AppState, library: &Library, stats: Stats) {
-    let app_state = app_state.clone();
-    let library = library.clone();
+impl ToolProgress {
+    fn new(translation_key: &'static str, total: usize) -> Self {
+        Self { translation_key, finished: 0, total }
+    }
 
-    *stats.lock() = Some((0, library.total_entries() as u128));
+    pub fn show_progress(&self, ui: &mut Ui) {
+        ui.label(format!("{} – {}", t!(self.translation_key), t!("tools.progress")));
 
-    thread::spawn(move || {
-        library.iter_sounds()
-            .collect::<Vec<_>>()
-            .into_par_iter()
-            .for_each(|sound| {
-                // app_state.download_sound(sound);
-                if let Some(ref mut stats) = *stats.lock() {
-                    stats.0 += 1;
+        let progress = self.finished as f32 / self.total as f32;
+        let text = format!("{}/{} ({:.2}%)", self.finished, self.total, progress * 100.0);
+        ui.add(ProgressBar::new(progress).text(text));
+    }
+}
+
+impl AppState {
+    pub fn download_multiple_sfx(&self, translation_key: &'static str, ids: Vec<EntryId>) {
+        if !self.is_gd_folder_valid() { return }
+
+        let progress = self.tool_progress.clone();
+        *progress.lock() = Some(ToolProgress::new(translation_key, ids.len()));
+
+        let cache = self.sfx_cache.clone();
+        let gd_folder = self.settings.gd_folder.clone();
+    
+        thread::spawn(move || {
+            ids.into_par_iter().try_for_each(|id| {
+                let file_entry = FileEntry::new(id);
+                if !file_entry.file_exists(&gd_folder) {
+                    let bytes = cache.lock().get(&id).cloned()
+                        .or_else(|| file_entry.try_download_bytes());
+
+                    if let Some(bytes) = bytes {
+                        file_entry.try_write_bytes(&gd_folder, bytes);
+                    }
                 }
+                progress.lock().as_mut().map(|progress| progress.finished += 1)
             });
-
-        *stats.lock() = None;
-    });
-}
-
-pub fn download_from_range(app_state: &AppState, stats: Stats, range: RangeInclusive<u32>) {
-    let app_state = app_state.clone();
-
-    *stats.lock() = Some((0, range.clone().count() as u128));
-
-    thread::spawn(move || {
-        range.into_par_iter()
-        .for_each(|id| {
-            // app_state.download_sound(&LibraryEntry {
-            //     id,
-            //     name: String::new(),
-            //     parent_id: 0,
-            //     kind: EntryKind::Sound { bytes: 0, duration: Centiseconds(0) },
-            // })
-            // .map(|handle| handle.join());
-
-            if let Some(ref mut stats) = *stats.lock() {
-                stats.0 += 1;
-            }
+    
+            *progress.lock() = None;
         });
-
-        *stats.lock() = None;
-    });
-}
-
-pub fn delete_all_sfx(app_state: &AppState, stats: Stats) {
-    if let Ok(read_dir) = fs::read_dir(&app_state.settings.gd_folder) {
-        let read_dir = read_dir.collect::<Vec<_>>();
-        let count = read_dir.len();
-
-        *stats.lock() = Some((0, count as u128));
+    }
+    
+    pub fn delete_all_sfx(&self, translation_key: &'static str) {
+        let Ok(read_dir) = fs::read_dir(&self.settings.gd_folder) else { return };
+        let read_dir = read_dir.flatten().collect::<Vec<_>>();
+        
+        let progress = self.tool_progress.clone();
+        *progress.lock() = Some(ToolProgress::new(translation_key, read_dir.len()));
 
         thread::spawn(move || {
             read_dir.into_par_iter()
-            .for_each(|entry| {
-                if let Ok(entry) = entry {
-                    let is_valid = entry.file_name()
-                        .to_str()
+                .filter(|entry| {
+                    entry.file_name().to_str()
                         .filter(|s| s.starts_with('s') && s.ends_with(".ogg"))
                         .map(|s| &s[1..s.len()-4])
-                        .filter(|s| s.parse::<u32>().is_ok())
-                        .is_some();
+                        .and_then(|s| s.parse::<u32>().ok())
+                        .is_some()
+                })
+                .try_for_each(|entry| {
+                    let _ = fs::remove_file(entry.path());
+                    progress.lock().as_mut().map(|progress| progress.finished += 1)
+                });
 
-                    if is_valid {
-                        let _ = fs::remove_file(entry.path());
-                    }
-                }
-                 
-                if let Some(ref mut stats) = *stats.lock() {
-                    stats.0 += 1;
-                }
-            });
-
-            *stats.lock() = None;
+            *progress.lock() = None;
         });
     }
 }

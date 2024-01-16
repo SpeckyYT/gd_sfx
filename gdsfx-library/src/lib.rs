@@ -58,7 +58,7 @@ impl Library {
             .filter(Self::check_library_version)
             .unwrap_or_else(|| {
                 let bytes = requests::request_file(SFX_LIBRARY_FILE)
-                    .and_then(|response| response.bytes().ok())
+                    .and_then(|response| Ok(response.bytes()?))
                     .map(|bytes| bytes.to_vec())
                     .expect("Couldn't get library data");
 
@@ -70,7 +70,7 @@ impl Library {
     fn check_library_version(library: &Library) -> bool {
         const SFX_VERSION_ENDPOINT: &str = "sfxlibrary_version.txt";
 
-        requests::request_file(SFX_VERSION_ENDPOINT)
+        requests::request_file(SFX_VERSION_ENDPOINT).ok()
             .and_then(|response| response.text().ok())
             .map(|version| version == library.get_version())
             .unwrap_or(false)
