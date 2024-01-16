@@ -13,13 +13,15 @@ pub type EntryId = u32;
 #[derive(Debug, Clone)]
 pub struct Library {
     root_id: EntryId,
+    sound_ids: Vec<EntryId>,
+
     entries: HashMap<EntryId, LibraryEntry>,
     child_map: HashMap<EntryId, Vec<EntryId>>,
 
-    credits: Vec<Credit>,
-
     total_bytes: i64,
     total_duration: Centiseconds,
+
+    credits: Vec<Credit>,
 }
 
 #[derive(Debug, Clone)]
@@ -52,7 +54,7 @@ impl Library {
             .map(parse::parse_library_from_bytes)
             .filter(|library| {
                 requests::fetch_library_version()
-                    .map(|version| version.to_string() == library.get_root().name)
+                    .map(|version| version.to_string() == library.get_version())
                     .unwrap_or(false)
             })
             .unwrap_or_else(|| {
@@ -66,7 +68,7 @@ impl Library {
         self.entries.get(&self.root_id).unwrap()
     }
 
-    pub fn get_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {
+    pub fn iter_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {
         self.child_map
             .get(&entry.id)
             .into_iter()
@@ -74,35 +76,28 @@ impl Library {
             .flat_map(|id| self.entries.get(id))
     }
 
-    pub fn get_all_sounds(&self) -> Vec<&LibraryEntry> {
-        fn get_sounds_recursive<'a>(library: &'a Library, entry: &'a LibraryEntry) -> Vec<&'a LibraryEntry> {
-            match &entry.kind {
-                EntryKind::Category => {
-                    library
-                        .get_children(entry)
-                        .flat_map(|entry| get_sounds_recursive(library, entry))
-                        .collect()
-                }
-                EntryKind::Sound { .. } => vec![entry],
-            }
-        }
-        get_sounds_recursive(self, self.get_root())
+    pub fn iter_sounds(&self) -> impl Iterator<Item = &LibraryEntry> {
+        self.sound_ids.iter().flat_map(|id| self.entries.get(id))
+    }
+
+    pub fn total_entries(&self) -> usize {
+        self.entries.len()
+    }
+
+    pub fn total_bytes(&self) -> i64 {
+        self.total_bytes
+    }
+
+    pub fn total_duration(&self) -> Centiseconds {
+        self.total_duration
+    }
+
+    pub fn get_version(&self) -> &str {
+        &self.get_root().name
     }
 
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
-    }
-
-    pub fn get_total_entries(&self) -> usize {
-        self.entries.len()
-    }
-
-    pub fn get_total_bytes(&self) -> i64 {
-        self.total_bytes
-    }
-
-    pub fn get_total_duration(&self) -> Centiseconds {
-        self.total_duration
     }
 }
 
@@ -111,7 +106,7 @@ impl LibraryEntry {
         format!("s{}.ogg", self.id)
     }
 
-    pub fn try_get_bytes(&self) -> Result<Vec<u8>> {
+    pub fn try_get_bytes(&self) -> Option<Vec<u8>> {
         requests::fetch_sfx_data(self)
     }
 
@@ -135,13 +130,13 @@ impl LibraryEntryFileHandler {
         self.path.exists()
     }
 
-    pub fn try_read_bytes(&self) -> Result<Vec<u8>> {
-        gdsfx_files::read_file(&self.path)
+    pub fn try_read_bytes(&self) -> Option<Vec<u8>> {
+        gdsfx_files::read_file(&self.path).ok()
     }
 
-    pub fn try_write_bytes(&self, get_bytes: impl FnOnce() -> Result<Vec<u8>>) {
+    pub fn try_write_bytes(&self, get_bytes: impl FnOnce() -> Option<Vec<u8>>) {
         if !self.file_exists() {
-            if let Ok(bytes) = get_bytes() {
+            if let Some(bytes) = get_bytes() {
                 let _ = gdsfx_files::write_file(&self.path, bytes);
             }
         }

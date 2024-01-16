@@ -19,7 +19,6 @@ gdsfx-files = { path = "../gdsfx-files" }
 gdsfx-library = { path = "../gdsfx-library" }
 once_cell = { workspace = true }
 pretty-bytes = { workspace = true }
-quick_cache = { workspace = true }
 rayon = { workspace = true }
 rust-i18n = { workspace = true }
 serde = { workspace = true }

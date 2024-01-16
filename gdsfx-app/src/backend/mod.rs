@@ -1,9 +1,9 @@
-use std::{thread::{self, JoinHandle}, sync::Arc};
+use std::{thread::{self, JoinHandle}, sync::Arc, collections::HashMap};
 
+use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind};
-use quick_cache::sync::Cache;
 use search::SearchSettings;
 use settings::PersistentSettings;
 
@@ -14,7 +14,7 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
-#[derive(Debug, Clone)]
+#[derive(Default, Clone)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,
@@ -25,7 +25,7 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
-    sfx_cache: Arc<Cache<EntryId, Vec<u8>>>,
+    sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
 
 impl AppState {
@@ -33,17 +33,10 @@ impl AppState {
         let settings = PersistentSettings::load_or_default();
         rust_i18n::set_locale(&settings.locale);
 
-        Self {
-            selected_tab: Tab::default(),
-            selected_sfx: None,
-        
+        Self {        
             settings,
             favorites: Favorites::load_or_default(),
-        
-            search_settings: SearchSettings::default(),
-            audio_settings: AudioSettings::default(),
-        
-            sfx_cache: Arc::new(Cache::new(100)),
+            ..Default::default()
         }
     }
 
@@ -51,7 +44,7 @@ impl AppState {
         match &entry.kind {
             EntryKind::Category => {
                 library
-                    .get_children(entry)
+                    .iter_children(entry)
                     .any(|child| self.is_matching_entry(child, library))
             }
 
@@ -73,14 +66,12 @@ impl AppState {
         let audio_settings = self.audio_settings;
 
         thread::spawn(move || {
-            let bytes = cache.get_or_insert_with(&entry.id, || {
-                match file_handler.map(|file_handler| file_handler.try_read_bytes()) {
-                    Some(Ok(bytes)) => Ok(bytes),
-                    _ => entry.try_get_bytes(),
-                }
-            });
+            let bytes = cache.lock()
+                .get(&entry.id).cloned()
+                .or_else(|| file_handler.and_then(|file_handler| file_handler.try_read_bytes()))
+                .or_else(|| entry.try_get_bytes());
 
-            if let Ok(bytes) = bytes {
+            if let Some(bytes) = bytes {
                 gdsfx_audio::stop_all();
                 gdsfx_audio::play_sound(bytes, audio_settings);
             }
@@ -92,14 +83,14 @@ impl AppState {
         let entry = entry.clone();
 
         entry.create_file_handler(&self.settings.gd_folder)
-        .map(|file_handler|
-            thread::spawn(move || {
-                file_handler.try_write_bytes(|| {
-                    cache.get_or_insert_with(&entry.id, || {
-                        file_handler.try_read_bytes().or_else(|_| entry.try_get_bytes())
+            .map(|file_handler|
+                thread::spawn(move || {
+                    file_handler.try_write_bytes(|| {
+                        cache.lock().get(&entry.id).cloned()
+                            .or_else(|| file_handler.try_read_bytes())
+                            .or_else(|| entry.try_get_bytes())
                     })
                 })
-            })
-        )
+            )
     }
 }

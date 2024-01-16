@@ -12,17 +12,18 @@ pub fn download_all(app_state: &AppState, library: &Library, stats: Stats) {
     let app_state = app_state.clone();
     let library = library.clone();
 
-    *stats.lock() = Some((0, library.get_total_entries() as u128));
+    *stats.lock() = Some((0, library.total_entries() as u128));
 
     thread::spawn(move || {
-        library.get_all_sounds()
-        .into_par_iter()
-        .for_each(|sound| {
-            app_state.download_sound(sound);
-            if let Some(ref mut stats) = *stats.lock() {
-                *stats = (stats.0 + 1, stats.1);
-            }
-        });
+        library.iter_sounds()
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .for_each(|sound| {
+                app_state.download_sound(sound);
+                if let Some(ref mut stats) = *stats.lock() {
+                    *stats = (stats.0 + 1, stats.1);
+                }
+            });
 
         *stats.lock() = None;
     });
@@ -66,7 +67,7 @@ pub fn delete_all_sfx(app_state: &AppState, stats: Stats) {
                 if let Ok(entry) = entry {
                     let is_valid = entry.file_name()
                         .to_str()
-                        .filter(|s| s.starts_with("s") && s.ends_with(".ogg"))
+                        .filter(|s| s.starts_with('s') && s.ends_with(".ogg"))
                         .map(|s| &s[1..s.len()-4])
                         .filter(|s| s.parse::<u32>().is_ok())
                         .is_some();

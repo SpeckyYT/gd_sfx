@@ -100,6 +100,7 @@ impl FromStr for Credit {
 
 fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
     let root_id = entries.first().expect("No library entries").id;
+    let mut sound_ids = Vec::new();
 
     let mut entry_map = HashMap::new();
     let mut child_map = HashMap::new();
@@ -111,6 +112,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             total_bytes += *bytes;
             total_duration += duration.0;
+            sound_ids.push(entry.id);
         }
         
         child_map.entry(entry.parent_id)
@@ -122,11 +124,14 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
 
     Library {
         root_id,
+        sound_ids,
+
         entries: entry_map,
         child_map,
-        credits,
-
+        
         total_bytes,
         total_duration: Centiseconds(total_duration),
+
+        credits,
     }
 }
