@@ -10,7 +10,7 @@ mod parse;
 
 pub type EntryId = u32;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Library {
     root_id: EntryId,
     entries: HashMap<EntryId, LibraryEntry>,
@@ -36,7 +36,7 @@ pub enum EntryKind {
     Sound { bytes: i64, duration: Centiseconds },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Credit {
     pub name: String,
     pub link: String,

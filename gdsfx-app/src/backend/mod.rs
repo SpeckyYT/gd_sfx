@@ -14,6 +14,7 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
+#[derive(Debug, Clone)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,

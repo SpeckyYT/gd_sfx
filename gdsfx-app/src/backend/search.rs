@@ -5,7 +5,7 @@ use strum::EnumIter;
 
 use crate::localized_enum;
 
-#[derive(Default)]
+#[derive(Default, Debug, Clone)]
 pub struct SearchSettings {
     pub search_query: String,
     pub sorting_mode: Sorting,

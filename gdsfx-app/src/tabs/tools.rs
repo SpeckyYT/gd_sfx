@@ -5,7 +5,7 @@ use egui_modal::Modal;
 use gdsfx_library::Library;
 use once_cell::sync::Lazy;
 
-use crate::backend::AppState;
+use crate::backend::{AppState, self};
 
 const MAX_ID_RANGE: u32 = 100000;
 
@@ -40,7 +40,7 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &AppState, library: &Librar
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            // backend::tools::download_all(app_state, library, TOOL_PROGRESS.clone()); TODO
+            backend::tools::download_all(&app_state, &library, TOOL_PROGRESS.clone());
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();
