@@ -1650,6 +1650,7 @@ dependencies = [
  "pretty-bytes",
  "quick_cache",
  "quote",
+ "rayon",
  "rust-i18n",
  "serde",
  "serde_json",

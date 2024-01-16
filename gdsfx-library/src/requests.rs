@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, Error};
 use once_cell::sync::Lazy;
 use reqwest::{blocking::Client, header::*};
 use url::Url;
@@ -52,12 +52,20 @@ pub(crate) fn fetch_library_data() -> Result<Vec<u8>> {
 }
 
 pub(crate) fn fetch_sfx_data(entry: &LibraryEntry) -> Result<Vec<u8>> {
-    let url = SFX_URL_PATH.join(&entry.get_file_name()).unwrap();
-    let sfx_data = CLIENT
-        .get(url.as_str())
-        .send()?
-        .bytes()?
-        .to_vec();
+    // 💀💀💀💀💀💀💀 bro, seriously forgot to check for is_success
 
-    Ok(sfx_data)
+    let url = SFX_URL_PATH.join(&entry.get_file_name()).unwrap();
+    let sfx_response = CLIENT
+        .get(url.as_str())
+        .send()?;
+
+    if sfx_response.status().is_success() {
+        Ok(
+            sfx_response
+            .bytes()?
+            .to_vec()
+        )
+    } else {
+        Err(Error::msg("404 SFX Not found"))
+    }
 }

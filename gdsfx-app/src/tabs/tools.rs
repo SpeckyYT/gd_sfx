@@ -23,7 +23,7 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &AppState, library: &Librar
     ui.colored_label(Color32::KHAKI, t!("tools.warning.long_time"));
     ui.colored_label(Color32::KHAKI, t!("tools.warning.program_not_usable"));
 
-    let download_select_range_modal = download_range_select_modal(ctx);
+    let download_select_range_modal = download_range_select_modal(ctx, app_state);
 
     let is_tool_running = TOOL_PROGRESS.lock().is_some();
 
@@ -51,12 +51,12 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &AppState, library: &Librar
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
-            *TOOL_PROGRESS.lock() = Some((69,420)); // TODO: INSERT HERE DELETER
+            backend::tools::delete_all_sfx(app_state, TOOL_PROGRESS.clone());
         }
     });
 }
 
-fn download_range_select_modal(ctx: &Context) -> Modal {
+fn download_range_select_modal(ctx: &Context, app_state: &AppState) -> Modal {
     let modal = Modal::new(ctx, "download_range_select");
 
     modal.show(|ui| {
@@ -82,7 +82,8 @@ fn download_range_select_modal(ctx: &Context) -> Modal {
 
         modal.buttons(ui, |ui| {
             if ui.button(t!("tools.modal.confirm")).triple_clicked() {
-                *TOOL_PROGRESS.lock() = Some((69, 420)); // TODO: INSERT HERE DOWNLOADER
+                let range = *BRUTEFORCE_RANGE.lock();
+                backend::tools::download_from_range(app_state, TOOL_PROGRESS.clone(), range.0..=range.1);
                 modal.close();
             }
             modal.caution_button(ui, t!("tools.modal.cancel"));

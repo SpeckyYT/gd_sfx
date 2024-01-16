@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc};
+use std::{thread::{self, JoinHandle}, sync::Arc};
 
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
@@ -87,18 +87,19 @@ impl AppState {
         });
     }
 
-    pub fn download_sound(&self, entry: &LibraryEntry) {
+    pub fn download_sound(&self, entry: &LibraryEntry) -> Option<JoinHandle<()>> {
         let cache = self.sfx_cache.clone();
         let entry = entry.clone();
 
-        if let Some(file_handler) = entry.create_file_handler(&self.settings.gd_folder) {
+        entry.create_file_handler(&self.settings.gd_folder)
+        .map(|file_handler|
             thread::spawn(move || {
                 file_handler.try_write_bytes(|| {
                     cache.get_or_insert_with(&entry.id, || {
                         file_handler.try_read_bytes().or_else(|_| entry.try_get_bytes())
                     })
-                });
-            });
-        }
+                })
+            })
+        )
     }
 }

@@ -31,6 +31,7 @@ prettyplease = "0.2.16"
 proc-macro2 = "1.0.76"
 quick_cache = "0.4.0"
 quote = "1.0.35"
+rayon = "1.8.0"
 reqwest = { version = "0.11.23", features = ["blocking"] }
 rodio = "0.17.3"
 rust-i18n = "2.3.0"
