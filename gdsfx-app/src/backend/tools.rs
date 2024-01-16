@@ -19,7 +19,7 @@ pub fn download_all(app_state: &AppState, library: &Library, stats: Stats) {
             .collect::<Vec<_>>()
             .into_par_iter()
             .for_each(|sound| {
-                app_state.download_sound(sound);
+                // app_state.download_sound(sound);
                 if let Some(ref mut stats) = *stats.lock() {
                     stats.0 += 1;
                 }
@@ -37,13 +37,13 @@ pub fn download_from_range(app_state: &AppState, stats: Stats, range: RangeInclu
     thread::spawn(move || {
         range.into_par_iter()
         .for_each(|id| {
-            app_state.download_sound(&LibraryEntry {
-                id,
-                name: String::new(),
-                parent_id: 0,
-                kind: EntryKind::Sound { bytes: 0, duration: Centiseconds(0) },
-            })
-            .map(|handle| handle.join());
+            // app_state.download_sound(&LibraryEntry {
+            //     id,
+            //     name: String::new(),
+            //     parent_id: 0,
+            //     kind: EntryKind::Sound { bytes: 0, duration: Centiseconds(0) },
+            // })
+            // .map(|handle| handle.join());
 
             if let Some(ref mut stats) = *stats.lock() {
                 stats.0 += 1;

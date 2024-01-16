@@ -1,5 +1,5 @@
 use eframe::{egui::{self, *}, epaint::Vec2};
-use gdsfx_library::{Library, LibraryEntry};
+use gdsfx_library::{Library, LibraryEntry, FileEntry};
 use strum::IntoEnumIterator;
 
 use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum};
@@ -65,7 +65,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
     }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        app_state.play_sound(entry);
+        app_state.play_sound(entry.id);
     }
 
     button.context_menu(|ui: &mut Ui| {
@@ -78,14 +78,17 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
             ui.close_menu();
         }
 
-        if let Some(file_handler) = entry.create_file_handler(&app_state.settings.gd_folder) {
-            if file_handler.file_exists() {
+        if app_state.is_gd_folder_valid() {
+            let file_entry = FileEntry::new(entry.id);
+            let gd_folder = &app_state.settings.gd_folder;
+
+            if file_entry.file_exists(gd_folder) {
                 if ui.button(t!("sound.delete")).clicked() {
-                    file_handler.try_delete_file();
+                    file_entry.try_delete_file(gd_folder);
                     ui.close_menu();
                 }
             } else if ui.button(t!("sound.download")).clicked() {
-                app_state.download_sound(entry);
+                app_state.download_sound(entry.id);
                 ui.close_menu();
             }
         }

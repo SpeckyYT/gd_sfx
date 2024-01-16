@@ -1,9 +1,9 @@
-use std::{thread::{self, JoinHandle}, sync::Arc, collections::HashMap};
+use std::{thread, sync::Arc, collections::HashMap, path::Path};
 
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind};
+use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
 
@@ -52,24 +52,38 @@ impl AppState {
                 let search = self.search_settings.search_query.to_lowercase();
 
                 // TODO: stats system for storing which files have been downloaded
-                (!self.search_settings.show_downloaded /* || entry.create_file_handler(&self.settings.gd_folder).file_exists() */)
+                (!self.search_settings.show_downloaded /* || FileEntry::new(entry.id).file_exists(&self.settings.gd_folder) */ )
                     && entry.name.to_lowercase().contains(&search)
                     || entry.id.to_string() == search
             }
         }
     }
 
-    pub fn play_sound(&self, entry: &LibraryEntry) {
+    pub fn is_gd_folder_valid(&self) -> bool {
+        let path = Path::new(&self.settings.gd_folder);
+        path.is_absolute() && path.is_dir()
+    }
+
+    pub fn play_sound(&self, id: EntryId) {
         let cache = self.sfx_cache.clone();
-        let entry = entry.clone();
-        let file_handler = entry.create_file_handler(&self.settings.gd_folder);
+        let gd_folder = self.settings.gd_folder.clone();
         let audio_settings = self.audio_settings;
 
         thread::spawn(move || {
-            let bytes = cache.lock()
-                .get(&entry.id).cloned()
-                .or_else(|| file_handler.and_then(|file_handler| file_handler.try_read_bytes()))
-                .or_else(|| entry.try_get_bytes());
+            let bytes = {
+                let mut cache = cache.lock();
+                cache.get(&id).cloned().or_else(|| {
+                    let file_entry = FileEntry::new(id);
+                    let bytes = file_entry.try_read_bytes(gd_folder)
+                        .or_else(|| file_entry.try_download_bytes());
+
+                    if let Some(bytes) = bytes.as_ref() {
+                        cache.insert(id, bytes.clone());
+                    }
+
+                    bytes
+                })
+            };
 
             if let Some(bytes) = bytes {
                 gdsfx_audio::stop_all();
@@ -78,19 +92,24 @@ impl AppState {
         });
     }
 
-    pub fn download_sound(&self, entry: &LibraryEntry) -> Option<JoinHandle<()>> {
-        let cache = self.sfx_cache.clone();
-        let entry = entry.clone();
+    pub fn download_sound(&self, id: EntryId) {
+        if !self.is_gd_folder_valid() { return }
 
-        entry.create_file_handler(&self.settings.gd_folder)
-            .map(|file_handler|
-                thread::spawn(move || {
-                    file_handler.try_write_bytes(|| {
-                        cache.lock().get(&entry.id).cloned()
-                            .or_else(|| file_handler.try_read_bytes())
-                            .or_else(|| entry.try_get_bytes())
-                    })
-                })
-            )
+        let file_entry = FileEntry::new(id);
+        let gd_folder = &self.settings.gd_folder;
+
+        if file_entry.file_exists(gd_folder) { return }
+
+        let cache = self.sfx_cache.clone();
+        let gd_folder = gd_folder.clone();
+
+        thread::spawn(move || {
+            let bytes = cache.lock().get(&id).cloned()
+                .or_else(|| file_entry.try_download_bytes());
+
+            if let Some(bytes) = bytes {
+                file_entry.try_write_bytes(gd_folder, bytes);
+            }
+        });
     }
 }

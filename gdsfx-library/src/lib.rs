@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, collections::HashMap, fs};
+use std::{path::Path, collections::HashMap};
 
 use anyhow::Result;
 use stats::Centiseconds;
@@ -7,6 +7,9 @@ pub mod stats;
 
 mod requests;
 mod parse;
+
+mod files;
+pub use files::FileEntry;
 
 pub type EntryId = u32;
 
@@ -52,16 +55,25 @@ impl Library {
     
         gdsfx_files::read_file(&file).ok()
             .map(parse::parse_library_from_bytes)
-            .filter(|library| {
-                requests::fetch_library_version()
-                    .map(|version| version.to_string() == library.get_version())
-                    .unwrap_or(false)
-            })
+            .filter(Self::check_library_version)
             .unwrap_or_else(|| {
-                let bytes = requests::fetch_library_data().expect("Couldn't get library data");
+                let bytes = requests::request_file(SFX_LIBRARY_FILE)
+                    .and_then(|response| response.bytes().ok())
+                    .map(|bytes| bytes.to_vec())
+                    .expect("Couldn't get library data");
+
                 let _ = gdsfx_files::write_file(&file, &bytes);
                 parse::parse_library_from_bytes(bytes)
             })
+    }
+
+    fn check_library_version(library: &Library) -> bool {
+        const SFX_VERSION_ENDPOINT: &str = "sfxlibrary_version.txt";
+
+        requests::request_file(SFX_VERSION_ENDPOINT)
+            .and_then(|response| response.text().ok())
+            .map(|version| version == library.get_version())
+            .unwrap_or(false)
     }
 
     pub fn get_root(&self) -> &LibraryEntry {
@@ -98,51 +110,5 @@ impl Library {
 
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
-    }
-}
-
-impl LibraryEntry {
-    fn get_file_name(&self) -> String {
-        format!("s{}.ogg", self.id)
-    }
-
-    pub fn try_get_bytes(&self) -> Option<Vec<u8>> {
-        requests::fetch_sfx_data(self)
-    }
-
-    pub fn create_file_handler(&self, gd_folder: impl AsRef<Path>) -> Option<LibraryEntryFileHandler> {
-        let path = gd_folder.as_ref();
-        
-        (path.is_absolute() && path.is_dir()).then(|| {
-            LibraryEntryFileHandler {
-                path: path.join(self.get_file_name()),
-            }
-        })
-    }
-}
-
-pub struct LibraryEntryFileHandler {
-    path: PathBuf,
-}
-
-impl LibraryEntryFileHandler {
-    pub fn file_exists(&self) -> bool {
-        self.path.exists()
-    }
-
-    pub fn try_read_bytes(&self) -> Option<Vec<u8>> {
-        gdsfx_files::read_file(&self.path).ok()
-    }
-
-    pub fn try_write_bytes(&self, get_bytes: impl FnOnce() -> Option<Vec<u8>>) {
-        if !self.file_exists() {
-            if let Some(bytes) = get_bytes() {
-                let _ = gdsfx_files::write_file(&self.path, bytes);
-            }
-        }
-    }
-
-    pub fn try_delete_file(&self) {
-        let _ = fs::remove_file(&self.path);
     }
 }
