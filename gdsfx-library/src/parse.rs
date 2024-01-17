@@ -47,7 +47,7 @@ impl FromStr for LibraryEntry {
             kind: match kind {
                 EntryKind::SOUND_KEY => EntryKind::Sound {
                     bytes: parts[4].parse()?,
-                    duration: Centiseconds(parts[5].parse()?),
+                    duration: Duration::from_millis(10 * parts[5].parse::<u64>()?),
                 },
                 EntryKind::CATEGORY_KEY => EntryKind::Category,
 
@@ -67,8 +67,8 @@ impl ToString for LibraryEntry {
         };
 
         let (bytes, duration) = match self.kind {
-            EntryKind::Sound { bytes, duration } => (bytes, duration.0),
-            _ => (0, 0),
+            EntryKind::Sound { bytes, duration } => (bytes, duration),
+            _ => (0, Duration::ZERO),
         };
 
         let parts = [
@@ -77,7 +77,7 @@ impl ToString for LibraryEntry {
             kind.to_string(),
             self.parent_id.to_string(),
             bytes.to_string(),
-            duration.to_string(),
+            (duration.as_millis() / 10).to_string(),
         ];
         
         parts.join(",")
@@ -106,12 +106,12 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
     let mut child_map = HashMap::new();
 
     let mut total_bytes = 0;
-    let mut total_duration = 0;
+    let mut total_duration = Duration::ZERO;
 
     for entry in entries {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             total_bytes += *bytes;
-            total_duration += duration.0;
+            total_duration += *duration;
             sound_ids.push(entry.id);
         }
         
@@ -130,7 +130,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         child_map,
         
         total_bytes,
-        total_duration: Centiseconds(total_duration),
+        total_duration,
 
         credits,
     }

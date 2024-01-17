@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, time::Duration};
 
 use gdsfx_library::{LibraryEntry, EntryKind};
 use strum::EnumIter;
@@ -38,10 +38,10 @@ impl Sorting {
             matches!(entry.kind, EntryKind::Category)
         }
     
-        fn get_duration(entry: &LibraryEntry) -> i64 {
+        fn get_duration(entry: &LibraryEntry) -> Duration {
             match entry.kind {
-                EntryKind::Sound { duration, .. } => duration.0,
-                _ => 0,
+                EntryKind::Sound { duration, .. } => duration,
+                _ => Duration::ZERO,
             }
         }
     

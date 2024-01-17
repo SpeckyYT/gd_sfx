@@ -1,4 +1,4 @@
-use std::{thread, fs};
+use std::{thread, fs, time::Instant};
 
 use eframe::egui::{Ui, ProgressBar};
 use gdsfx_library::{EntryId, FileEntry};
@@ -6,24 +6,43 @@ use rayon::prelude::*;
 
 use super::AppState;
 
-#[derive(Default)]
 pub struct ToolProgress {
     translation_key: &'static str,
+    start_time: Instant,
     finished: usize,
     total: usize,
 }
 
 impl ToolProgress {
     fn new(translation_key: &'static str, total: usize) -> Self {
-        Self { translation_key, finished: 0, total }
+        Self {
+            translation_key,
+            start_time: Instant::now(),
+            finished: 0,
+            total,
+        }
     }
 
     pub fn show_progress(&self, ui: &mut Ui) {
-        ui.label(format!("{} – {}", t!(self.translation_key), t!("tools.progress")));
+        ui.label(format!("{} – {}", t!(self.translation_key), self.format_time()));
 
         let progress = self.finished as f32 / self.total as f32;
         let text = format!("{}/{} ({:.2}%)", self.finished, self.total, progress * 100.0);
         ui.add(ProgressBar::new(progress).text(text));
+    }
+
+    fn format_time(&self) -> String {
+        let elapsed_seconds = self.start_time.elapsed().as_secs();
+
+        let seconds = elapsed_seconds % 60;
+        let minutes = (elapsed_seconds / 60) % 60;
+        let hours = minutes / 60;
+
+        if hours > 0 {
+            format!("{hours:02}:{minutes:02}:{seconds:02}")
+        } else {
+            format!("{minutes:02}:{seconds:02}")
+        }
     }
 }
 

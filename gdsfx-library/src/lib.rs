@@ -1,4 +1,4 @@
-use std::{path::Path, collections::HashMap, fmt};
+use std::{path::Path, collections::HashMap, time::Duration};
 
 use anyhow::Result;
 
@@ -19,7 +19,7 @@ pub struct Library {
     child_map: HashMap<EntryId, Vec<EntryId>>,
 
     total_bytes: i64,
-    total_duration: Centiseconds,
+    total_duration: Duration,
 
     credits: Vec<Credit>,
 }
@@ -35,7 +35,7 @@ pub struct LibraryEntry {
 #[derive(Debug, Clone)]
 pub enum EntryKind {
     Category,
-    Sound { bytes: i64, duration: Centiseconds },
+    Sound { bytes: i64, duration: Duration },
 }
 
 #[derive(Debug, Clone)]
@@ -97,7 +97,7 @@ impl Library {
         self.total_bytes
     }
 
-    pub fn total_duration(&self) -> Centiseconds {
+    pub fn total_duration(&self) -> Duration {
         self.total_duration
     }
 
@@ -107,38 +107,5 @@ impl Library {
 
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Centiseconds(pub i64);
-
-impl fmt::Display for Centiseconds {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:.2}s", self.0 as f64 / 100.0)
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_format_centiseconds() {
-        macro_rules! test {
-            ( $centiseconds:literal, $expected:literal ) => {
-                assert_eq!(format!("{}", Centiseconds($centiseconds)), $expected);
-            }
-        }
-
-        test!(   0,  "0.00s");
-        test!(  12,  "0.12s");
-        test!( 345,  "3.45s");
-        test!(6789, "67.89s");
-
-        test!(   1,  "0.01s");
-        test!(  10,  "0.10s");
-        test!( 100,  "1.00s");
-        test!(1000, "10.00s");
     }
 }

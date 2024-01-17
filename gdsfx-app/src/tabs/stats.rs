@@ -14,7 +14,8 @@ pub fn render(ui: &mut Ui, app_state: &AppState, library: &Library) {
     let total_bytes = pretty_bytes(library.total_bytes() as f64);
     ui.label(t!("stats.library.size", size = total_bytes));
 
-    ui.label(t!("stats.library.duration", duration = library.total_duration()));
+    let total_duration = format!("{:.2}s", library.total_duration().as_secs_f32());
+    ui.label(t!("stats.library.duration", duration = total_duration));
 
     ui.add_space(5.0);
 

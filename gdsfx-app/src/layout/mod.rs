@@ -1,4 +1,5 @@
 use eframe::{egui::{self, *}, epaint::Vec2};
+use egui_modal::ModalStyle;
 use gdsfx_library::{Library, LibraryEntry};
 use strum::IntoEnumIterator;
 
@@ -90,4 +91,11 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, 
             }
         }
     });
+}
+
+pub fn add_caution_button(ui: &mut Ui, text: impl Into<WidgetText>) -> Response {
+    let default_modal_style = ModalStyle::default();
+    let widget_text = text.into().color(default_modal_style.caution_button_text_color);
+    let button = Button::new(widget_text).fill(default_modal_style.caution_button_fill);
+    ui.add(button)
 }

@@ -1,8 +1,7 @@
-use eframe::{egui::{Ui, ComboBox, Button, Layout, WidgetText}, emath::Align};
-use egui_modal::ModalStyle;
+use eframe::{egui::{Ui, ComboBox, Layout}, emath::Align};
 use strum::IntoEnumIterator;
 
-use crate::{backend::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum};
+use crate::{backend::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum, layout};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.heading(t!("settings"));
@@ -24,14 +23,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
         ui.add_space(4.0);
 
-        let default_modal_style = ModalStyle::default();
-        let widget_text = WidgetText::from(t!("settings.reset")).color(default_modal_style.caution_button_text_color);
-        let reset_button = Button::new(widget_text).fill(default_modal_style.caution_button_fill);
-        
-        if ui.add(reset_button).triple_clicked() {
+        if layout::add_caution_button(ui, t!("settings.reset")).triple_clicked() {
             app_state.settings = PersistentSettings::default();
         }
-
+        
         ui.label(t!("settings.reset.instruction"));
     });
 

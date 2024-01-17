@@ -23,7 +23,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
         ui.heading(t!("sound.info.id", id = entry.id));
         ui.heading(t!("sound.info.category.id", id = entry.parent_id));
         ui.heading(t!("sound.info.size", size = pretty_bytes::converter::convert(*bytes as f64)));
-        ui.heading(t!("sound.info.duration", duration = duration));
+        ui.heading(t!("sound.info.duration", duration = format!("{:.2}s", duration.as_secs_f32())));
 
         ui.add_space(25.0);
 
