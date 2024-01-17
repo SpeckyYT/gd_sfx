@@ -19,8 +19,6 @@
     "settings.language": "Taal",
 
     "tools": "Gereedschappen",
-    "tools.warning.long_time": "Waarschuwing: deze acties kunnen lang duren.",
-    "tools.warning.program_not_usable": "Het programma zal niet reageren terwijl deze aan het uitvoeren zijn.",
     "tools.instruction": "Tripel-klik de knoppen om ze te starten",
     "tools.download_all_sfx": "Download alle SFX",
     "tools.download_all_sfx.title": "Downloaden...",

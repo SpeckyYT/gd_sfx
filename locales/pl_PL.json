@@ -36,8 +36,6 @@
     "library.collapse_all": "Zwiń wszystkie kategorie",
 
     "tools": "Narzędzia",
-    "tools.warning.long_time": "Uwaga: te funkcje mogą zająć dużo czasu.",
-    "tools.warning.program_not_usable": "Nie będziesz mógł używać tego programu kiedy będą działać.",
     "tools.instruction": "Naciśnij przycisk trzy razy aby uruchomić",
     "tools.download_all_sfx": "Pobierz wszystkie efekty dźwiękowe",
     "tools.download_from_range": "Pobierz wszystkie efekty dźwiękowe po ID",

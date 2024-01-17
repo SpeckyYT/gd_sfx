@@ -85,12 +85,12 @@ impl Library {
             .flat_map(|id| self.entries.get(id))
     }
 
-    pub fn iter_sounds(&self) -> impl Iterator<Item = &LibraryEntry> {
-        self.sound_ids.iter().flat_map(|id| self.entries.get(id))
+    pub fn get_sound_ids(&self) -> &Vec<EntryId> {
+        &self.sound_ids
     }
 
-    pub fn total_sounds(&self) -> usize {
-        self.sound_ids.len()
+    pub fn iter_sounds(&self) -> impl Iterator<Item = &LibraryEntry> {
+        self.sound_ids.iter().flat_map(|id| self.entries.get(id))
     }
 
     pub fn total_bytes(&self) -> i64 {
