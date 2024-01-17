@@ -1,4 +1,4 @@
-use std::{ffi::OsStr, collections::HashMap};
+use std::collections::HashMap;
 
 use gdsfx_build::TokenStream;
 use gdsfx_files::paths;
@@ -13,19 +13,16 @@ struct Locale {
 
 pub fn build() -> TokenStream {
     let mut translations = HashMap::new();
-
-    let locale_files = gdsfx_files::read_dir(paths::build::LOCALES_DIR).unwrap()
-        .map(|file| file.path());
+    let locale_files = gdsfx_files::read_dir(paths::build::LOCALES_DIR).unwrap();
 
     for file in locale_files {
-        if let Some(locale) = file.file_stem().and_then(OsStr::to_str) {
-            let locale_json: Locale = gdsfx_files::read_json_file(&file).unwrap();            
-            let translators = locale_json.translators;
+        let path = file.path();
+        let Some(locale) = path.file_stem().and_then(|path| path.to_str()) else { continue };
 
-            translations.insert(locale.to_string(), quote! {
-                &[ #(#translators),* ]
-            });
-        }
+        let locale_json: Locale = gdsfx_files::read_json_file(&path).unwrap();            
+        let translators = locale_json.translators;
+
+        translations.insert(locale.to_string(), quote!(&[ #(#translators),* ]));
     }
 
     let locales = translations.keys();
