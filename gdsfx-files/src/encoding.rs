@@ -21,7 +21,7 @@ fn zlib_encode(bytes: &[u8]) -> Vec<u8> {
     let mut output = Vec::with_capacity(bytes.len());
     let mut encoder = ZlibEncoder::new(&mut output, Compression::new(9));
     encoder.write_all(bytes).unwrap();
-    drop(encoder);
+    drop(encoder); // why?
     output
 }
 

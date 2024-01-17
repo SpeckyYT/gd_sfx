@@ -8,10 +8,10 @@ use crate::backend::AppState;
 // and instead maybe put some stuff on the right side of the screen
 // also make sure everything fits on the ui
 pub fn render(ctx: &Context, app_state: &mut AppState) {
-    let Some(entry) = app_state.selected_sfx.clone() else { return };
-    let EntryKind::Sound { bytes, duration } = &entry.kind else { return };
-
     CentralPanel::default().show(ctx, |ui| {
+        let Some(entry) = &app_state.selected_sfx else { return };
+        let EntryKind::Sound { bytes, duration } = &entry.kind else { return };
+
         ui.heading(&entry.name);
 
         ui.add_space(10.0);

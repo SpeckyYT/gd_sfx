@@ -40,7 +40,7 @@
     "library.collapse_all": "Alles einklappen",
 
     "tools": "Tools",
-    "tools.instruction": "Schaltflächen zum Ausführen dreimal klicken",
+    "tools.instruction": "Dreifachklick zum Ausführen",
     "tools.download_all_sfx": "Alle Soundeffekte herunterladen",
     "tools.download_from_range": "SFX aus ID-Bereich herunterladen",
     "tools.download_from_range.from_id": "von ID",

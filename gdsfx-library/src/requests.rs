@@ -16,7 +16,7 @@ fn get_cdn_url() -> Url {
         .send().ok()
         .filter(|response| response.status().is_success())
         .and_then(|response| response.text().ok())
-        .unwrap_or(String::from(FALLBACK_CDN_URL));
+        .unwrap_or(FALLBACK_CDN_URL.to_string());
 
     Url::parse(&url).unwrap()
 }

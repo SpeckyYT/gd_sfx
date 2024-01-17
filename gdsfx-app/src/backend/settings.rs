@@ -73,8 +73,8 @@ impl PersistentSettings {
         if self.has_changed() {
             let json_data = serde_json::to_string(self).expect("derived serialization shouldn't fail");
             
-            let _ = gdsfx_files::create_parent_dirs(&*SETTINGS_FILE);
-            let _ = gdsfx_files::write_file(&*SETTINGS_FILE, json_data);
+            if gdsfx_files::create_parent_dirs(&*SETTINGS_FILE).is_err() { return }
+            if gdsfx_files::write_file(&*SETTINGS_FILE, json_data).is_err() { return }
 
             self.set_last_state();
         }

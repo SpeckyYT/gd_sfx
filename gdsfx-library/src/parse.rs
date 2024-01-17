@@ -1,12 +1,12 @@
 use std::{str::FromStr, collections::HashMap};
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 
 use crate::*;
 
-pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Library {
+pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Result<Library> {
     let bytes = gdsfx_files::encoding::decode(&bytes);
-    let string = std::str::from_utf8(&bytes).unwrap();
+    let string = std::str::from_utf8(&bytes)?;
 
     let (library_string, credits_string) = string
         .split_once('|')
@@ -98,8 +98,9 @@ impl FromStr for Credit {
     }
 }
 
-fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
-    let root_id = entries.first().expect("No library entries").id;
+fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Library> {
+    // TODO: can the root id be (reasonably) evaluated programatically?
+    let root_id = entries.first().context("No library entries")?.id;
     let mut sound_ids = Vec::new();
 
     let mut entry_map = HashMap::new();
@@ -123,7 +124,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         entry_map.insert(entry.id, entry);
     }
 
-    Library {
+    Ok(Library {
         root_id,
         sound_ids,
 
@@ -134,5 +135,5 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         total_duration,
 
         credits,
-    }
+    })
 }

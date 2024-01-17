@@ -10,7 +10,7 @@ pub use files::FileEntry;
 
 pub type EntryId = u32;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Library {
     root_id: EntryId,
     sound_ids: Vec<EntryId>,
@@ -38,7 +38,7 @@ pub enum EntryKind {
     Sound { bytes: i64, duration: Duration },
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Credit {
     pub name: String,
     pub link: String,
@@ -50,9 +50,10 @@ impl Library {
     
         let file = gd_folder.as_ref().join(SFX_LIBRARY_FILE);
     
-        gdsfx_files::read_file(&file).ok()
-            .map(parse::parse_library_from_bytes)
-            .filter(Self::check_library_version)
+        // TODO: if cannot download library and theres no downloaded library available show info/error message with retry button
+        gdsfx_files::read_file(&file)
+            .and_then(parse::parse_library_from_bytes)
+            .ok().filter(Self::check_library_version)
             .unwrap_or_else(|| {
                 let bytes = requests::request_file(SFX_LIBRARY_FILE)
                     .and_then(|response| Ok(response.bytes()?))
@@ -60,7 +61,7 @@ impl Library {
                     .expect("Couldn't get library data");
 
                 let _ = gdsfx_files::write_file(&file, &bytes);
-                parse::parse_library_from_bytes(bytes)
+                parse::parse_library_from_bytes(bytes).expect("Invalid library data")
             })
     }
 
@@ -74,7 +75,7 @@ impl Library {
     }
 
     pub fn get_root(&self) -> &LibraryEntry {
-        self.entries.get(&self.root_id).unwrap()
+        self.entries.get(&self.root_id).expect("Root ID not in library")
     }
 
     pub fn iter_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {

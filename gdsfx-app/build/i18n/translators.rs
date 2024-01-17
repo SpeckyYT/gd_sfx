@@ -35,7 +35,7 @@ pub fn build() -> TokenStream {
         fn get_translators(locale: &str) -> &[&str] {
             match locale {
                 #(#locales => #translators,)*
-                _ => unreachable!()
+                _ => &[]
             }
         }
     }

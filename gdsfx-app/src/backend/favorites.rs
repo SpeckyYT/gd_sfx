@@ -11,7 +11,7 @@ static FAVORITES_FILE: Lazy<PathBuf> = Lazy::new(|| {
         .join("favorites.json")
 });
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Favorites(HashSet<EntryId>);
 
 impl Default for Favorites {

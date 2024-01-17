@@ -38,8 +38,7 @@ pub fn build() {
     let schema_settings = find_locale_schema_settings();
 
     let mut template: LocaleSchema = serde_json::from_str(LOCALE_SCHEMA_TEMPLATE)
-        .context("Incorrect JSON in locale schema template")
-        .unwrap();
+        .expect("Incorrect JSON in locale schema template");
 
     let source_locale: LocaleFormat = gdsfx_files::read_json_file(paths::build::LOCALE_SCHEMA_SOURCE_FILE).unwrap();
 
@@ -54,8 +53,7 @@ pub fn build() {
     let destination_file = Path::new(paths::build::CARGO_WORKSPACE_ROOT).join(schema_settings.url);
 
     let formatted_template = serde_json::to_string_pretty(&template)
-        .context("Couldn't serialize locale schema")
-        .unwrap();
+        .expect("Couldn't serialize locale schema");
 
     gdsfx_files::create_parent_dirs(&destination_file).unwrap();
     gdsfx_files::write_file(destination_file, formatted_template).unwrap();
