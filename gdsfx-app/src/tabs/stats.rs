@@ -2,7 +2,9 @@ use eframe::egui::Ui;
 use gdsfx_library::Library;
 use pretty_bytes::converter::convert as pretty_bytes;
 
-pub fn render(ui: &mut Ui, library: &Library) {
+use crate::backend::AppState;
+
+pub fn render(ui: &mut Ui, app_state: &AppState, library: &Library) {
     ui.heading(t!("stats.library"));
 
     ui.add_space(10.0);
@@ -24,5 +26,5 @@ pub fn render(ui: &mut Ui, library: &Library) {
     
     ui.add_space(10.0);
 
-    // ui.label(t!("stats.files.downloaded", files = EXISTING_SOUND_FILES.lock().len()));
+    ui.label(t!("stats.files.downloaded", files = app_state.get_sfx_count()));
 }

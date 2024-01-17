@@ -17,7 +17,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState, library: &Library) {
                     Tab::Favorites => favorites::render(ui, app_state, library),
                     Tab::Tools => tools::render(ui, ctx, app_state, library),
                     Tab::Settings => settings::render(ui, app_state),
-                    Tab::Stats => stats::render(ui, library),
+                    Tab::Stats => stats::render(ui, app_state, library),
                     Tab::Credits => credits::render(ui, library),
                 }
             });

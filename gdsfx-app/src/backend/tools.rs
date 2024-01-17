@@ -36,6 +36,7 @@ impl AppState {
 
         let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
+        let downloaded_sfx = self.downloaded_sfx.clone();
     
         thread::spawn(move || {
             ids.into_par_iter().try_for_each(|id| {
@@ -45,7 +46,9 @@ impl AppState {
                         .or_else(|| file_entry.try_download_bytes());
 
                     if let Some(bytes) = bytes {
-                        file_entry.try_write_bytes(&gd_folder, bytes);
+                        if file_entry.try_write_bytes(&gd_folder, bytes).is_ok() {
+                            downloaded_sfx.lock().insert(id);
+                        }
                     }
                 }
                 progress.lock().as_mut().map(|progress| progress.finished += 1)

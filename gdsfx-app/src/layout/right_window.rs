@@ -1,6 +1,6 @@
 use eframe::{egui::{Context, CentralPanel, Button, Slider}, epaint::Color32};
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{EntryKind, FileEntry};
+use gdsfx_library::EntryKind;
 
 use crate::backend::AppState;
 
@@ -28,18 +28,16 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
         ui.add_space(25.0);
 
         if app_state.is_gd_folder_valid() {
-            let file_entry = FileEntry::new(entry.id);
-            let gd_folder = &app_state.settings.gd_folder;
-            let file_exists = file_entry.file_exists(gd_folder);
+            let file_exists = app_state.is_sfx_downloaded(entry.id);
 
             let download_button = Button::new(t!("sound.download"));
             if ui.add_enabled(!file_exists, download_button).clicked() {
-                app_state.download_sound(entry.id);
+                app_state.download_sfx(entry.id);
             }
 
             let delete_button = Button::new(t!("sound.delete"));
             if ui.add_enabled(file_exists, delete_button).clicked() {
-                file_entry.try_delete_file(gd_folder);
+                app_state.delete_sfx(entry.id);
             }
         } else {
             ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
@@ -48,7 +46,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
         ui.add_space(10.0);
 
         if ui.button(t!("sound.play")).clicked() {
-            app_state.play_sound(entry.id);
+            app_state.play_sfx(entry.id);
         }
 
         let stop_button = Button::new(t!("sound.stop"));

@@ -62,7 +62,7 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
         modal.title(ui, t!("tools.download_from_range"));
 
         modal.frame(ui, |ui| {
-            let range = &mut app_state.bruteforce_range;
+            let range = &mut app_state.download_id_range;
 
             let from_slider = Slider::new(&mut range.0, 0..=MAX_ID_RANGE)
                 .text(t!("tools.download_from_range.from_id"));
@@ -81,7 +81,7 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
 
         modal.buttons(ui, |ui| {
             if ui.button(t!("tools.confirm")).triple_clicked() {
-                let range = app_state.bruteforce_range;
+                let range = app_state.download_id_range;
                 app_state.download_multiple_sfx("tools.download_from_range", (range.0..=range.1).collect());
                 modal.close();
             }

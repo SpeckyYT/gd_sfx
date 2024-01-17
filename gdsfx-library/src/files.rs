@@ -1,5 +1,7 @@
 use std::{path::{PathBuf, Path}, fs};
 
+use anyhow::Result;
+
 use crate::{EntryId, requests};
 
 pub struct FileEntry(EntryId);
@@ -31,11 +33,11 @@ impl FileEntry {
             .map(|bytes| bytes.to_vec())
     }
 
-    pub fn try_write_bytes(&self, gd_folder: impl AsRef<Path>, bytes: Vec<u8>) {
-        let _ = gdsfx_files::write_file(self.get_path(gd_folder), bytes);
+    pub fn try_write_bytes(&self, gd_folder: impl AsRef<Path>, bytes: Vec<u8>) -> Result<()> {
+        gdsfx_files::write_file(self.get_path(gd_folder), bytes)
     }
 
-    pub fn try_delete_file(&self, gd_folder: impl AsRef<Path>) {
-        let _ = fs::remove_file(self.get_path(gd_folder));
+    pub fn try_delete_file(&self, gd_folder: impl AsRef<Path>) -> Result<()> {
+        Ok(fs::remove_file(self.get_path(gd_folder))?)
     }
 }

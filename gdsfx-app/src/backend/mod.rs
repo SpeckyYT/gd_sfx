@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc, collections::HashMap, path::Path};
+use std::{thread, sync::Arc, collections::{HashMap, HashSet}, path::Path, fs};
 
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
@@ -27,8 +27,9 @@ pub struct AppState {
     pub audio_settings: AudioSettings,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
-    pub bruteforce_range: (EntryId, EntryId),
+    pub download_id_range: (EntryId, EntryId),
 
+    downloaded_sfx: Arc<Mutex<HashSet<EntryId>>>,
     sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
 
@@ -37,10 +38,23 @@ impl AppState {
         let settings = PersistentSettings::load_or_default();
         rust_i18n::set_locale(&settings.locale);
 
+
+        let downloaded_sfx = fs::read_dir(&settings.gd_folder)
+            .map(|read_dir| {
+                read_dir
+                    .flatten()
+                    .flat_map(|file| file.file_name().into_string())
+                    .filter(|file_name| file_name.starts_with('s') && file_name.ends_with(".ogg"))
+                    .flat_map(|file_name| file_name[1..file_name.len()-4].parse())
+                    .collect::<HashSet<_>>()
+            })
+            .unwrap_or_default();
+
         Self {
             settings,
             favorites: Favorites::load_or_default(),
-            bruteforce_range: (0, 14500),
+            download_id_range: (0, 14500),
+            downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
             ..Default::default()
         }
     }
@@ -56,8 +70,7 @@ impl AppState {
             EntryKind::Sound { .. } => {
                 let search = self.search_settings.search_query.to_lowercase();
 
-                // TODO: stats system for storing which files have been downloaded
-                (!self.search_settings.show_downloaded /* || FileEntry::new(entry.id).file_exists(&self.settings.gd_folder) */ )
+                (!self.search_settings.show_downloaded || self.downloaded_sfx.lock().contains(&entry.id))
                     && entry.name.to_lowercase().contains(&search)
                     || entry.id.to_string() == search
             }
@@ -69,7 +82,11 @@ impl AppState {
         path.is_absolute() && path.is_dir()
     }
 
-    pub fn play_sound(&self, id: EntryId) {
+    pub fn is_sfx_downloaded(&self, id: EntryId) -> bool {
+        self.downloaded_sfx.lock().contains(&id)
+    }
+
+    pub fn play_sfx(&self, id: EntryId) {
         let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
         let audio_settings = self.audio_settings;
@@ -97,7 +114,7 @@ impl AppState {
         });
     }
 
-    pub fn download_sound(&self, id: EntryId) {
+    pub fn download_sfx(&self, id: EntryId) {
         if !self.is_gd_folder_valid() { return }
 
         let file_entry = FileEntry::new(id);
@@ -107,14 +124,26 @@ impl AppState {
 
         let cache = self.sfx_cache.clone();
         let gd_folder = gd_folder.clone();
+        let downloaded_sfx = self.downloaded_sfx.clone();
 
         thread::spawn(move || {
             let bytes = cache.lock().get(&id).cloned()
                 .or_else(|| file_entry.try_download_bytes());
 
-            if let Some(bytes) = bytes {
-                file_entry.try_write_bytes(gd_folder, bytes);
+            let Some(bytes) = bytes else { return };
+            if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
+                downloaded_sfx.lock().insert(id);
             }
         });
+    }
+
+    pub fn delete_sfx(&self, id: EntryId) {
+        if FileEntry::new(id).try_delete_file(&self.settings.gd_folder).is_ok() {
+            self.downloaded_sfx.lock().remove(&id);
+        }
+    }
+
+    pub fn get_sfx_count(&self) -> usize {
+        self.downloaded_sfx.lock().len()
     }
 }
