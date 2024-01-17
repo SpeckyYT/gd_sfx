@@ -44,7 +44,7 @@
     "tools.warning.program_not_usable": "You will not be able to use this program while they are running.",
     "tools.instruction": "Triple click the buttons to run",
     "tools.download_all_sfx": "Download all SFX",
-    "tools.download_from_range": "Download from range",
+    "tools.download_from_range": "Download from ID range",
     "tools.download_from_range.from_id": "from ID",
     "tools.download_from_range.to_id": "to ID",
     "tools.download.title": "Downloading...",
@@ -54,6 +54,7 @@
     "tools.confirm": "Confirm",
     "tools.cancel": "Cancel",
     "tools.close": "Close",
+    "tools.stop": "Stop",
 
     "settings": "Settings",
     "settings.search_filter_mode": "Search filter mode",

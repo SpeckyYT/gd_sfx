@@ -29,6 +29,8 @@ pub struct AppState {
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
     pub download_id_range: (EntryId, EntryId),
 
+    // TODO https://docs.rs/notify/6.1.1/notify/
+    // to keep track of externally added and removed SFX?
     downloaded_sfx: Arc<Mutex<HashSet<EntryId>>>,
     sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
@@ -71,8 +73,7 @@ impl AppState {
                 let search = self.search_settings.search_query.to_lowercase();
 
                 (!self.search_settings.show_downloaded || self.downloaded_sfx.lock().contains(&entry.id))
-                    && entry.name.to_lowercase().contains(&search)
-                    || entry.id.to_string() == search
+                    && (entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search)
             }
         }
     }
@@ -80,6 +81,10 @@ impl AppState {
     pub fn is_gd_folder_valid(&self) -> bool {
         let path = Path::new(&self.settings.gd_folder);
         path.is_absolute() && path.is_dir()
+    }
+
+    pub fn is_tool_running(&self) -> bool {
+        self.tool_progress.lock().is_some()
     }
 
     pub fn is_sfx_downloaded(&self, id: EntryId) -> bool {

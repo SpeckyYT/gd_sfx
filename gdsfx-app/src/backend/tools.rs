@@ -84,19 +84,17 @@ impl AppState {
         let progress = self.tool_progress.clone();
         *progress.lock() = Some(ToolProgress::new(translation_key, read_dir.len()));
 
+        let gd_folder = self.settings.gd_folder.clone();
+        let downloaded_sfx = self.downloaded_sfx.clone();
+
         thread::spawn(move || {
-            read_dir.into_par_iter()
-                .filter(|entry| {
-                    entry.file_name().to_str()
-                        .filter(|s| s.starts_with('s') && s.ends_with(".ogg"))
-                        .map(|s| &s[1..s.len()-4])
-                        .and_then(|s| s.parse::<u32>().ok())
-                        .is_some()
-                })
-                .try_for_each(|entry| {
-                    let _ = fs::remove_file(entry.path());
-                    progress.lock().as_mut().map(|progress| progress.finished += 1)
-                });
+            let ids = downloaded_sfx.lock().clone();
+            ids.into_iter().try_for_each(|id| {
+                if FileEntry::new(id).try_delete_file(&gd_folder).is_ok() {
+                    downloaded_sfx.lock().remove(&id);
+                }
+                progress.lock().as_mut().map(|progress| progress.finished += 1)
+            });
 
             *progress.lock() = None;
         });

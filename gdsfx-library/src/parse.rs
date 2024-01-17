@@ -105,7 +105,6 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
     let mut entry_map = HashMap::new();
     let mut child_map = HashMap::new();
 
-    let mut total_sfx = 0;
     let mut total_bytes = 0;
     let mut total_duration = Duration::ZERO;
 
@@ -113,7 +112,6 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         if let EntryKind::Sound { bytes, duration } = &entry.kind {
             total_bytes += *bytes;
             total_duration += *duration;
-            total_sfx += 1;
 
             sound_ids.push(entry.id);
         }
@@ -132,7 +130,6 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Library {
         entries: entry_map,
         child_map,
         
-        total_sfx,
         total_bytes,
         total_duration,
 
