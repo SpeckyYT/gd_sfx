@@ -70,10 +70,12 @@ impl AppState {
             }
 
             EntryKind::Sound { .. } => {
-                let search = self.search_settings.search_query.to_lowercase();
+                if self.search_settings.show_downloaded && !self.is_sfx_downloaded(entry.id) {
+                    return false
+                }
 
-                (!self.search_settings.show_downloaded || self.downloaded_sfx.lock().contains(&entry.id))
-                    && (entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search)
+                let search = self.search_settings.search_query.to_lowercase();
+                entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search
             }
         }
     }

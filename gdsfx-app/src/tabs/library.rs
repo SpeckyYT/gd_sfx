@@ -22,7 +22,7 @@ fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library: &Library, mu
                 let is_enabled = app_state.is_matching_entry(entry, library);
     
                 if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
-                    return // don't render at all
+                    continue // skip rendering entirely
                 }
     
                 ui.add_enabled_ui(is_enabled, |ui| {
