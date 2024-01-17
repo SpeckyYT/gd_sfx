@@ -9,7 +9,7 @@ pub fn render(ui: &mut Ui, app_state: &AppState, library: &Library) {
 
     ui.add_space(10.0);
 
-    ui.label(t!("stats.library.files", files = library.total_entries()));
+    ui.label(t!("stats.library.files", files = library.total_sfx()));
 
     let total_bytes = pretty_bytes(library.total_bytes() as f64);
     ui.label(t!("stats.library.size", size = total_bytes));

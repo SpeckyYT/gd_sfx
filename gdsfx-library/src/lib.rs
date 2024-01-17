@@ -18,6 +18,7 @@ pub struct Library {
     entries: HashMap<EntryId, LibraryEntry>,
     child_map: HashMap<EntryId, Vec<EntryId>>,
 
+    total_sfx: u64,
     total_bytes: i64,
     total_duration: Duration,
 
@@ -91,6 +92,10 @@ impl Library {
 
     pub fn total_entries(&self) -> usize {
         self.entries.len()
+    }
+
+    pub fn total_sfx(&self) -> u64 {
+        self.total_sfx
     }
 
     pub fn total_bytes(&self) -> i64 {
