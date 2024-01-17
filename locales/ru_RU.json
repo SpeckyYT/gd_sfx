@@ -21,8 +21,6 @@
     "settings.language": "Язык",
 
     "tools": "Инструменты",
-    "tools.warning.long_time": "Предупреждение: эти функции занимают много времени на обробаботку.",
-    "tools.warning.program_not_usable": "Вы не сможете использовать это программу во время их роботы.",
     "tools.instruction": "Трижды нажмите кнопку для запуска",
     "tools.download_all_sfx": "Скачать все SFX",
     "tools.download_all_sfx.title": "Скачивание...",

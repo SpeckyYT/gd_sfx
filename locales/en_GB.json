@@ -1,5 +1,5 @@
 {
-    "language.name": "English (United States)",
+    "language.name": "English (United Kingdom)",
     "language.translators": [],
 
     "tab.library": "Library",
@@ -40,8 +40,6 @@
     "library.collapse_all": "Collapse all",
 
     "tools": "Tools",
-    "tools.warning.long_time": "Warning: these functions take a long time to process.",
-    "tools.warning.program_not_usable": "You will not be able to use this program while they are running.",
     "tools.instruction": "Triple click the buttons to run",
     "tools.download_all_sfx": "Download all SFX",
     "tools.download_from_range": "Download from ID range",

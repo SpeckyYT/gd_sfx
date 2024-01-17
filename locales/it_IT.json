@@ -33,8 +33,6 @@
     "settings.sfx_select_mode.hover": "Hover",
 
     "tools": "Strumenti",
-    "tools.warning.long_time": "Attenzione: queste funzioni richiedono molto tempo.",
-    "tools.warning.program_not_usable": "Non potrai utilizzare questo programma mentre funzionano.",
     "tools.instruction": "Premi tre volte per eseguire",
     "tools.download_all_sfx": "Scarica tutti gli effetti sonori",
     "tools.download.title": "Scaricando...",

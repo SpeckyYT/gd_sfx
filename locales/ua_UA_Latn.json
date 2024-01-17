@@ -20,8 +20,6 @@
     "settings.language": "Mova",
 
     "tools": "Instrumenty",
-    "tools.warning.long_time": "Poperedženńa: ci funkciji zajmajuť bahato času na obrobku.",
-    "tools.warning.program_not_usable": "Vy ne budete spromožni vykorystovuvaty ću prohrammu pid čas jich roboty.",
     "tools.instruction": "Tryči natysniť knopku dľa zapusku",
     "tools.download_all_sfx": "Zavantažyty vsi SFX",
     "tools.download_all_sfx.title": "Zavantaženńa...",

@@ -40,8 +40,6 @@
     "library.collapse_all": "Alles einklappen",
 
     "tools": "Tools",
-    "tools.warning.long_time": "Achtung: Die Verarbeitung dieser Funktionen kann sehr lange dauern.",
-    "tools.warning.program_not_usable": "Das Programm ist während ihrer Ausführung nicht verwendbar.",
     "tools.instruction": "Schaltflächen zum Ausführen dreimal klicken",
     "tools.download_all_sfx": "Alle Soundeffekte herunterladen",
     "tools.download_from_range": "SFX aus ID-Bereich herunterladen",

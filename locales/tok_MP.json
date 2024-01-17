@@ -21,8 +21,6 @@
     "settings.language": "toki",
 
     "tools": "ilo",
-    "tools.warning.long_time": "o ilo ni li kepeken e tenpo mute.",
-    "tools.warning.program_not_usable": "ilo ni li pali la sina ken ala kepeken ilo ni.",
     "tools.instruction": "luka mute e leko ni la ilo li pali",
     "tools.download_all_sfx": "kama jo e lipu kalama ale",
     "tools.download_all_sfx.title": "kama jo...",
