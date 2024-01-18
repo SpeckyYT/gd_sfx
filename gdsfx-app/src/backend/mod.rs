@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc, path::Path, fs};
+use std::{thread, sync::Arc, path::Path, fs, collections::BTreeSet};
 use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
@@ -27,7 +27,7 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
-    pub unlisted_sounds: HashSet<EntryId>,
+    pub unlisted_sounds: BTreeSet<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
     pub download_id_range: (EntryId, EntryId),

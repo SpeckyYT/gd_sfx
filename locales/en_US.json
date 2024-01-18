@@ -38,6 +38,7 @@
     "search.show_downloaded": "Show downloaded",
 
     "library.collapse_all": "Collapse all",
+    "library.unlisted_sfx": "Unlisted SFX",
 
     "tools": "Tools",
     "tools.instruction": "Triple click the buttons to run",
@@ -77,6 +78,7 @@
     "stats.library.version": "Library version: %{version}",
     "stats.files": "SFX Files",
     "stats.files.downloaded": "Downloaded SFX files: %{files}",
+    "stats.sounds.unlisted": "Unlisted SFX: %{sounds}",
 
     "credits.sfx": "SFX Credits",
     "credits.this_project": "This project",

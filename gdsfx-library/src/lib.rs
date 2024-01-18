@@ -114,3 +114,9 @@ impl Library {
         &self.credits
     }
 }
+
+impl AsRef<LibraryEntry> for LibraryEntry {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
