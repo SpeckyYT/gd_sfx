@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use ahash::HashMap;
 use gdsfx_files::paths;
 use quote::quote;
 

@@ -1,5 +1,5 @@
-use std::{path::Path, collections::HashMap, time::Duration};
-
+use std::{path::Path, time::Duration};
+use ahash::HashMap;
 use anyhow::Result;
 
 mod requests;
@@ -76,6 +76,10 @@ impl Library {
 
     pub fn get_root(&self) -> &LibraryEntry {
         self.entries.get(&self.root_id).expect("Root ID not in library")
+    }
+
+    pub fn get_entries(&self) -> &HashMap<EntryId, LibraryEntry> {
+        &self.entries
     }
 
     pub fn iter_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {

@@ -1698,6 +1698,7 @@ dependencies = [
 name = "gdsfx-app"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "anyhow",
  "educe",
  "eframe",
@@ -1761,6 +1762,7 @@ dependencies = [
 name = "gdsfx-library"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "anyhow",
  "eframe",
  "gdsfx-files",

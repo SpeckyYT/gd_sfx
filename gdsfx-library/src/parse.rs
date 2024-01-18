@@ -1,5 +1,5 @@
-use std::{str::FromStr, collections::HashMap};
-
+use std::str::FromStr;
+use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
 
 use crate::*;
