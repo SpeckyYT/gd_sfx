@@ -29,5 +29,5 @@ pub fn render(ui: &mut Ui, app_state: &AppState, library: &Library) {
 
     ui.label(t!("stats.files.downloaded", files = app_state.get_sfx_count()));
 
-    ui.label(t!("stats.sounds.unlisted", sounds = app_state.unlisted_sounds.len()));
+    ui.label(t!("stats.sounds.unlisted", sounds = app_state.unlisted_sfx.len()));
 }

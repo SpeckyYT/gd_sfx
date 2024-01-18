@@ -29,7 +29,7 @@ localized_enum! {
 }
 
 impl Sorting {
-    pub fn comparator(&self) -> impl FnMut(&&LibraryEntry, &&LibraryEntry) -> Ordering + '_ {
+    pub fn compare_entries(&self, a: &LibraryEntry, b: &LibraryEntry) -> Ordering {
         fn is_category(entry: &LibraryEntry) -> bool {
             matches!(entry.kind, EntryKind::Category)
         }
@@ -48,7 +48,7 @@ impl Sorting {
             }
         }
         
-        move |a, b| is_category(b).cmp(&is_category(a)) // categories on top
+        is_category(b).cmp(&is_category(a)) // categories on top
             .then(match self {
                 Sorting::Default => Ordering::Equal,
                 Sorting::NameInc => a.name.cmp(&b.name),

@@ -39,6 +39,7 @@
 
     "library.collapse_all": "Collapse all",
     "library.unlisted_sfx": "Unlisted SFX",
+    "library.unlisted_sfx.hint": "Use the \"%{tool}\" tool to discover unlisted SFX",
 
     "tools": "Tools",
     "tools.instruction": "Triple click the buttons to run",
@@ -46,9 +47,7 @@
     "tools.download_from_range": "Download from ID range",
     "tools.download_from_range.from_id": "from ID",
     "tools.download_from_range.to_id": "to ID",
-    "tools.download.title": "Downloading...",
     "tools.delete_all_sfx": "Delete all SFX",
-    "tools.delete.title": "Deleting...",
     "tools.progress": "Progress",
     "tools.confirm": "Confirm",
     "tools.cancel": "Cancel",

@@ -14,25 +14,32 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
 
     let categories: Vec<&LibraryEntry> = library.iter_children(library.get_root()).collect();
     render_recursive(ui, app_state, library, categories, collapse_all);
-    
-    ui.separator();
 
-    let mut unlisted_sounds: Vec<LibraryEntry> = app_state.unlisted_sounds.iter()
-        .map(|id|
-            LibraryEntry {
-                id: *id,
-                name: id.to_string(),
-                parent_id: UNLISTED_ID,
-                kind: EntryKind::Sound { bytes: 0, duration: Duration::ZERO },
-            }
-        )
-        .filter(|entry| app_state.is_matching_entry(entry, library))
+    let mut unlisted_sounds: Vec<LibraryEntry> = app_state.unlisted_sfx.iter()
+        .map(|&id| LibraryEntry {
+            id,
+            name: id.to_string(),
+            parent_id: UNLISTED_ID,
+            kind: EntryKind::Sound {
+                bytes: 0,
+                duration: Duration::ZERO,
+            },
+        })
         .collect();
 
-    unlisted_sounds.sort_by(|a,b| app_state.search_settings.sorting_mode.comparator()(&a, &b));
+    let unlisted_sfx_empty = unlisted_sounds.is_empty();
 
-    ui.add_enabled_ui(!unlisted_sounds.is_empty(), |ui| {
-        let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx")).open((collapse_all||unlisted_sounds.is_empty()).then_some(false));
+    if unlisted_sfx_empty && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
+        return
+    }
+
+    unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+
+    ui.separator();
+
+    ui.add_enabled_ui(!unlisted_sfx_empty, |ui| {
+        let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx"))
+            .open((unlisted_sfx_empty || collapse_all).then_some(false));
 
         let response = collapsing.show(ui, |ui| {
             for entry in unlisted_sounds {
@@ -40,12 +47,13 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
             }
         });
 
-        response.header_response.on_disabled_hover_text(" if u no unlisted then use download from id range tool :)_)");
+        let text = t!("library.unlisted_sfx.hint", tool = t!("tools.download_from_range"));
+        response.header_response.on_disabled_hover_text(text);
     });
 }
 
 fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library: &Library, mut entries: Vec<&LibraryEntry>, collapse_all: bool) {
-    entries.sort_by(app_state.search_settings.sorting_mode.comparator());
+    entries.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
     for entry in entries {
         match entry.kind {
             EntryKind::Category => {

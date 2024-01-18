@@ -38,6 +38,8 @@
     "search.show_downloaded": "Show downloaded",
 
     "library.collapse_all": "Collapse all",
+    "library.unlisted_sfx": "Unlisted SFX",
+    "library.unlisted_sfx.hint": "Use the \"%{tool}\" tool to discover unlisted SFX",
 
     "tools": "Tools",
     "tools.instruction": "Triple click the buttons to run",
@@ -45,9 +47,7 @@
     "tools.download_from_range": "Download from ID range",
     "tools.download_from_range.from_id": "from ID",
     "tools.download_from_range.to_id": "to ID",
-    "tools.download.title": "Downloading...",
     "tools.delete_all_sfx": "Delete all SFX",
-    "tools.delete.title": "Deleting...",
     "tools.progress": "Progress",
     "tools.confirm": "Confirm",
     "tools.cancel": "Cancel",
@@ -64,7 +64,9 @@
     "settings.play_sfx_on_click": "Play SFX on click",
     "settings.language": "Language",
     "settings.gd_folder": "Geometry Dash folder",
+    "settings.gd_folder.select": "Select folder...",
     "settings.gd_folder.not_found": "Specify a valid Geometry Dash folder path in the settings in order to download SFX.",
+    "settings.cannot_modify.tool_running": "This setting cannot be modified while a tool is running.",
     "settings.reset": "Reset settings",
     "settings.reset.instruction": "Triple click to confirm",
 
@@ -75,6 +77,7 @@
     "stats.library.version": "Library version: %{version}",
     "stats.files": "SFX Files",
     "stats.files.downloaded": "Downloaded SFX files: %{files}",
+    "stats.sounds.unlisted": "Unlisted SFX: %{sounds}",
 
     "credits.sfx": "SFX Credits",
     "credits.this_project": "This project",

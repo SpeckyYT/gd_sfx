@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc, path::Path, fs, collections::BTreeSet};
+use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
@@ -27,7 +27,7 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
-    pub unlisted_sounds: BTreeSet<EntryId>,
+    pub unlisted_sfx: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
     pub download_id_range: (EntryId, EntryId),
@@ -51,21 +51,20 @@ impl AppState {
             })
             .unwrap_or_default();
 
-        // this takes around 7-9ms with (13786 / 13873) over here
-        let unlisted_sounds = downloaded_sfx.difference(
-            &library.get_entries()
-            .keys().copied()
-            .collect()
-        )
-        .copied()
-        .collect();
+        // TODO how do we want to update unlisted_sfx? a fn register_sfx(&mut self, id: EntryId, library?)
+        // and/or can unlisted_sfx be (partially) refactored into gdsfx-library?
+        // additional things to consider:
+        // - favorites tab
+        // - tools (un)registering sfx ids → thread safety
+        let library_sfx = &library.get_sound_ids().iter().copied().collect();
+        let unlisted_sfx = downloaded_sfx.difference(library_sfx).copied().collect();
 
         Self {
             settings,
             favorites: Favorites::load_or_default(),
             download_id_range: (0, 14500),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
-            unlisted_sounds,
+            unlisted_sfx,
             ..Default::default()
         }
     }

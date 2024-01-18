@@ -38,6 +38,8 @@
     "search.show_downloaded": "Nur heruntergeladene SFX",
 
     "library.collapse_all": "Alles einklappen",
+    "library.unlisted_sfx": "Nicht gelistet",
+    "library.unlisted_sfx.hint": "Nicht gelistete Soundeffekte können mithilfe des \"%{tool}\"-Tools entdeckt werden",
 
     "tools": "Tools",
     "tools.instruction": "Dreifachklick zum Ausführen",
@@ -45,9 +47,7 @@
     "tools.download_from_range": "SFX aus ID-Bereich herunterladen",
     "tools.download_from_range.from_id": "von ID",
     "tools.download_from_range.to_id": "bis ID",
-    "tools.download.title": "Soundeffekte werden heruntergeladen...",
     "tools.delete_all_sfx": "Alle Soundeffekte löschen",
-    "tools.delete.title": "Soundeffekte werden gelöscht...",
     "tools.progress": "Fortschritt",
     "tools.confirm": "Bestätigen",
     "tools.cancel": "Abbrechen",
@@ -64,7 +64,9 @@
     "settings.play_sfx_on_click": "SFX auf Klick abspielen",
     "settings.language": "Sprache",
     "settings.gd_folder": "Geometry Dash-Ordner",
+    "settings.gd_folder.select": "Ordner auswählen...",
     "settings.gd_folder.not_found": "Ein gültiger Geometry Dash-Ordner muss in den Einstellungen angegeben sein, um SFX herunterladen zu können.",
+    "settings.cannot_modify.tool_running": "Diese Einstellung kann nicht geändert werden, während ein Tool ausgeführt wird.",
     "settings.reset": "Einstellungen zurücksetzen",
     "settings.reset.instruction": "Dreifachklick zum Bestätigen",
 
@@ -75,6 +77,7 @@
     "stats.library.version": "Bibliotheksversion: %{version}",
     "stats.files": "SFX-Dateien",
     "stats.files.downloaded": "Heruntergeladene Dateien: %{files}",
+    "stats.sounds.unlisted": "Nicht gelistete Soundeffekte: %{sounds}",
 
     "credits.sfx": "SFX-Produzenten",
     "credits.this_project": "Dieses Projekt",

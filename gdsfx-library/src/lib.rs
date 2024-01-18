@@ -71,7 +71,7 @@ impl Library {
         requests::request_file(SFX_VERSION_ENDPOINT).ok()
             .and_then(|response| response.text().ok())
             .map(|version| version == library.get_version())
-            .unwrap_or(false)
+            .unwrap_or(true) // if request failed then don't bother redownloading library
     }
 
     pub fn get_root(&self) -> &LibraryEntry {
@@ -112,11 +112,5 @@ impl Library {
 
     pub fn get_credits(&self) -> &Vec<Credit> {
         &self.credits
-    }
-}
-
-impl AsRef<LibraryEntry> for LibraryEntry {
-    fn as_ref(&self) -> &Self {
-        self
     }
 }
