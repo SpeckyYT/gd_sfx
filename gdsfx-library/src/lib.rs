@@ -1,5 +1,5 @@
-use std::{path::Path, collections::HashMap, time::Duration};
-
+use std::{path::Path, time::Duration};
+use ahash::{HashMap, HashSet};
 use anyhow::Result;
 
 mod requests;
@@ -17,6 +17,7 @@ pub struct Library {
 
     entries: HashMap<EntryId, LibraryEntry>,
     child_map: HashMap<EntryId, Vec<EntryId>>,
+    unlisted_sfx: HashSet<EntryId>,
 
     total_bytes: i64,
     total_duration: Duration,

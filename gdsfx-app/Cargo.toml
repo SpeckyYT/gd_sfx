@@ -8,6 +8,7 @@ build = "build/main.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+ahash = { workspace = true }
 anyhow = { workspace = true }
 educe = { workspace = true }
 eframe = { workspace = true }
@@ -29,6 +30,7 @@ strum = { workspace = true }
 winapi = { workspace = true }
 
 [build-dependencies]
+ahash = { workspace = true }
 anyhow = { workspace = true }
 gdsfx-build = { path = "../gdsfx-build" }
 gdsfx-files = { path = "../gdsfx-files" }

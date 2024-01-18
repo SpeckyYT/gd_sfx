@@ -1,4 +1,5 @@
-use std::{collections::HashSet, path::PathBuf};
+use std::path::PathBuf;
+use ahash::{HashSet, HashSetExt};
 
 use anyhow::Result;
 use gdsfx_files::paths;

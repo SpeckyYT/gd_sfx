@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use ahash::{HashMap, HashMapExt};
 
 use gdsfx_build::TokenStream;
 use gdsfx_files::paths;

@@ -1,4 +1,5 @@
-use std::{thread, sync::Arc, collections::{HashMap, HashSet}, path::Path, fs};
+use std::{thread, sync::Arc, path::Path, fs};
+use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;

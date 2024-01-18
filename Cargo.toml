@@ -12,6 +12,7 @@ resolver = "2"
 # TODO
 # this list can be organized into categories
 # instead of just being sorted alphabetically
+ahash = "0.8.7"
 anyhow = "1.0.79"
 base64 = "0.21.6"
 build_script = "0.2.0"
