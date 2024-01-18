@@ -1,5 +1,5 @@
 use std::{path::Path, time::Duration};
-use ahash::{HashMap, HashSet};
+use ahash::HashMap;
 use anyhow::Result;
 
 mod requests;
@@ -17,7 +17,6 @@ pub struct Library {
 
     entries: HashMap<EntryId, LibraryEntry>,
     child_map: HashMap<EntryId, Vec<EntryId>>,
-    unlisted_sfx: HashSet<EntryId>,
 
     total_bytes: i64,
     total_duration: Duration,
@@ -77,6 +76,10 @@ impl Library {
 
     pub fn get_root(&self) -> &LibraryEntry {
         self.entries.get(&self.root_id).expect("Root ID not in library")
+    }
+
+    pub fn get_entries(&self) -> &HashMap<EntryId, LibraryEntry> {
+        &self.entries
     }
 
     pub fn iter_children(&self, entry: &LibraryEntry) -> impl Iterator<Item = &LibraryEntry> {

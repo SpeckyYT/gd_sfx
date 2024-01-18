@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use backend::AppState;
+use backend::{AppState, settings::PersistentSettings};
 use eframe::{*, egui::{ViewportBuilder, IconData}};
 use gdsfx_files::paths;
 use gdsfx_library::Library;
@@ -72,8 +72,9 @@ impl GdSfx {
     fn load(ctx: &eframe::CreationContext) -> Box<dyn eframe::App> {
         egui_extras::install_image_loaders(&ctx.egui_ctx);
 
-        let app_state = AppState::load();
-        let library = Library::load(&app_state.settings.gd_folder);
+        let settings = PersistentSettings::load();
+        let library = Library::load(&settings.gd_folder);
+        let app_state = AppState::load(settings, &library);
 
         Box::new(Self { app_state, library })
     }

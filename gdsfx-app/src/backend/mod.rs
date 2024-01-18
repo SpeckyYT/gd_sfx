@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc, path::Path, fs};
+use std::{thread, sync::Arc, path::Path, fs, time::Instant};
 use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
@@ -27,6 +27,8 @@ pub struct AppState {
     pub search_settings: SearchSettings,
     pub audio_settings: AudioSettings,
 
+    pub unlisted_sounds: HashSet<EntryId>,
+
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
     pub download_id_range: (EntryId, EntryId),
 
@@ -37,27 +39,33 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn load() -> Self {
-        let settings = PersistentSettings::load_or_default();
-        rust_i18n::set_locale(&settings.locale);
-
-
-        let downloaded_sfx = fs::read_dir(&settings.gd_folder)
+    pub fn load(settings: PersistentSettings, library: &Library) -> Self {
+        let downloaded_sfx: HashSet<EntryId> = fs::read_dir(&settings.gd_folder)
             .map(|read_dir| {
                 read_dir
                     .flatten()
                     .flat_map(|file| file.file_name().into_string())
                     .filter(|file_name| file_name.starts_with('s') && file_name.ends_with(".ogg"))
                     .flat_map(|file_name| file_name[1..file_name.len()-4].parse())
-                    .collect::<HashSet<_>>()
+                    .collect()
             })
             .unwrap_or_default();
+
+        // this takes around 7-9ms with (13786 / 13873) over here
+        let unlisted_sounds = downloaded_sfx.difference(
+            &library.get_entries()
+            .keys().copied()
+            .collect()
+        )
+        .copied()
+        .collect();
 
         Self {
             settings,
             favorites: Favorites::load_or_default(),
             download_id_range: (0, 14500),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
+            unlisted_sounds,
             ..Default::default()
         }
     }

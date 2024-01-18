@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use ahash::{HashMap, HashSet, HashMapExt, HashSetExt};
+use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
 
 use crate::*;
@@ -130,7 +130,6 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Lib
 
         entries: entry_map,
         child_map,
-        unlisted_sfx: HashSet::new(),
         
         total_bytes,
         total_duration,
