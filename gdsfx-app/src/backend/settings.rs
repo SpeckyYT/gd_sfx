@@ -62,14 +62,10 @@ fn ignore_option<T>(_: &Option<T>) -> Option<T> { None }
 
 impl PersistentSettings {
     pub fn load() -> Self {
-        let settings = PersistentSettings::load_or_default();
-        rust_i18n::set_locale(&settings.locale);
-        settings
-    }
-
-    pub fn load_or_default() -> Self {
         let mut settings: PersistentSettings = gdsfx_files::read_json_file(&*SETTINGS_FILE)
             .unwrap_or_default();
+
+        rust_i18n::set_locale(&settings.locale);
 
         settings.set_last_state();
         settings

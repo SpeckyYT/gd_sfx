@@ -1,4 +1,4 @@
-use std::{thread, sync::Arc, path::Path, fs, time::Instant};
+use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
