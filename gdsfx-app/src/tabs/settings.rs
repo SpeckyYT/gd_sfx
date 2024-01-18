@@ -65,7 +65,6 @@ fn select_gd_folder(ui: &mut Ui, app_state: &mut AppState) {
     
     if response.clicked() {
         let file_dialog = rfd::FileDialog::new()
-            .set_title(t!("settings.gd_folder.select"))
             .set_directory(&app_state.settings.gd_folder);
 
         if let Some(folder) = file_dialog.pick_folder() {
