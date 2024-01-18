@@ -1,4 +1,4 @@
-use eframe::{egui::{Ui, ComboBox, Layout}, emath::Align};
+use eframe::{egui::*, emath::Align};
 use strum::IntoEnumIterator;
 
 use crate::{backend::{AppState, settings::PersistentSettings}, i18n::LocalizedEnum, layout};
@@ -17,18 +17,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     set_locale(ui, app_state);
 
     ui.add_space(10.0);
-    ui.label(t!("settings.gd_folder"));
-    ui.text_edit_singleline(&mut app_state.settings.gd_folder);
 
-    ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
-        ui.add_space(4.0);
+    select_gd_folder(ui, app_state);
 
-        if layout::add_caution_button(ui, t!("settings.reset")).triple_clicked() {
-            app_state.settings = PersistentSettings::default();
-        }
-        
-        ui.label(t!("settings.reset.instruction"));
-    });
+    reset_settings(ui, app_state);
 
     app_state.settings.try_save_if_changed();
 }
@@ -59,4 +51,37 @@ fn set_locale(ui: &mut Ui, app_state: &mut AppState) {
         });
 
     rust_i18n::set_locale(&app_state.settings.locale);
+}
+
+fn select_gd_folder(ui: &mut Ui, app_state: &mut AppState) {
+    ui.label(t!("settings.gd_folder"));
+
+    let text_edit = TextEdit::singleline(&mut app_state.settings.gd_folder).desired_width(f32::INFINITY);
+    ui.add_enabled(false, text_edit);
+
+    let button = Button::new(t!("settings.gd_folder.select"));
+    let response = ui.add_enabled(!app_state.is_tool_running(), button)
+        .on_disabled_hover_text(t!("settings.cannot_modify.tool_running"));
+    
+    if response.clicked() {
+        let file_dialog = rfd::FileDialog::new()
+            .set_title(t!("settings.gd_folder.select"))
+            .set_directory(&app_state.settings.gd_folder);
+
+        if let Some(folder) = file_dialog.pick_folder() {
+            app_state.settings.gd_folder = folder.display().to_string();
+        }
+    }
+}
+
+fn reset_settings(ui: &mut Ui, app_state: &mut AppState) {
+    ui.with_layout(Layout::bottom_up(Align::Min), |ui| {
+        ui.add_space(4.0);
+
+        if layout::add_caution_button(ui, t!("settings.reset")).triple_clicked() {
+            app_state.settings = PersistentSettings::default();
+        }
+        
+        ui.label(t!("settings.reset.instruction"));
+    });
 }

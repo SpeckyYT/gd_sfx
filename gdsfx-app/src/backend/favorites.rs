@@ -30,10 +30,8 @@ impl Favorites {
     fn try_save(&self) -> Result<()> {
         let json_data = serde_json::to_string(self).expect("derived serialization shouldn't fail");
 
-        gdsfx_files::create_parent_dirs(&*FAVORITES_FILE)?;
-        gdsfx_files::write_file(&*FAVORITES_FILE, json_data)?;
-
-        Ok(())
+        let _ = gdsfx_files::create_parent_dirs(&*FAVORITES_FILE);
+        gdsfx_files::write_file(&*FAVORITES_FILE, json_data)
     }
 
     pub fn has_favorite(&self, id: EntryId) -> bool {
