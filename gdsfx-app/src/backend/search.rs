@@ -29,7 +29,7 @@ localized_enum! {
 }
 
 impl Sorting {
-    pub fn comparator<>(&self) -> impl FnMut(&LibraryEntry, &LibraryEntry) -> Ordering + '_ {
+    pub fn comparator(&self) -> impl FnMut(&&LibraryEntry, &&LibraryEntry) -> Ordering + '_ {
         fn is_category(entry: &LibraryEntry) -> bool {
             matches!(entry.kind, EntryKind::Category)
         }

@@ -17,24 +17,24 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
     
     ui.separator();
 
-    ui.add_enabled_ui(!app_state.unlisted_sounds.is_empty(), |ui| {
-        let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx")).open(collapse_all.then_some(false));
+    let mut unlisted_sounds: Vec<LibraryEntry> = app_state.unlisted_sounds.iter()
+        .map(|id|
+            LibraryEntry {
+                id: *id,
+                name: id.to_string(),
+                parent_id: UNLISTED_ID,
+                kind: EntryKind::Sound { bytes: 0, duration: Duration::ZERO },
+            }
+        )
+        .filter(|entry| app_state.is_matching_entry(entry, library))
+        .collect();
+
+    unlisted_sounds.sort_by(|a,b| app_state.search_settings.sorting_mode.comparator()(&a, &b));
+
+    ui.add_enabled_ui(!unlisted_sounds.is_empty(), |ui| {
+        let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx")).open((collapse_all||unlisted_sounds.is_empty()).then_some(false));
 
         let response = collapsing.show(ui, |ui| {
-            let mut unlisted_sounds: Vec<LibraryEntry> = app_state.unlisted_sounds.iter()
-                .map(|id|
-                    LibraryEntry {
-                        id: *id,
-                        name: id.to_string(),
-                        parent_id: UNLISTED_ID,
-                        kind: EntryKind::Sound { bytes: 0, duration: Duration::ZERO },
-                    }
-                )
-                .filter(|entry| app_state.is_matching_entry(entry, library))
-                .collect();
-
-            unlisted_sounds.sort_by(app_state.search_settings.sorting_mode.comparator());
-
             for entry in unlisted_sounds {
                 layout::add_sfx_button(ui, app_state, library, &entry);
             }
