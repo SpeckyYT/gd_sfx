@@ -1,5 +1,5 @@
 {
-    "language.name": "Arabic (Egypt)",
+    "language.name": "عربي (مصر)",
     "language.translators": [Poppygh],
 
     "tab.library": "مكتبة",
@@ -56,7 +56,7 @@
 
     "settings": "الإعدادات",
     "settings.search_filter_mode": "وضع البحث",
-    "settings.search_filter_mode.gray_out": "Gray out???????idk what the fuck this meanns..",
+    "settings.search_filter_mode.gray_out": "إيقاف التشغيل",
     "settings.search_filter_mode.hide": "إخفاء",
     "settings.sfx_select_mode": "إختيار وضع المؤثرات الصوتية",
     "settings.sfx_select_mode.hover": "التحليق",
