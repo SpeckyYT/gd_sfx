@@ -1,6 +1,8 @@
+use std::borrow::Cow;
+
 pub trait LocalizedEnum {
-    fn localize_enum() -> String;
-    fn localize_variant(&self) -> String;
+    fn localize_enum() -> Cow<'static, str>;
+    fn localize_variant(&self) -> Cow<'_, str>;
 }
 
 #[macro_export]
@@ -17,15 +19,15 @@ macro_rules! localized_enum {
         }
 
         impl $crate::i18n::LocalizedEnum for $name {
-            fn localize_variant(&self) -> String {
+            #[allow(unused)]
+            fn localize_enum() -> std::borrow::Cow<'static, str> {
+                t!($enum_tkey)
+            }
+
+            fn localize_variant(&self) -> std::borrow::Cow<'_, str> {
                 t!(match self {
                     $($name::$variant => concat!($enum_tkey, ".", $tkey),)*
                 })
-            }
-
-            #[allow(unused)]
-            fn localize_enum() -> String {
-                t!($enum_tkey)
             }
         }
     }
