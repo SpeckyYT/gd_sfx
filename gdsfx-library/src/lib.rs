@@ -47,23 +47,23 @@ pub struct Credit {
 impl Library {
     pub fn load(gd_folder: impl AsRef<Path>) -> Result<Self> {
         const SFX_LIBRARY_FILE: &str = "sfxlibrary.dat";
-    
+
         let file = gd_folder.as_ref().join(SFX_LIBRARY_FILE);
 
         let local_library = gdsfx_files::read_file(&file)
             .and_then(parse::parse_library_from_bytes);
 
-        if Self::should_try_update(local_library.as_ref().ok()) {
-            let bytes = requests::request_file(SFX_LIBRARY_FILE)
-                .and_then(|response| Ok(response.bytes()?.to_vec()));
-
-            if let Ok(bytes) = bytes {
-                let _ = gdsfx_files::write_file(&file, &bytes);
-                return parse::parse_library_from_bytes(bytes)
-            }
+        if !Self::should_try_update(local_library.as_ref().ok()) {
+            return local_library
         }
 
-        local_library
+        requests::request_file(SFX_LIBRARY_FILE)
+            .and_then(|response| {
+                let bytes = response.bytes()?.to_vec();
+                let _ = gdsfx_files::write_file(&file, &bytes);
+                parse::parse_library_from_bytes(bytes)
+            })
+            .or_else(|download_err| local_library.map_err(|_| download_err))
     }
 
     fn should_try_update(library: Option<&Library>) -> bool {
