@@ -41,6 +41,7 @@ credits!(
     TAGS => "tags": "https://github.com/zTags"
     KR8GZ => "kr8gz": "https://github.com/kr8gz"
     ELDYJ => "eldyj": "https://github.com/eldyj"
+    GACHAYTB3 => "GachaYTB3": "https://github.com/GachaYTB"
     GGOD => "ggod": "https://github.com/GGodPL"
 );
 
@@ -70,6 +71,8 @@ credits!(
         "ua_UA_latin"
         "rue_UA"
         "ru_RU"
+    GACHAYTB3
+        "fr_FR"
     GGOD
         "pl_PL"
 );
