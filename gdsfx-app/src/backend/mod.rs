@@ -57,7 +57,7 @@ impl AppState {
         // - favorites tab
         // - tools (un)registering sfx ids → thread safety
         // - storing unlisted sfx? or only show downloaded ones
-        let library_sfx = &library.get_sound_ids().iter().copied().collect();
+        let library_sfx = &library.sound_ids().iter().copied().collect();
         let unlisted_sfx = downloaded_sfx.difference(library_sfx).copied().collect();
 
         Self {

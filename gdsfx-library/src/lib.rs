@@ -24,7 +24,7 @@ pub struct Library {
     credits: Vec<Credit>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LibraryEntry {
     pub id: EntryId,
     pub name: String,
@@ -32,13 +32,13 @@ pub struct LibraryEntry {
     pub kind: EntryKind,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum EntryKind {
     Category,
     Sound { bytes: i64, duration: Duration },
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Credit {
     pub name: String,
     pub link: String,
@@ -78,7 +78,7 @@ impl Library {
         self.entries.get(&self.root_id).expect("Root ID not in library")
     }
 
-    pub fn get_entries(&self) -> &HashMap<EntryId, LibraryEntry> {
+    pub fn entries(&self) -> &HashMap<EntryId, LibraryEntry> {
         &self.entries
     }
 
@@ -90,7 +90,7 @@ impl Library {
             .flat_map(|id| self.entries.get(id))
     }
 
-    pub fn get_sound_ids(&self) -> &Vec<EntryId> {
+    pub fn sound_ids(&self) -> &Vec<EntryId> {
         &self.sound_ids
     }
 
@@ -110,7 +110,7 @@ impl Library {
         &self.get_root().name
     }
 
-    pub fn get_credits(&self) -> &Vec<Credit> {
+    pub fn credits(&self) -> &Vec<Credit> {
         &self.credits
     }
 }

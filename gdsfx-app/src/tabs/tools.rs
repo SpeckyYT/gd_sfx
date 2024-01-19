@@ -18,7 +18,7 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &Li
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            app_state.download_multiple_sfx("tools.download_all_sfx", library.get_sound_ids().clone());
+            app_state.download_multiple_sfx("tools.download_all_sfx", library.sound_ids().clone());
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();

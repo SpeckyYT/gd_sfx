@@ -32,3 +32,27 @@ macro_rules! localized_enum {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_localized_enum() {
+        localized_enum! {
+            #[derive(Default)]
+            pub(crate) enum LocalizedEnumTest = "test" {
+                Foo = "foo",
+                Bar = "bar",
+                #[default]
+                Baz = "baz",
+            }
+        }
+
+        rust_i18n::set_locale("nonexistent_locale");
+        assert_eq!(LocalizedEnumTest::localize_enum(), "nonexistent_locale.test");
+        assert_eq!(LocalizedEnumTest::Foo.localize_variant(), "nonexistent_locale.test.foo");
+        assert_eq!(LocalizedEnumTest::Bar.localize_variant(), "nonexistent_locale.test.bar");
+        assert_eq!(LocalizedEnumTest::default().localize_variant(), "nonexistent_locale.test.baz");
+    }
+}

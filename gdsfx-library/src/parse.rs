@@ -137,3 +137,38 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Lib
         credits,
     })
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_parse_library_entry() {
+        const FIRE_IN_THE_HOLE: &str = "4451,Fire In The Hole,0,4442,29496,187";
+
+        let entry = LibraryEntry::from_str(FIRE_IN_THE_HOLE).unwrap();
+        assert_eq!(entry, LibraryEntry {
+            id: 4451,
+            name: "Fire In The Hole".to_string(),
+            parent_id: 4442,
+            kind: EntryKind::Sound {
+                bytes: 29496,
+                duration: Duration::from_millis(187 * 10),
+            }
+        });
+
+        let string = entry.to_string();
+        assert_eq!(string, FIRE_IN_THE_HOLE);
+    }
+
+    #[test]
+    fn test_parse_credit() {
+        const SHARKS_CREDIT: &str = "Sharks,https://www.sharkstunes.com";
+
+        let credit = Credit::from_str(SHARKS_CREDIT).unwrap();
+        assert_eq!(credit, Credit {
+            name: "Sharks".to_string(),
+            link: "https://www.sharkstunes.com".to_string(),
+        });
+    }
+}

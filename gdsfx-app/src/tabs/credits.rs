@@ -15,7 +15,7 @@ pub fn render(ui: &mut Ui, library: &Library) {
 
     ui.add_space(10.0);
 
-    for credits in library.get_credits() {
+    for credits in library.credits() {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 
