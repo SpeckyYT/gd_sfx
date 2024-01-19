@@ -73,7 +73,7 @@ impl GdSfx {
         egui_extras::install_image_loaders(&ctx.egui_ctx);
 
         let settings = PersistentSettings::load();
-        let library = Library::load(&settings.gd_folder);
+        let library = Library::load(&settings.gd_folder).expect("TODO: info screen with error message and retry button");
         let app_state = AppState::load(settings, &library);
 
         Box::new(Self { app_state, library })

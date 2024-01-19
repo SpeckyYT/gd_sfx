@@ -45,33 +45,36 @@ pub struct Credit {
 }
 
 impl Library {
-    pub fn load(gd_folder: impl AsRef<Path>) -> Self {
+    pub fn load(gd_folder: impl AsRef<Path>) -> Result<Self> {
         const SFX_LIBRARY_FILE: &str = "sfxlibrary.dat";
     
         let file = gd_folder.as_ref().join(SFX_LIBRARY_FILE);
-    
-        // TODO: if cannot download library and theres no downloaded library available show info/error message with retry button
-        gdsfx_files::read_file(&file)
-            .and_then(parse::parse_library_from_bytes)
-            .ok().filter(Self::check_library_version)
-            .unwrap_or_else(|| {
-                let bytes = requests::request_file(SFX_LIBRARY_FILE)
-                    .and_then(|response| Ok(response.bytes()?))
-                    .map(|bytes| bytes.to_vec())
-                    .expect("Couldn't get library data");
 
+        let local_library = gdsfx_files::read_file(&file)
+            .and_then(parse::parse_library_from_bytes);
+
+        if Self::should_try_update(local_library.as_ref().ok()) {
+            let bytes = requests::request_file(SFX_LIBRARY_FILE)
+                .and_then(|response| Ok(response.bytes()?.to_vec()));
+
+            if let Ok(bytes) = bytes {
                 let _ = gdsfx_files::write_file(&file, &bytes);
-                parse::parse_library_from_bytes(bytes).expect("Invalid library data")
-            })
+                return parse::parse_library_from_bytes(bytes)
+            }
+        }
+
+        local_library
     }
 
-    fn check_library_version(library: &Library) -> bool {
+    fn should_try_update(library: Option<&Library>) -> bool {
         const SFX_VERSION_ENDPOINT: &str = "sfxlibrary_version.txt";
+
+        let Some(library) = library else { return true };
 
         requests::request_file(SFX_VERSION_ENDPOINT).ok()
             .and_then(|response| response.text().ok())
-            .map(|version| version == library.get_version())
-            .unwrap_or(true) // if request failed then don't bother redownloading library
+            .map(|version| version != library.get_version())
+            .unwrap_or(false) // request failed, don't bother updating
     }
 
     pub fn get_root(&self) -> &LibraryEntry {
