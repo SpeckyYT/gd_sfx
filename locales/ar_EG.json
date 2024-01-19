@@ -68,7 +68,7 @@
     "settings.gd_folder.not_found": ".في الاعدادات لتنزيل المؤثرات الصوتية Geometry Dash حدد مسار ملف",
     "settings.cannot_modify.tool_running": ".لا يمكن استخدام الاعدادات و الأداة مفعلة",
     "settings.reset": "إعادة ضبط",
-    "settings.reset.instruction": "إضغط ثلاث مرات للتأكد"،
+    "settings.reset.instruction": "إضغط ثلاث مرات للتأكد",
     "stats.library": "قائمة المؤثرات الصوتية",
     "stats.library.duration": "المدة الكلية: %{duration}",
     "stats.library.files": "الملفات الكلية: %{files}",
