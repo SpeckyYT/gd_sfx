@@ -43,6 +43,10 @@ fn set_locale(ui: &mut Ui, app_state: &mut AppState) {
         .selected_text(t!("language.name"))
         .show_ui(ui, |ui| {
             for locale in rust_i18n::available_locales!() {
+                // arabic text cannot be rendered yet sadly :(
+                // https://github.com/emilk/egui/issues/3378
+                if locale == "ar_EG" { continue }
+
                 ui.selectable_value(
                     &mut app_state.settings.locale,
                     locale.to_string(), t!("language.name", locale = locale)
@@ -56,7 +60,11 @@ fn set_locale(ui: &mut Ui, app_state: &mut AppState) {
 fn select_gd_folder(ui: &mut Ui, app_state: &mut AppState) {
     ui.label(t!("settings.gd_folder"));
 
-    let text_edit = TextEdit::singleline(&mut app_state.settings.gd_folder).desired_width(f32::INFINITY);
+    let is_invalid = !app_state.is_gd_folder_valid();
+    let text_edit = TextEdit::singleline(&mut app_state.settings.gd_folder)
+        .desired_width(f32::INFINITY)
+        .text_color_opt(is_invalid.then_some(Color32::LIGHT_RED));
+
     ui.add_enabled(false, text_edit);
 
     let button = Button::new(t!("settings.gd_folder.select"));
