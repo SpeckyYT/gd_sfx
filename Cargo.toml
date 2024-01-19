@@ -43,3 +43,8 @@ strum = { version = "0.25.0", features = ["derive"] }
 syn = "2.0.48"
 url = "2.5.0"
 winapi = { version = "0.3.9", features = ["wincon", "winuser"] }
+
+[profile.release]
+opt-level = 'z'
+lto = true
+strip = "symbols"
