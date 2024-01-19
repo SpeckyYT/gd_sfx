@@ -70,7 +70,7 @@
 
     "stats.library": "Bibliothèque SFX",
     "stats.library.duration": "Durée totale: %{duration}",
-    "stats.library.files": "Fichiers totales: %{files}",
+    "stats.library.files": "Total des fichiers: %{files}",
     "stats.library.size": "Taille totale: %{size}",
     "stats.library.version": "Version de la bibliothèque: %{version}",
     "stats.files": "Fichiers SFX",
@@ -78,6 +78,6 @@
 
     "credits.sfx": "Crédits SFX",
     "credits.this_project": "Ce projet",
-    "credits.this_project.developers": "Dévelopeurs",
+    "credits.this_project.developers": "Développeurs",
     "credits.this_project.translations": "Traductions pour %{lang}"
 }
