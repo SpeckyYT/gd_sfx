@@ -5,7 +5,7 @@ use strum::IntoEnumIterator;
 
 use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum};
 
-pub mod top_panel;
+pub mod tabs_panel;
 pub mod left_window;
 pub mod right_window;
 
