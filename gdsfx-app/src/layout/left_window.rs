@@ -9,8 +9,6 @@ pub fn render(ctx: &Context, app_state: &mut AppState, library: &Library) {
         .max_width(layout::RIGHT_PANEL_WIDTH)
         .default_width(layout::DEFAULT_LIBRARY_WIDTH)
         .show(ctx, |ui| {
-            // ui.selectable_value(, selected_value, text)
-
             ScrollArea::vertical().show(ui, |ui| {
                 use tabs::*;
                 
