@@ -1,7 +1,7 @@
 [package]
 name = "gdsfx-app"
 description = "The main GDSFX crate which runs the application."
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 build = "build/main.rs"
 
