@@ -25,7 +25,7 @@ gdsfx_build::get_output!(include!("i18n.rs"));
 // → see gdsfx-app/build/icon.rs
 const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("icon.bin"));
 
-struct GdSfx {
+pub struct GdSfx {
     app_state: AppState,
     library: Library,
 }
@@ -41,7 +41,7 @@ impl eframe::App for GdSfx {
 }
 
 impl GdSfx {
-    fn run() -> eframe::Result<()> {
+    pub fn run() -> eframe::Result<()> {
         let icon = IconData {
             rgba: ICON_BYTES.to_vec(),
             width: gdsfx_build::ICON_WIDTH,
@@ -77,17 +77,5 @@ impl GdSfx {
         let app_state = AppState::load(settings, &library);
 
         Box::new(Self { app_state, library })
-    }
-}
-
-fn main() -> eframe::Result<()> {
-    hide_console_window();
-    GdSfx::run()
-}
-
-fn hide_console_window() {
-    if !cfg!(debug_assertions) {
-        #[cfg(windows)]
-        unsafe { winapi::um::wincon::FreeConsole() };
     }
 }

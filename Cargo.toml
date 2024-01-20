@@ -1,3 +1,8 @@
+[package]
+name = "gdsfx"
+version = "0.1.2"
+edition = "2021"
+
 [workspace]
 members = [
     "gdsfx-app",
@@ -43,6 +48,11 @@ strum = { version = "0.25.0", features = ["derive"] }
 syn = "2.0.48"
 url = "2.5.0"
 winapi = { version = "0.3.9", features = ["wincon", "winuser"] }
+
+[dependencies]
+gdsfx-app = { path = "gdsfx-app" }
+eframe = { workspace = true }
+winapi = { workspace = true }
 
 [profile.release]
 opt-level = 'z'
