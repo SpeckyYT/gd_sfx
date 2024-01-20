@@ -4,6 +4,7 @@ use gdsfx_library::{Library, LibraryEntry};
 use crate::{layout, backend::AppState};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+    layout::add_library_page_selection(ui, app_state);
     layout::add_search_area(ui, &mut app_state.search_settings);
 
     let mut sounds: Vec<&LibraryEntry> = library.iter_sounds().collect();

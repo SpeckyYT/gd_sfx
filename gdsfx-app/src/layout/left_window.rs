@@ -18,7 +18,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState, library: &Library) {
                     Tab::Tools => tools::render(ui, ctx, app_state, library),
                     Tab::Settings => settings::render(ui, app_state),
                     Tab::Stats => stats::render(ui, app_state, library),
-                    Tab::Credits => credits::render(ui, library),
+                    Tab::Credits => credits::render(ui, app_state, library),
                 }
             });
         });

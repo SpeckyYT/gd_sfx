@@ -5,6 +5,8 @@ use gdsfx_library::Library;
 use crate::{backend::AppState, layout};
 
 pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &Library) {
+    layout::add_library_page_selection(ui, app_state);
+
     ui.heading(t!("tools"));
 
     ui.add_space(10.0);
