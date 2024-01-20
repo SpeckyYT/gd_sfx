@@ -50,15 +50,17 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     if app_state.is_gd_folder_valid() {
         let file_exists = app_state.is_sfx_downloaded(id);
 
-        let download_button = Button::new(t!("sound.download"));
-        if ui.add_enabled(!file_exists, download_button).clicked() {
-            app_state.download_sfx(id);
-        }
+        ui.horizontal(|ui| {
+            let download_button = Button::image(Image::from_bytes(t!("sound.download"), include_bytes!("../../../assets/normal.png")));
+            if ui.add_enabled(!file_exists, download_button).clicked() {
+                app_state.download_sfx(id);
+            }
 
-        let delete_button = Button::new(t!("sound.delete"));
-        if ui.add_enabled(file_exists, delete_button).clicked() {
-            app_state.delete_sfx(id);
-        }
+            let delete_button = Button::image(Image::from_bytes(t!("sound.delete"), include_bytes!("../../../assets/normal.png")));
+            if ui.add_enabled(file_exists, delete_button).clicked() {
+                app_state.delete_sfx(id);
+            }
+        });
     } else {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
