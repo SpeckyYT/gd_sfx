@@ -22,6 +22,7 @@ jobs:
         uses: rust-build/rust-build.action@v1.4.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SRC_DIR: gdsfx-app
         with:
           RUSTTARGET: ${{ matrix.target }}
           ARCHIVE_TYPES: ${{ matrix.archive }}
