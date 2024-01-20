@@ -1,15 +1,16 @@
 [package]
 name = "gdsfx-library"
-version = "0.1.2"
+version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+gdsfx-files = { workspace = true }
+
 ahash = { workspace = true }
 anyhow = { workspace = true }
-eframe = { workspace = true }
-gdsfx-files = { path = "../gdsfx-files" }
 once_cell = { workspace = true }
-reqwest = { workspace = true }
-url = { workspace = true }
+
+reqwest = { version = "0.11.23", features = ["blocking"] }
+url = "2.5.0"

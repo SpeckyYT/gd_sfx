@@ -41,7 +41,7 @@ impl eframe::App for GdSfx {
 }
 
 impl GdSfx {
-    pub fn run() -> eframe::Result<()> {
+    pub fn run() -> Result<()> {
         let icon = IconData {
             rgba: ICON_BYTES.to_vec(),
             width: gdsfx_build::ICON_WIDTH,

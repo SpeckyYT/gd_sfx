@@ -1,41 +1,42 @@
 [package]
 name = "gdsfx-app"
-description = "The main GDSFX crate which runs the application."
-version = "0.1.2"
+description = "Runs the application backend and renders the UI."
+version = "0.1.0"
 edition = "2021"
 build = "build/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+gdsfx-audio = { workspace = true }
+gdsfx-build = { workspace = true }
+gdsfx-files = { workspace = true }
+gdsfx-library = { workspace = true }
+
 ahash = { workspace = true }
 anyhow = { workspace = true }
 educe = { workspace = true }
-eframe = { workspace = true }
-egui-modal = { workspace = true }
-egui_extras = { workspace = true }
-gdsfx-audio = { path = "../gdsfx-audio" }
-gdsfx-build = { path = "../gdsfx-build" }
-gdsfx-files = { path = "../gdsfx-files" }
-gdsfx-library = { path = "../gdsfx-library" }
 once_cell = { workspace = true }
 pretty-bytes = { workspace = true }
 rayon = { workspace = true }
-rfd = { workspace = true }
-rust-i18n = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 strum = { workspace = true }
 
-[target.'cfg(target_os = "windows")'.dependencies]
-winapi = { workspace = true }
+eframe = "0.25.0"
+egui-modal = "0.3.2"
+egui_extras = { version = "0.25.0", features = ["image"] }
+rfd = "0.13.0"
+rust-i18n = "3.0.0"
 
 [build-dependencies]
+gdsfx-build = { workspace = true }
+gdsfx-files = { workspace = true }
+
 ahash = { workspace = true }
 anyhow = { workspace = true }
-gdsfx-build = { path = "../gdsfx-build" }
-gdsfx-files = { path = "../gdsfx-files" }
-quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-image = { workspace = true }
+
+image = { version = "0.24.8", default_features = false, features = ["png"] }
+quote = "1.0.35"

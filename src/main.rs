@@ -1,6 +1,6 @@
-fn main() -> eframe::Result<()> {
+fn main() {
     hide_console_window();
-    gdsfx_app::GdSfx::run()
+    gdsfx_app::GdSfx::run().unwrap();
 }
 
 fn hide_console_window() {
