@@ -1695,6 +1695,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gdsfx"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "gdsfx-app",
+ "winapi",
+]
+
+[[package]]
 name = "gdsfx-app"
 version = "0.1.0"
 dependencies = [
@@ -1718,7 +1727,6 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
- "winapi",
 ]
 
 [[package]]
@@ -1764,7 +1772,6 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "anyhow",
- "eframe",
  "gdsfx-files",
  "once_cell",
  "reqwest",

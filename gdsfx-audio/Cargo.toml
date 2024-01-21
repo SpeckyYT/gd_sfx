@@ -1,14 +1,16 @@
 [package]
 name = "gdsfx-audio"
-version = "0.1.2"
+description = "Handles audio manipulation and output for GDSFX."
+version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bot = { git = "https://github.com/zeozeozeo/zcb3/", version = "0.1.0" }
-crossbeam-channel = { workspace = true }
-kittyaudio = "0.1.7"
-lazy_static = { workspace = true }
 parking_lot = { workspace = true }
-rodio = { workspace = true }
+lazy_static = { workspace = true }
+
+bot = { git = "https://github.com/zeozeozeo/zcb3/", version = "0.1.0" }
+crossbeam-channel = "0.5.11"
+kittyaudio = "0.1.7"
+rodio = "0.17.3"
