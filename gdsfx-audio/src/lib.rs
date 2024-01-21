@@ -66,6 +66,12 @@ pub struct AudioSettings {
     pub fade_out: u32,
 }
 
+impl Default for AudioSystem {
+    fn default() -> Self {
+        Self::new().unwrap()
+    }
+}
+
 impl AudioSystem {
     pub fn new() -> Result<Self> {
         let system = System::create()?;
