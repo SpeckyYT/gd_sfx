@@ -1,12 +1,14 @@
 use std::{fs, path::Path};
 
-const INCLUDE_DIR: &str = "include/";
-const TARGET_DIR: &str = "../target/debug/deps/";
+use gdsfx_files::paths;
 
 fn main() {
+    const INCLUDE_DIR: &str = "include/";
+    let target_dir = Path::new(paths::build::CARGO_WORKSPACE_ROOT).join("target/debug/deps/");
+    
     for file in gdsfx_files::read_dir(INCLUDE_DIR).unwrap() {
         let source = file.path();
-        let destination = Path::new(TARGET_DIR).join(file.file_name());
+        let destination = target_dir.join(file.file_name());
         fs::copy(&source, &destination).unwrap();
 
         gdsfx_build::cargo_rerun_if_changed(source);

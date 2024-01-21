@@ -1,10 +1,11 @@
 use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
-use eframe::epaint::mutex::Mutex;
+use educe::Educe;
 use favorites::Favorites;
-use gdsfx_audio::{AudioSettings, AudioSystem};
+use gdsfx_audio::AudioSystem;
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
+use parking_lot::Mutex;
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
@@ -16,22 +17,23 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
-#[derive(Default)]
+#[derive(Educe)]
+#[educe(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub selected_sfx: Option<LibraryEntry>,
 
+    pub search_settings: SearchSettings,
+
     pub settings: PersistentSettings,
     pub favorites: Favorites,
 
-    pub search_settings: SearchSettings,
-
-    pub audio_settings: AudioSettings,
     pub audio_system: AudioSystem,
 
     pub unlisted_sfx: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+    #[educe(Default = (0, 14500))]
     pub download_id_range: (EntryId, EntryId),
 
     // TODO https://docs.rs/notify/6.1.1/notify/
@@ -64,8 +66,7 @@ impl AppState {
 
         Self {
             settings,
-            favorites: Favorites::load_or_default(),
-            download_id_range: (0, 14500),
+            favorites: Favorites::load(),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
             unlisted_sfx,
             ..Default::default()
@@ -107,13 +108,12 @@ impl AppState {
     pub fn play_sfx(&mut self, id: EntryId) {
         let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
-        let audio_settings = self.audio_settings;
 
         let bytes = {
             let mut cache = cache.lock();
             cache.get(&id).cloned().or_else(|| {
                 let file_entry = FileEntry::new(id);
-                let bytes = file_entry.try_read_bytes(gd_folder)
+                let bytes = file_entry.try_read_bytes(&gd_folder)
                     .or_else(|| file_entry.try_download_bytes());
 
                 if let Some(bytes) = bytes.as_ref() {
@@ -125,8 +125,9 @@ impl AppState {
         };
 
         if let Some(bytes) = bytes {
-            let _ = self.audio_system.stop_audio();
-            let _ = self.audio_system.play_sound(bytes);
+            // TODO
+            let _ = bytes;
+            let _ = self.audio_system.play_file(&format!("{gd_folder}/s{id}.ogg"));
         }
     }
 
@@ -147,7 +148,7 @@ impl AppState {
                 .or_else(|| file_entry.try_download_bytes());
 
             let Some(bytes) = bytes else { return };
-            if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
+            if file_entry.try_write_bytes(&gd_folder, bytes).is_ok() {
                 downloaded_sfx.lock().insert(id);
             }
         });

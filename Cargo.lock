@@ -1452,6 +1452,7 @@ dependencies = [
  "gdsfx-library",
  "image",
  "once_cell",
+ "parking_lot",
  "pretty-bytes",
  "quote",
  "rayon",

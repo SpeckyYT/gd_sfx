@@ -1,4 +1,4 @@
-use std::{sync::Arc, thread, mem};
+use std::{sync::Arc, thread};
 
 use educe::Educe;
 use libfmod::*;
@@ -66,12 +66,6 @@ pub struct AudioSettings {
     pub fade_out: u32,
 }
 
-impl Default for AudioSystem {
-    fn default() -> Self {
-        Self::new().unwrap()
-    }
-}
-
 impl AudioSystem {
     pub fn new() -> Result<Self> {
         let system = System::create()?;
@@ -87,56 +81,49 @@ impl AudioSystem {
         })
     }
 
-    pub fn play_sound(&mut self, bytes: impl AsRef<[u8]>) -> Result<()> {
+    // TODO: https://github.com/lebedec/libfmod-gen/issues/13
+    pub fn play_file(&mut self, file_name: &str) -> Result<()> {
         self.stop_audio()?;
 
         let settings = *self.settings.read();
 
-        let mode = if settings.looping { Mode::LOOP_NORMAL } else { Mode::DEFAULT };
+        let mut mode = Mode::DEFAULT;
+        if settings.looping { mode |= Mode::LOOP_NORMAL };
 
-        // SAFETY: System::create_sound requires the first parameter to be a &str,
-        // which is immediately converted back to a Vec<u8> in the CString constructor though.
-        let sound = unsafe {
-            #[allow(clippy::transmute_bytes_to_str)] // these bytes might not be valid UTF-8
-            let bytes = mem::transmute(bytes.as_ref());
-            self.system.create_sound(bytes, mode, None)?
-        };
+        let sound = self.system.create_sound(file_name, mode, None)?;
 
         // Calculate start/end points
         // TODO: figure out points with speed factor
         let (sample_rate, _, _) = self.system.get_software_format()?;
 
-        let start_point = AudioSettings::millis_to_pcm(settings.start, sample_rate);
+        let sound_start = AudioSettings::millis_to_pcm(settings.start, sample_rate);
 
-        let end_point = match settings.end > 0 {
+        let sound_end = match settings.end > 0 {
             true => AudioSettings::millis_to_pcm(settings.end, sample_rate),
             false => sound.get_length(TimeUnit::PCM)?,
         };
 
         // Prevent invalid parameters from being passed at all
-        if settings.volume == 0.0 || start_point >= end_point { return Ok(()) }
+        if settings.volume == 0.0 || sound_start >= sound_end { return Ok(()) }
 
         // Start/end points for looping sound
-        sound.set_loop_points(start_point, TimeUnit::PCM, end_point, TimeUnit::PCM)?;
+        sound.set_loop_points(sound_start, TimeUnit::PCM, sound_end, TimeUnit::PCM)?;
 
         let channel = self.system.play_sound(sound, None, false)?;
+        let (_, start_point) = channel.get_dsp_clock()?;
 
-        // Prepare start offset and fade in
-        // TODO: figure out overlapping fade times, and speed factor
-        channel.set_position(start_point, TimeUnit::PCM)?;
-        channel.add_fade_point(0, 0.0)?;
+        // Start offset and fade in
+        channel.set_position(sound_start, TimeUnit::PCM)?;
+        channel.add_fade_point(start_point, 0.0)?;
+        let fade_in_end = start_point + AudioSettings::millis_to_pcm(settings.fade_in, sample_rate) as u64;
 
-        let fade_in_time = AudioSettings::millis_to_pcm(settings.fade_in, sample_rate);
-
-        // Prepare end point and fade out for single sound
-        // TODO: figure out overlapping fade times, and speed factor
-        let duration = end_point - start_point;
+        // End point and fade out for single sound
+        let end_point = start_point + (sound_end - sound_start) as u64;
+        let fade_out_start = end_point - AudioSettings::millis_to_pcm(settings.fade_out, sample_rate) as u64;
         if !settings.looping {
-            channel.add_fade_point(duration.into(), 0.0)?;
-            channel.set_delay(None, Some(duration.into()), true)?;
+            channel.add_fade_point(end_point, 0.0)?;
+            channel.set_delay(None, Some(end_point), true)?;
         }
-
-        let fade_out_time = AudioSettings::millis_to_pcm(settings.fade_out, sample_rate);
 
         // Pitch shift
         let pitch = AudioSettings::linear_to_exp(settings.pitch);
@@ -151,25 +138,27 @@ impl AudioSystem {
 
         thread::spawn(move || -> Result<()> {
             loop {
-                let Some(channel) = *channel.read() else { break };
+                let channel = channel.read();
+                let Some(channel) = channel.as_ref() else { break };
                 if !channel.is_playing()? { break }
-
+    
                 let settings = *settings.read();
-
+    
                 if !settings.looping {
                     // If looping is disabled, let the current iteration finish
                     channel.set_loop_count(0)?;
                 }
-
+    
                 channel.set_volume(settings.volume)?;
-
+    
                 // This pitch-setting function also stretches time
                 channel.set_pitch(AudioSettings::linear_to_exp(settings.speed))?;
 
-                // Update fade in/out points with actual volume
-                channel.add_fade_point(fade_in_time.into(), settings.volume)?;
-                if mode != Mode::LOOP_NORMAL { // Initially looping sounds shouldn't fade out
-                    channel.add_fade_point((duration - fade_out_time).into(), settings.volume)?;
+                // Update fade in/out points with actual volume                
+                // TODO: figure out overlapping fade times, and speed factor
+                channel.add_fade_point(fade_in_end, settings.volume)?;
+                if !mode.contains(Mode::LOOP_NORMAL) { // Initially looping sounds shouldn't fade out
+                    channel.add_fade_point(fade_out_start, settings.volume)?;
                 }
             }
 
@@ -190,6 +179,12 @@ impl AudioSystem {
             Some(channel) => channel.stop(),
             None => Ok(()),
         }
+    }
+}
+
+impl Default for AudioSystem {
+    fn default() -> Self {
+        Self::new().expect("Couldn't initialize audio system")
     }
 }
 
