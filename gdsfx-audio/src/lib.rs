@@ -87,11 +87,9 @@ impl AudioSystem {
         let sound = self.system.create_sound(file_name, mode, None)?;
 
         // Calculate start/end points
-        // TODO: figure out points with speed factor
         let (sample_rate, _, _) = self.system.get_software_format()?;
 
         let sound_start = AudioSettings::millis_to_pcm(settings.start, sample_rate);
-
         let sound_end = match settings.end > 0 {
             true => AudioSettings::millis_to_pcm(settings.end, sample_rate),
             false => sound.get_length(TimeUnit::PCM)?,
@@ -106,17 +104,16 @@ impl AudioSystem {
         let channel = self.system.play_sound(sound, None, false)?;
         let (_, start_point) = channel.get_dsp_clock()?;
 
-        // Start offset and fade in
+        // Start offset and prepare fade in
         channel.set_position(sound_start, TimeUnit::PCM)?;
         channel.add_fade_point(start_point, 0.0)?;
         let fade_in_end = start_point + AudioSettings::millis_to_pcm(settings.fade_in, sample_rate) as u64;
 
-        // End point and fade out for single sound
+        // Calculate end point and prepare fade out for single sound
         let end_point = start_point + (sound_end - sound_start) as u64;
         let fade_out_start = end_point - AudioSettings::millis_to_pcm(settings.fade_out, sample_rate) as u64;
         if !settings.looping {
             channel.add_fade_point(end_point, 0.0)?;
-            channel.set_delay(None, Some(end_point), true)?;
         }
 
         // Set up pitch shift
@@ -136,11 +133,14 @@ impl AudioSystem {
                 let Some(channel) = channel.as_ref() else { break };
 
                 // Channel has finished
-                if !channel.is_playing()? { break } // TODO: why does this stop early when channel speed is slower?
+                if !channel.is_playing()? { break }
 
                 // Stop if past end point
-                if channel.get_position(TimeUnit::PCM)? >= sound_end { break }
-    
+                if channel.get_position(TimeUnit::PCM)? >= sound_end {
+                    channel.stop()?; // TODO rewrite using channels, then send a stop command
+                    break
+                }
+
                 let settings = *settings.read();
     
                 // If looping is disabled, let the current iteration finish
@@ -156,10 +156,14 @@ impl AudioSystem {
                 channel.set_pitch(AudioSettings::linear_to_exp(settings.speed))?;
 
                 // Update fade in/out points with actual volume                
-                // TODO: figure out overlapping fade times, and speed factor
                 channel.add_fade_point(fade_in_end, settings.volume)?;
                 if !mode.contains(Mode::LOOP_NORMAL) { // Initially looping sounds shouldn't fade out
                     channel.add_fade_point(fade_out_start, settings.volume)?;
+                    // TODO: figure out stupid fade point placement with dsp clock and pcm fucky wucky
+                    // let (dsp_clock, parent_clock) = channel.get_dsp_clock()?;
+                    // let position = channel.get_position(TimeUnit::PCM)?;
+                    // eprintln!("Start: {start_point} → {fade_in_end} (PCM {sound_start}) | End: {fade_out_start} → {end_point} (PCM {sound_end}) | Pos: {dsp_clock}/{parent_clock} (PCM {position})");
+                    // thread::sleep_ms(8);
                 }
             }
 
