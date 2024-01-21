@@ -11,12 +11,12 @@ pub struct AudioSystem {
     system: System,
 
     /// The FMOD channel which is currently playing sound, or `None` if no sound is being played.
-    channel: Arc<RwLock<Option<Channel>>>,
+    channel: Option<Channel>,
 
     /// Public instance of `AudioSettings` that can be modified at any time.
     /// Only specific changes to this struct can be applied immediately while playing audio though;
     /// see the fields of the `AudioSettings` struct for more information.
-    pub settings: Arc<RwLock<AudioSettings>>,
+    pub settings: AudioSettings,
 }
 
 #[derive(Educe, Debug, Clone, Copy, PartialEq)]
@@ -61,33 +61,37 @@ pub struct AudioSettings {
 }
 
 impl AudioSystem {
-    pub fn new() -> Result<Self> {
+    pub fn new() -> Result<Arc<RwLock<Self>>> {
         let system = System::create()?;
     
         // Since previously playing audio is stopped when new audio should be played,
         // a maximum of 1 channel should be enough.
         system.init(1, Init::NORMAL, None)?;
 
-        Ok(Self {
+        let system = Self {
             system,
             channel: Default::default(),
             settings: Default::default(),
-        })
+        };
+
+        Ok(Arc::new(RwLock::new(system)))
     }
 
     // TODO: https://github.com/lebedec/libfmod-gen/issues/13
-    pub fn play_file(&mut self, file_name: &str) -> Result<()> {
-        self.stop_audio()?;
+    pub fn play_file(audio_system: Arc<RwLock<AudioSystem>>, file_name: &str) -> Result<()> {
+        let mut setup_system = audio_system.write();
 
-        let settings = *self.settings.read();
+        setup_system.stop_audio()?;
+
+        let settings = setup_system.settings;
 
         let mut mode = Mode::DEFAULT;
         if settings.looping { mode |= Mode::LOOP_NORMAL };
 
-        let sound = self.system.create_sound(file_name, mode, None)?;
+        let sound = setup_system.system.create_sound(file_name, mode, None)?;
 
         // Calculate start/end points
-        let (sample_rate, _, _) = self.system.get_software_format()?;
+        let (sample_rate, _, _) = setup_system.system.get_software_format()?;
 
         let sound_start = AudioSettings::millis_to_pcm(settings.start, sample_rate);
         let sound_end = match settings.end > 0 {
@@ -101,7 +105,7 @@ impl AudioSystem {
         // Start/end points for looping sound
         sound.set_loop_points(sound_start, TimeUnit::PCM, sound_end, TimeUnit::PCM)?;
 
-        let channel = self.system.play_sound(sound, None, false)?;
+        let channel = setup_system.system.play_sound(sound, None, false)?;
         let (_, start_point) = channel.get_dsp_clock()?;
 
         // Start offset and prepare fade in
@@ -117,31 +121,30 @@ impl AudioSystem {
         }
 
         // Set up pitch shift
-        let pitch_shift = self.system.create_dsp_by_type(DspType::Pitchshift)?;
+        let pitch_shift = setup_system.system.create_dsp_by_type(DspType::Pitchshift)?;
         channel.add_dsp(ChannelControlDspIndex::Tail.into(), pitch_shift)?;
 
-        *self.channel.write() = Some(channel);
+        setup_system.channel = Some(channel);
 
-        let channel = Arc::clone(&self.channel);
-        let settings = Arc::clone(&self.settings);
+        let audio_system = Arc::clone(&audio_system);
 
         thread::spawn(move || -> Result<()> {
             loop {
-                let channel = channel.read();
+                let mut system = audio_system.write();
 
                 // Channel was removed
-                let Some(channel) = channel.as_ref() else { break };
+                let Some(channel) = system.channel.as_ref() else { break };
 
                 // Channel has finished
                 if !channel.is_playing()? { break }
 
                 // Stop if past end point
-                if channel.get_position(TimeUnit::PCM)? >= sound_end {
-                    channel.stop()?; // TODO rewrite using channels, then send a stop command
+                if !settings.looping && channel.get_position(TimeUnit::PCM)? >= sound_end {
+                    system.stop_audio()?;
                     break
                 }
 
-                let settings = *settings.read();
+                let settings = system.settings;
     
                 // If looping is disabled, let the current iteration finish
                 if !settings.looping { channel.set_loop_count(0)? }
@@ -174,22 +177,16 @@ impl AudioSystem {
     }
 
     pub fn is_playing(&self) -> bool {
-        self.channel.read()
+        self.channel
             .and_then(|channel| channel.is_playing().ok())
             .unwrap_or(false)
     }
 
     pub fn stop_audio(&mut self) -> Result<()> {
-        match self.channel.write().take() {
+        match self.channel.take() {
             Some(channel) => channel.stop(),
             None => Ok(()),
         }
-    }
-}
-
-impl Default for AudioSystem {
-    fn default() -> Self {
-        Self::new().expect("Couldn't initialize audio system")
     }
 }
 

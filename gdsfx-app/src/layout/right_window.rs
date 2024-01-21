@@ -70,8 +70,8 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     }
 
     let stop_button = Button::new(t!("sound.stop"));
-    if ui.add_enabled(app_state.audio_system.is_playing(), stop_button).clicked() {
-        let _ = app_state.audio_system.stop_audio();
+    if ui.add_enabled(app_state.audio_system.read().is_playing(), stop_button).clicked() {
+        let _ = app_state.audio_system.write().stop_audio();
     }
 
     ui.add_space(10.0);
@@ -87,7 +87,8 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 }
 
 fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
-    let mut audio_settings = app_state.audio_system.settings.write();
+    let mut audio_system = app_state.audio_system.write();
+    let audio_settings = &mut audio_system.settings;
 
     ui.add(Slider::new(&mut audio_settings.speed, -12..=12).text(t!("sound.speed")));
     ui.add(Slider::new(&mut audio_settings.pitch, -12..=12).text(t!("sound.pitch")));

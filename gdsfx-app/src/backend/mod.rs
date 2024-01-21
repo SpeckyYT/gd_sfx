@@ -5,7 +5,7 @@ use educe::Educe;
 use favorites::Favorites;
 use gdsfx_audio::AudioSystem;
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
-use parking_lot::Mutex;
+use parking_lot::{Mutex, RwLock};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
@@ -28,7 +28,8 @@ pub struct AppState {
     pub settings: PersistentSettings,
     pub favorites: Favorites,
 
-    pub audio_system: AudioSystem,
+    #[educe(Default = AudioSystem::new().unwrap())]
+    pub audio_system: Arc<RwLock<AudioSystem>>,
 
     pub unlisted_sfx: Vec<EntryId>,
 
@@ -108,29 +109,30 @@ impl AppState {
     pub fn play_sfx(&mut self, id: EntryId) {
         let gd_folder = self.settings.gd_folder.clone();
         let cache = Arc::clone(&self.sfx_cache);
+        let audio_system = Arc::clone(&self.audio_system);
 
-        // TODO don't block main thread while getting bytes
-        // how to use channels? are they useful here?
-        let bytes = {
-            let mut cache = cache.lock();
-            cache.get(&id).cloned().or_else(|| {
-                let file_entry = FileEntry::new(id);
-                let bytes = file_entry.try_read_bytes(&gd_folder)
-                    .or_else(|| file_entry.try_download_bytes());
+        thread::spawn(move || {
+            let bytes = {
+                let mut cache = cache.lock();
+                cache.get(&id).cloned().or_else(|| {
+                    let file_entry = FileEntry::new(id);
+                    let bytes = file_entry.try_read_bytes(&gd_folder)
+                        .or_else(|| file_entry.try_download_bytes());
 
-                if let Some(bytes) = bytes.as_ref() {
-                    cache.insert(id, bytes.clone());
-                }
+                    if let Some(bytes) = bytes.as_ref() {
+                        cache.insert(id, bytes.clone());
+                    }
 
-                bytes
-            })
-        };
+                    bytes
+                })
+            };
 
-        if let Some(bytes) = bytes {
-            // TODO
-            let _ = bytes;
-            let _ = self.audio_system.play_file(&format!("{gd_folder}/s{id}.ogg"));
-        }
+            if let Some(bytes) = bytes {
+                // TODO
+                let _ = bytes;
+                let _ = AudioSystem::play_file(audio_system, &format!("{gd_folder}/s{id}.ogg"));
+            }
+        });        
     }
 
     pub fn download_sfx(&self, id: EntryId) {
