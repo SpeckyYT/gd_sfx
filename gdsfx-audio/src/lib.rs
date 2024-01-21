@@ -14,7 +14,6 @@ pub struct AudioSystem {
     channel: Arc<RwLock<Option<Channel>>>,
 
     /// Public instance of `AudioSettings` that can be modified at any time.
-    /// 
     /// Only specific changes to this struct can be applied immediately while playing audio though;
     /// see the fields of the `AudioSettings` struct for more information.
     pub settings: Arc<RwLock<AudioSettings>>,
@@ -47,13 +46,14 @@ pub struct AudioSettings {
     /// 
     /// Can be set to false while playing to stop looping.
     #[educe(Default = false)]
-    pub looped: bool,
+    pub looping: bool,
 
     /// Start offset in milliseconds, before applying the speed modifier.
     #[educe(Default = 0)]
     pub start: u32,
 
     /// End point in milliseconds, before applying the speed modifier.
+    /// The default value of 0 lets the sound play until it has finished.
     #[educe(Default = 0)]
     pub end: u32,
 
@@ -86,7 +86,7 @@ impl AudioSystem {
 
         let settings = *self.settings.read();
 
-        let mode = if settings.looped { Mode::LOOP_NORMAL } else { Mode::DEFAULT };
+        let mode = if settings.looping { Mode::LOOP_NORMAL } else { Mode::DEFAULT };
 
         // SAFETY: System::create_sound requires the first parameter to be a &str,
         // which is immediately converted back to a Vec<u8> in the CString constructor though.
@@ -110,10 +110,8 @@ impl AudioSystem {
         // Prevent invalid parameters from being passed at all
         if settings.volume == 0.0 || start_point >= end_point { return Ok(()) }
 
-        // Start/end points for looped sound
-        if settings.looped {
-            sound.set_loop_points(start_point, TimeUnit::PCM, end_point, TimeUnit::PCM)?;
-        }
+        // Start/end points for looping sound
+        sound.set_loop_points(start_point, TimeUnit::PCM, end_point, TimeUnit::PCM)?;
 
         let channel = self.system.play_sound(sound, None, false)?;
 
@@ -122,17 +120,17 @@ impl AudioSystem {
         channel.set_position(start_point, TimeUnit::PCM)?;
         channel.add_fade_point(0, 0.0)?;
 
-        let fade_in_time = AudioSettings::millis_to_pcm(settings.fade_in, sample_rate) as u64;
+        let fade_in_time = AudioSettings::millis_to_pcm(settings.fade_in, sample_rate);
 
         // Prepare end point and fade out for single sound
         // TODO: figure out overlapping fade times, and speed factor
-        let duration = (end_point - start_point) as u64;
-        if !settings.looped {
-            channel.add_fade_point(duration, 0.0)?;
-            channel.set_delay(None, Some(duration), true)?;
+        let duration = end_point - start_point;
+        if !settings.looping {
+            channel.add_fade_point(duration.into(), 0.0)?;
+            channel.set_delay(None, Some(duration.into()), true)?;
         }
 
-        let fade_out_time = AudioSettings::millis_to_pcm(settings.fade_out, sample_rate) as u64;
+        let fade_out_time = AudioSettings::millis_to_pcm(settings.fade_out, sample_rate);
 
         // Pitch shift
         let pitch = AudioSettings::linear_to_exp(settings.pitch);
@@ -152,7 +150,7 @@ impl AudioSystem {
 
                 let settings = *settings.read();
 
-                if !settings.looped {
+                if !settings.looping {
                     // If looping is disabled, let the current iteration finish
                     channel.set_loop_count(0)?;
                 }
@@ -163,9 +161,9 @@ impl AudioSystem {
                 channel.set_pitch(AudioSettings::linear_to_exp(settings.speed))?;
 
                 // Update fade in/out points with actual volume
-                channel.add_fade_point(fade_in_time, settings.volume)?;
-                if mode != Mode::LOOP_NORMAL { // Initially looped sounds shouldn't fade out
-                    channel.add_fade_point(duration - fade_out_time, settings.volume)?;
+                channel.add_fade_point(fade_in_time.into(), settings.volume)?;
+                if mode != Mode::LOOP_NORMAL { // Initially looping sounds shouldn't fade out
+                    channel.add_fade_point((duration - fade_out_time).into(), settings.volume)?;
                 }
             }
 

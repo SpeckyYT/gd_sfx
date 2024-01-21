@@ -11,3 +11,7 @@ educe = { workspace = true }
 parking_lot = { workspace = true }
 
 libfmod = "2.206.3"
+
+[build-dependencies]
+gdsfx-build = { workspace = true }
+gdsfx-files = { workspace = true }

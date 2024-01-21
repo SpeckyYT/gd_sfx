@@ -1467,6 +1467,8 @@ name = "gdsfx-audio"
 version = "0.1.0"
 dependencies = [
  "educe",
+ "gdsfx-build",
+ "gdsfx-files",
  "libfmod",
  "parking_lot",
 ]
