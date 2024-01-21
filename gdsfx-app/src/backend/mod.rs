@@ -3,7 +3,7 @@ use ahash::{HashMap, HashSet};
 
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
-use gdsfx_audio::AudioSettings;
+use gdsfx_audio::{AudioSettings, AudioSystem};
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
@@ -25,7 +25,9 @@ pub struct AppState {
     pub favorites: Favorites,
 
     pub search_settings: SearchSettings,
+
     pub audio_settings: AudioSettings,
+    pub audio_system: AudioSystem,
 
     pub unlisted_sfx: Vec<EntryId>,
 
@@ -102,32 +104,30 @@ impl AppState {
         self.downloaded_sfx.lock().contains(&id)
     }
 
-    pub fn play_sfx(&self, id: EntryId) {
+    pub fn play_sfx(&mut self, id: EntryId) {
         let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
         let audio_settings = self.audio_settings;
 
-        thread::spawn(move || {
-            let bytes = {
-                let mut cache = cache.lock();
-                cache.get(&id).cloned().or_else(|| {
-                    let file_entry = FileEntry::new(id);
-                    let bytes = file_entry.try_read_bytes(gd_folder)
-                        .or_else(|| file_entry.try_download_bytes());
+        let bytes = {
+            let mut cache = cache.lock();
+            cache.get(&id).cloned().or_else(|| {
+                let file_entry = FileEntry::new(id);
+                let bytes = file_entry.try_read_bytes(gd_folder)
+                    .or_else(|| file_entry.try_download_bytes());
 
-                    if let Some(bytes) = bytes.as_ref() {
-                        cache.insert(id, bytes.clone());
-                    }
+                if let Some(bytes) = bytes.as_ref() {
+                    cache.insert(id, bytes.clone());
+                }
 
-                    bytes
-                })
-            };
+                bytes
+            })
+        };
 
-            if let Some(bytes) = bytes {
-                gdsfx_audio::stop_all();
-                gdsfx_audio::play_sound(bytes, audio_settings);
-            }
-        });
+        if let Some(bytes) = bytes {
+            let _ = self.audio_system.stop_audio();
+            let _ = self.audio_system.play_sound(bytes);
+        }
     }
 
     pub fn download_sfx(&self, id: EntryId) {

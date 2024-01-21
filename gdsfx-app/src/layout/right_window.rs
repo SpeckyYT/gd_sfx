@@ -70,8 +70,8 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     }
 
     let stop_button = Button::new(t!("sound.stop"));
-    if ui.add_enabled(gdsfx_audio::is_playing_audio(), stop_button).clicked() {
-        gdsfx_audio::stop_all();
+    if ui.add_enabled(app_state.audio_system.is_playing(), stop_button).clicked() {
+        app_state.audio_system.stop_audio();
     }
     
     ui.add_space(10.0);
@@ -88,10 +88,10 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
 fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
     ui.label(t!("sound.speed"));
-    ui.add(Slider::new(&mut app_state.audio_settings.speed, -12.0..=12.0));
+    ui.add(Slider::new(&mut app_state.audio_settings.speed, -12..=12));
     
     ui.label(t!("sound.pitch"));
-    ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12.0..=12.0));
+    ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12..=12));
 
     ui.label(t!("sound.volume"));
     ui.add(Slider::new(&mut app_state.audio_settings.volume, 0.0..=2.0));
