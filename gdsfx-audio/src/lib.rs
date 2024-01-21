@@ -26,8 +26,6 @@ pub struct AudioSettings {
     /// `-12` represents half speed, while `-12` is double speed.
     /// 
     /// Also distorts pitch by this many semitones.
-    /// 
-    /// Modifiable while playing.
     #[educe(Default = 0)]
     pub speed: i32,
 
@@ -36,15 +34,11 @@ pub struct AudioSettings {
     pub pitch: i32,
 
     /// Volume range from `0.0` (no sound) to `2.0` (twice as loud).
-    /// 
-    /// Modifiable while playing.
     #[educe(Default = 1.0)]
     pub volume: f32,
 
     /// Whether to loop the sound.
     /// Takes into account start and end settings, as well as fading in once.
-    /// 
-    /// Can be set to false while playing to stop looping.
     #[educe(Default = false)]
     pub looping: bool,
 
@@ -104,7 +98,7 @@ impl AudioSystem {
         };
 
         // Prevent invalid parameters from being passed at all
-        if settings.volume == 0.0 || sound_start >= sound_end { return Ok(()) }
+        if sound_start >= sound_end { return Ok(()) }
 
         // Start/end points for looping sound
         sound.set_loop_points(sound_start, TimeUnit::PCM, sound_end, TimeUnit::PCM)?;
@@ -125,32 +119,39 @@ impl AudioSystem {
             channel.set_delay(None, Some(end_point), true)?;
         }
 
-        // Pitch shift
-        let pitch = AudioSettings::linear_to_exp(settings.pitch);
+        // Set up pitch shift
         let pitch_shift = self.system.create_dsp_by_type(DspType::Pitchshift)?;
-        pitch_shift.set_parameter_float(DspPitchShift::Pitch.into(), pitch)?;
         channel.add_dsp(ChannelControlDspIndex::Tail.into(), pitch_shift)?;
 
         *self.channel.write() = Some(channel);
 
-        let channel = self.channel.clone();
-        let settings = self.settings.clone();
+        let channel = Arc::clone(&self.channel);
+        let settings = Arc::clone(&self.settings);
 
         thread::spawn(move || -> Result<()> {
             loop {
                 let channel = channel.read();
+
+                // Channel was removed
                 let Some(channel) = channel.as_ref() else { break };
-                if !channel.is_playing()? { break }
+
+                // Channel has finished
+                if !channel.is_playing()? { break } // TODO: why does this stop early when channel speed is slower?
+
+                // Stop if past end point
+                if channel.get_position(TimeUnit::PCM)? >= sound_end { break }
     
                 let settings = *settings.read();
     
-                if !settings.looping {
-                    // If looping is disabled, let the current iteration finish
-                    channel.set_loop_count(0)?;
-                }
-    
+                // If looping is disabled, let the current iteration finish
+                if !settings.looping { channel.set_loop_count(0)? }
+
                 channel.set_volume(settings.volume)?;
-    
+
+                // Update pitch shift
+                let pitch = AudioSettings::linear_to_exp(settings.pitch);
+                pitch_shift.set_parameter_float(DspPitchShift::Pitch.into(), pitch)?;
+
                 // This pitch-setting function also stretches time
                 channel.set_pitch(AudioSettings::linear_to_exp(settings.speed))?;
 

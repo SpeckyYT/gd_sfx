@@ -106,9 +106,11 @@ impl AppState {
     }
 
     pub fn play_sfx(&mut self, id: EntryId) {
-        let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
+        let cache = Arc::clone(&self.sfx_cache);
 
+        // TODO don't block main thread while getting bytes
+        // how to use channels? are they useful here?
         let bytes = {
             let mut cache = cache.lock();
             cache.get(&id).cloned().or_else(|| {
@@ -139,9 +141,9 @@ impl AppState {
 
         if file_entry.file_exists(gd_folder) { return }
 
-        let cache = self.sfx_cache.clone();
         let gd_folder = gd_folder.clone();
-        let downloaded_sfx = self.downloaded_sfx.clone();
+        let cache = Arc::clone(&self.sfx_cache);
+        let downloaded_sfx = Arc::clone(&self.downloaded_sfx);
 
         thread::spawn(move || {
             let bytes = cache.lock().get(&id).cloned()
