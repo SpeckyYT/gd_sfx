@@ -46,23 +46,43 @@ fn render_sound_info(ui: &mut Ui, entry: &LibraryEntry) {
     }
 }
 
+const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(64.0, 64.0);
+
+macro_rules! image_button {
+    (
+        $ui:ident,
+        $($path:literal)? $($source:ident)?,
+        $size:expr,
+        $enabled:expr $(,)?
+    ) => {
+        {
+            let image: Image<'static> = $(include_image!($path).into())? $($source.into())?;
+            let download_button = Button::image(image.max_size($size)).min_size($size);
+            $ui.add_enabled($enabled, download_button)
+        }
+    };
+}
+
 fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     if app_state.is_gd_folder_valid() {
         let file_exists = app_state.is_sfx_downloaded(id);
 
-        const IMAGE_SIZE: Vec2 = Vec2::new(48.0, 48.0);
-
         ui.horizontal(|ui| {
-            // todo: macro?
-            let image: Image<'static> = include_image!("../../../assets/svg/download-solid.svg").into();
-            let download_button = Button::image(image.fit_to_exact_size(IMAGE_SIZE)).min_size(IMAGE_SIZE);
-            if ui.add_enabled(!file_exists, download_button).clicked() {
+            if image_button!(
+                ui,
+                "../../../assets/svg/download-solid.svg",
+                IMAGE_BUTTON_SIZE,
+                !file_exists,
+            ).clicked() {
                 app_state.download_sfx(id);
             }
 
-            let image: Image<'static> = include_image!("../../../assets/svg/trash-can-regular.svg").into();
-            let delete_button = Button::image(image.fit_to_exact_size(IMAGE_SIZE)).min_size(IMAGE_SIZE);
-            if ui.add_enabled(file_exists, delete_button).clicked() {
+            if image_button!(
+                ui,
+                "../../../assets/svg/trash-can-regular.svg",
+                IMAGE_BUTTON_SIZE,
+                file_exists,
+            ).clicked() {
                 app_state.delete_sfx(id);
             }
         });
@@ -72,22 +92,38 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     
     ui.add_space(10.0);
 
-    if ui.button(t!("sound.play")).clicked() {
-        app_state.play_sfx(id);
-    }
+    ui.horizontal(|ui| {
+        if image_button!(
+            ui,
+            "../../../assets/svg/play-solid.svg",
+            IMAGE_BUTTON_SIZE,
+            true,
+        ).clicked() {
+            app_state.play_sfx(id);
+        }
 
-    let stop_button = Button::new(t!("sound.stop"));
-    if ui.add_enabled(gdsfx_audio::is_playing_audio(), stop_button).clicked() {
-        gdsfx_audio::stop_all();
-    }
+        if image_button!(
+            ui,
+            "../../../assets/svg/stop-solid.svg",
+            IMAGE_BUTTON_SIZE,
+            gdsfx_audio::is_playing_audio(),
+        ).clicked() {
+            gdsfx_audio::stop_all();
+        }
+    });
     
-    ui.add_space(10.0);
+    ui.add_space(5.0);
 
     let favorite_button_label = match app_state.favorites.has_favorite(id) {
-        false => t!("sound.favorite.add"),
-        true => t!("sound.favorite.remove"),
+        true => include_image!("../../../assets/svg/star-solid.svg"),
+        false => include_image!("../../../assets/svg/star-regular.svg"),
     };
-    if ui.button(favorite_button_label).clicked() {
+    if image_button!(
+        ui,
+        favorite_button_label,
+        IMAGE_BUTTON_SIZE,
+        true,
+    ).clicked() {
         app_state.favorites.toggle_favorite(id);
         ui.close_menu();
     }
