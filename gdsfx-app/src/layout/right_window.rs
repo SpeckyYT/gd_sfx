@@ -50,13 +50,18 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     if app_state.is_gd_folder_valid() {
         let file_exists = app_state.is_sfx_downloaded(id);
 
+        const IMAGE_SIZE: Vec2 = Vec2::new(48.0, 48.0);
+
         ui.horizontal(|ui| {
-            let download_button = Button::image(Image::from_bytes(t!("sound.download"), include_bytes!("../../../assets/normal.png")));
+            // todo: macro?
+            let image: Image<'static> = include_image!("../../../assets/svg/download-solid.svg").into();
+            let download_button = Button::image(image.fit_to_exact_size(IMAGE_SIZE)).min_size(IMAGE_SIZE);
             if ui.add_enabled(!file_exists, download_button).clicked() {
                 app_state.download_sfx(id);
             }
 
-            let delete_button = Button::image(Image::from_bytes(t!("sound.delete"), include_bytes!("../../../assets/normal.png")));
+            let image: Image<'static> = include_image!("../../../assets/svg/trash-can-regular.svg").into();
+            let delete_button = Button::image(image.fit_to_exact_size(IMAGE_SIZE)).min_size(IMAGE_SIZE);
             if ui.add_enabled(file_exists, delete_button).clicked() {
                 app_state.delete_sfx(id);
             }
