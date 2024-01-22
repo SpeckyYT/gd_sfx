@@ -1,7 +1,7 @@
-use eframe::egui::Image;
+use eframe::egui::{Image, include_image};
 use strum::EnumIter;
 
-use crate::{localized_enum, i18n::LocalizedEnum};
+use crate::localized_enum;
 
 pub mod library;
 pub mod favorites;
@@ -25,15 +25,14 @@ localized_enum! {
 
 impl Tab {
     pub fn icon(&self) -> Image<'static> {
-        let bytes: &[u8] = match self {
-            Self::Library => include_bytes!("../../../assets/wtf_is_this.png"),
-            Self::Credits => include_bytes!("../../../assets/wtf_is_this.png"),
-            Self::Favorites => include_bytes!("../../../assets/favorite.png"),
-            Self::Settings => include_bytes!("../../../assets/settings.png"),
-            Self::Stats => include_bytes!("../../../assets/statistics.png"),
-            Self::Tools => include_bytes!("../../../assets/informations.png"),
-        };
-
-        Image::from_bytes(self.localize_variant().to_string(), bytes)
+        match self {
+            Self::Library => include_image!("../../../assets/svg/magnifying-glass-solid.svg"),
+            Self::Favorites => include_image!("../../../assets/svg/star-solid.svg"),
+            Self::Tools => include_image!("../../../assets/svg/screwdriver-wrench-solid.svg"),
+            Self::Stats => include_image!("../../../assets/svg/chart-simple-solid.svg"),
+            Self::Settings => include_image!("../../../assets/svg/gear-solid.svg"),
+            Self::Credits => include_image!("../../../assets/svg/people-group-solid.svg"),
+        }
+        .into()
     }
 }

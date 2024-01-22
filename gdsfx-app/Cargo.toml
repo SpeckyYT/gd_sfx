@@ -25,7 +25,7 @@ strum = { workspace = true }
 
 eframe = "0.25.0"
 egui-modal = "0.3.2"
-egui_extras = { version = "0.25.0", features = ["image"] }
+egui_extras = { version = "0.25.0", features = ["image","svg"] }
 rfd = "0.13.0"
 rust-i18n = "3.0.0"
 
