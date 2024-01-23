@@ -1,5 +1,6 @@
 use eframe::egui::Image;
 use strum::EnumIter;
+use crate::epaint::Color32;
 
 use crate::{localized_enum, images};
 
@@ -25,14 +26,26 @@ localized_enum! {
 
 impl Tab {
     pub fn icon(&self) -> Image<'static> {
-        match self {
-            Self::Library => images::MAGNIFYING_GLASS,
-            Self::Favorites => images::STAR_SOLID,
-            Self::Tools => images::TOOLS,
-            Self::Stats => images::CHART,
-            Self::Settings => images::GEAR,
-            Self::Credits => images::PEOPLE_GROUP,
+        macro_rules! images {
+            {$($pat:pat => $image:expr, rgb($r:expr, $g:expr, $b:expr)),* $(,)?} => {
+                {
+                    let image: Image<'static> = match self {
+                        $($pat => $image,)*
+                    }.into();
+                    match self {
+                        $($pat => image.tint(Color32::from_rgb($r, $g, $b)),)*
+                    }
+                }
+            };
         }
-        .into()
+
+        images!{
+            Self::Library => images::MAGNIFYING_GLASS, rgb(16,99,188),
+            Self::Favorites => images::STAR_SOLID, rgb(255,196,70),
+            Self::Tools => images::TOOLS, rgb(123,100,72),
+            Self::Settings => images::GEAR, rgb(191,191,191),
+            Self::Stats => images::CHART, rgb(105,219,61),
+            Self::Credits => images::PEOPLE_GROUP, rgb(255, 165, 64),
+        }
     }
 }
