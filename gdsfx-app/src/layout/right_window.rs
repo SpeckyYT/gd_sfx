@@ -52,12 +52,15 @@ const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(64.0, 64.0);
 macro_rules! image_button {
     (
         $ui:expr,
-        $source:expr,
+        $source:expr $(=> rgb($r:expr, $g:expr, $b:expr))?,
         $size:expr,
         $enabled:expr $(,)?
     ) => {
         {
             let image: Image<'static> = $source.into();
+            $(
+                let image = image.tint(Color32::from_rgb($r,$g,$b));
+            )?
             let download_button = Button::image(image.fit_to_exact_size($size * 0.8)).min_size($size);
             $ui.add_enabled($enabled, download_button)
         }
@@ -71,7 +74,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
         ui.horizontal(|ui| {
             if image_button!(
                 ui,
-                images::DOWNLOAD,
+                images::DOWNLOAD => rgb(20, 200, 60),
                 IMAGE_BUTTON_SIZE,
                 !file_exists,
             ).clicked() {
@@ -80,7 +83,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
             if image_button!(
                 ui,
-                images::TRASH,
+                images::TRASH => rgb(200, 20, 60),
                 IMAGE_BUTTON_SIZE,
                 file_exists,
             ).clicked() {
@@ -96,7 +99,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     ui.horizontal(|ui| {
         if image_button!(
             ui,
-            images::PLAY,
+            images::PLAY => rgb(20, 200, 60),
             IMAGE_BUTTON_SIZE,
             true,
         ).clicked() {
@@ -105,7 +108,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
         if image_button!(
             ui,
-            images::STOP,
+            images::STOP => rgb(200, 20, 60),
             IMAGE_BUTTON_SIZE,
             gdsfx_audio::is_playing_audio(),
         ).clicked() {
@@ -121,7 +124,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     };
     if image_button!(
         ui,
-        favorite_button_label,
+        favorite_button_label => rgb(255,196,70),
         IMAGE_BUTTON_SIZE,
         true,
     ).clicked() {

@@ -3,18 +3,20 @@ use strum::IntoEnumIterator;
 
 use crate::{tabs::Tab, backend::AppState};
 
+const TAB_SIZE: Vec2 = Vec2 { x: 48.0, y: 48.0 };
+
 pub fn render(ctx: &Context, app_state: &mut AppState) {
     SidePanel::left("tabs_panel")
-    .default_width(64.0)
+    .default_width(TAB_SIZE.x)
     .resizable(false)
     .show(ctx, |ui| {
-        ui.add_space(4.0);
+        ui.add_space(5.0);
         ui.vertical_centered(|ui| {
             for tab in Tab::iter() {
-                let icon = tab.icon().max_size(Vec2 { x: 64.0, y: 64.0 });
+                let icon = tab.icon().max_size(TAB_SIZE);
                 let tab_element = ui.add(
                     Button::image(icon)
-                    .min_size(Vec2 { x: 64.0, y: 64.0 })
+                    .min_size(TAB_SIZE)
                 );
 
                 if tab_element.clicked() {
@@ -22,6 +24,5 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
                 }
             }
         });
-        ui.add_space(2.0);
     });
 }
