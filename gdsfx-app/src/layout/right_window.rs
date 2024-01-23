@@ -1,6 +1,7 @@
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{EntryKind, LibraryEntry, EntryId};
+use crate::images;
 
 use crate::backend::AppState;
 
@@ -50,13 +51,13 @@ const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(64.0, 64.0);
 
 macro_rules! image_button {
     (
-        $ui:ident,
-        $($path:literal)? $($source:ident)?,
+        $ui:expr,
+        $source:expr,
         $size:expr,
         $enabled:expr $(,)?
     ) => {
         {
-            let image: Image<'static> = $(include_image!($path).into())? $($source.into())?;
+            let image: Image<'static> = $source.into();
             let download_button = Button::image(image.max_size($size)).min_size($size);
             $ui.add_enabled($enabled, download_button)
         }
@@ -70,7 +71,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
         ui.horizontal(|ui| {
             if image_button!(
                 ui,
-                "../../../assets/svg/download-solid.svg",
+                images::DOWNLOAD,
                 IMAGE_BUTTON_SIZE,
                 !file_exists,
             ).clicked() {
@@ -79,7 +80,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
             if image_button!(
                 ui,
-                "../../../assets/svg/trash-can-regular.svg",
+                images::TRASH,
                 IMAGE_BUTTON_SIZE,
                 file_exists,
             ).clicked() {
@@ -95,7 +96,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     ui.horizontal(|ui| {
         if image_button!(
             ui,
-            "../../../assets/svg/play-solid.svg",
+            images::PLAY,
             IMAGE_BUTTON_SIZE,
             true,
         ).clicked() {
@@ -104,7 +105,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
         if image_button!(
             ui,
-            "../../../assets/svg/stop-solid.svg",
+            images::STOP,
             IMAGE_BUTTON_SIZE,
             gdsfx_audio::is_playing_audio(),
         ).clicked() {
@@ -115,8 +116,8 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     ui.add_space(5.0);
 
     let favorite_button_label = match app_state.favorites.has_favorite(id) {
-        true => include_image!("../../../assets/svg/star-solid.svg"),
-        false => include_image!("../../../assets/svg/star-regular.svg"),
+        true => images::STAR_SOLID,
+        false => images::STAR_REGULAR,
     };
     if image_button!(
         ui,

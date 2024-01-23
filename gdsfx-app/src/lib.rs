@@ -8,6 +8,7 @@ use gdsfx_library::Library;
 mod backend;
 mod layout;
 mod tabs;
+mod images;
 mod i18n;
 
 // the build script reruns every time a file in the lang folder is changed
