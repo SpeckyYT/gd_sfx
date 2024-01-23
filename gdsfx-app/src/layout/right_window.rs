@@ -58,9 +58,8 @@ macro_rules! image_button {
     ) => {
         {
             let image: Image<'static> = $source.into();
-            $(
-                let image = image.tint(Color32::from_rgb($r,$g,$b));
-            )?
+            let image = image.tint(Color32::GRAY)
+                $( .tint(Color32::from_rgb($r,$g,$b)) )?;
             let download_button = Button::image(image.fit_to_exact_size($size * 0.8)).min_size($size);
             $ui.add_enabled($enabled, download_button)
         }
@@ -74,7 +73,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
         ui.horizontal(|ui| {
             if image_button!(
                 ui,
-                images::DOWNLOAD => rgb(20, 200, 60),
+                images::DOWNLOAD,
                 IMAGE_BUTTON_SIZE,
                 !file_exists,
             ).clicked() {
@@ -83,7 +82,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
             if image_button!(
                 ui,
-                images::TRASH => rgb(200, 20, 60),
+                images::TRASH,
                 IMAGE_BUTTON_SIZE,
                 file_exists,
             ).clicked() {
@@ -93,13 +92,13 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     } else {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
-    
+
     ui.add_space(10.0);
 
     ui.horizontal(|ui| {
         if image_button!(
             ui,
-            images::PLAY => rgb(20, 200, 60),
+            images::PLAY,
             IMAGE_BUTTON_SIZE,
             true,
         ).clicked() {
@@ -108,7 +107,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
 
         if image_button!(
             ui,
-            images::STOP => rgb(200, 20, 60),
+            images::STOP,
             IMAGE_BUTTON_SIZE,
             gdsfx_audio::is_playing_audio(),
         ).clicked() {
@@ -124,7 +123,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     };
     if image_button!(
         ui,
-        favorite_button_label => rgb(255,196,70),
+        favorite_button_label,
         IMAGE_BUTTON_SIZE,
         true,
     ).clicked() {

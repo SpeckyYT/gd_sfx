@@ -27,25 +27,31 @@ localized_enum! {
 impl Tab {
     pub fn icon(&self) -> Image<'static> {
         macro_rules! images {
-            {$($pat:pat => $image:expr, rgb($r:expr, $g:expr, $b:expr)),* $(,)?} => {
+            {$($pat:pat => $image:expr $(=> rgb($r:expr, $g:expr, $b:expr))?),* $(,)?} => {
                 {
                     let image: Image<'static> = match self {
-                        $($pat => $image,)*
+                        $(
+                            $pat => $image,
+                        )*
                     }.into();
-                    match self {
-                        $($pat => image.tint(Color32::from_rgb($r, $g, $b)),)*
-                    }
+                    let image = match self {
+                        $(
+                            $pat => image.tint(Color32::GRAY)
+                                $( .tint(Color32::from_rgb($r, $g, $b)) )?,
+                        )*
+                    };
+                    image
                 }
             };
         }
 
         images!{
-            Self::Library => images::MAGNIFYING_GLASS, rgb(16,99,188),
-            Self::Favorites => images::STAR_SOLID, rgb(255,196,70),
-            Self::Tools => images::TOOLS, rgb(123,100,72),
-            Self::Settings => images::GEAR, rgb(191,191,191),
-            Self::Stats => images::CHART, rgb(105,219,61),
-            Self::Credits => images::PEOPLE_GROUP, rgb(255, 165, 64),
+            Self::Library => images::MAGNIFYING_GLASS,
+            Self::Favorites => images::STAR_SOLID,
+            Self::Tools => images::TOOLS,
+            Self::Settings => images::GEAR,
+            Self::Stats => images::CHART,
+            Self::Credits => images::PEOPLE_GROUP,
         }
     }
 }
