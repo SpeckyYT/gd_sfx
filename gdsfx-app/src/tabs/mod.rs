@@ -1,7 +1,7 @@
-use eframe::egui::{Image, include_image};
+use eframe::egui::Image;
 use strum::EnumIter;
 
-use crate::localized_enum;
+use crate::{localized_enum, images};
 
 pub mod library;
 pub mod favorites;
@@ -26,12 +26,12 @@ localized_enum! {
 impl Tab {
     pub fn icon(&self) -> Image<'static> {
         match self {
-            Self::Library => include_image!("../../../assets/svg/magnifying-glass-solid.svg"),
-            Self::Favorites => include_image!("../../../assets/svg/star-solid.svg"),
-            Self::Tools => include_image!("../../../assets/svg/screwdriver-wrench-solid.svg"),
-            Self::Stats => include_image!("../../../assets/svg/chart-simple-solid.svg"),
-            Self::Settings => include_image!("../../../assets/svg/gear-solid.svg"),
-            Self::Credits => include_image!("../../../assets/svg/people-group-solid.svg"),
+            Self::Library => images::MAGNIFYING_GLASS,
+            Self::Favorites => images::STAR_SOLID,
+            Self::Tools => images::TOOLS,
+            Self::Stats => images::CHART,
+            Self::Settings => images::GEAR,
+            Self::Credits => images::PEOPLE_GROUP,
         }
         .into()
     }

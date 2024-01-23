@@ -1,9 +1,9 @@
-use eframe::{egui::{self, *}, epaint::Vec2};
+use eframe::{egui::*, epaint::Vec2};
 use egui_modal::ModalStyle;
 use gdsfx_library::{Library, LibraryEntry};
 use strum::IntoEnumIterator;
 
-use crate::{backend::{AppState, settings::*, search::*, LibraryPage}, i18n::LocalizedEnum};
+use crate::{backend::{AppState, settings::*, search::*, LibraryPage}, i18n::LocalizedEnum, images};
 
 pub mod tabs_panel;
 pub mod left_window;
@@ -54,15 +54,13 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
 }
 
 pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, entry: &LibraryEntry) {
-    const FAVORITE_ICON: ImageSource = egui::include_image!("../../../assets/twemoji-white-medium-star.png");
-
     if !app_state.is_matching_entry(entry, library) {
         return // don't render filtered buttons at all
     }
 
     let image = app_state.favorites
         .has_favorite(entry.id)
-        .then_some(Image::new(FAVORITE_ICON).tint(Color32::from_white_alpha(100))); // set opacity 0-255
+        .then_some(Image::new(images::FAVORITE_STAR).tint(Color32::from_white_alpha(100))); // set opacity 0-255
 
     let text = WidgetText::from(&entry.name);
     let button = ui.add(Button::opt_image_and_text(image, Some(text)));

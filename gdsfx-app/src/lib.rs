@@ -38,6 +38,8 @@ impl eframe::App for GdSfx {
         tabs_panel::render(ctx, &mut self.app_state);
         left_window::render(ctx, &mut self.app_state, &self.library);
         right_window::render(ctx, &mut self.app_state);
+
+        ctx.request_repaint();
     }
 }
 

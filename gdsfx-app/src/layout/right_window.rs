@@ -58,7 +58,7 @@ macro_rules! image_button {
     ) => {
         {
             let image: Image<'static> = $source.into();
-            let download_button = Button::image(image.max_size($size)).min_size($size);
+            let download_button = Button::image(image.fit_to_exact_size($size * 0.8)).min_size($size);
             $ui.add_enabled($enabled, download_button)
         }
     };
