@@ -2,9 +2,11 @@ use eframe::egui::Ui;
 use gdsfx_library::Library;
 use pretty_bytes::converter::convert as pretty_bytes;
 
-use crate::backend::AppState;
+use crate::{layout, backend::AppState};
 
-pub fn render(ui: &mut Ui, app_state: &AppState, library: &Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+    layout::add_library_page_selection(ui, app_state);
+
     ui.heading(t!("stats.library"));
 
     ui.add_space(10.0);

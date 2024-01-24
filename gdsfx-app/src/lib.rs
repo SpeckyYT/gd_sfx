@@ -8,6 +8,7 @@ use gdsfx_library::Library;
 mod backend;
 mod layout;
 mod tabs;
+mod images;
 mod i18n;
 
 // the build script reruns every time a file in the lang folder is changed
@@ -34,9 +35,11 @@ impl eframe::App for GdSfx {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         use layout::*;
         
-        top_panel::render(ctx, &mut self.app_state);
+        tabs_panel::render(ctx, &mut self.app_state);
         left_window::render(ctx, &mut self.app_state, &self.library);
         right_window::render(ctx, &mut self.app_state);
+
+        ctx.request_repaint();
     }
 }
 

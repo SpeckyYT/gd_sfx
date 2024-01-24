@@ -1,6 +1,7 @@
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{EntryKind, LibraryEntry, EntryId};
+use crate::images;
 
 use crate::backend::AppState;
 
@@ -46,41 +47,86 @@ fn render_sound_info(ui: &mut Ui, entry: &LibraryEntry) {
     }
 }
 
+const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(32.0, 32.0);
+
+macro_rules! image_button {
+    (
+        $ui:expr,
+        $source:expr $(=> rgb($r:expr, $g:expr, $b:expr))?,
+        $size:expr,
+        $enabled:expr $(,)?
+    ) => {
+        {
+            let image: Image<'static> = $source.into();
+            let image = image.tint(Color32::GRAY)
+                $( .tint(Color32::from_rgb($r,$g,$b)) )?;
+            let download_button = Button::image(image.fit_to_exact_size($size * 0.75)).min_size($size);
+            $ui.add_enabled($enabled, download_button)
+        }
+    };
+}
+
 fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
+    ui.horizontal(|ui| {
+        if image_button!(
+            ui,
+            images::PLAY,
+            IMAGE_BUTTON_SIZE,
+            true,
+        ).clicked() {
+            app_state.play_sfx(id);
+        }
+
+        if image_button!(
+            ui,
+            images::STOP,
+            IMAGE_BUTTON_SIZE,
+            gdsfx_audio::is_playing_audio(),
+        ).clicked() {
+            gdsfx_audio::stop_all();
+        }
+    });
+
+    ui.add_space(5.0);
+
     if app_state.is_gd_folder_valid() {
         let file_exists = app_state.is_sfx_downloaded(id);
 
-        let download_button = Button::new(t!("sound.download"));
-        if ui.add_enabled(!file_exists, download_button).clicked() {
-            app_state.download_sfx(id);
-        }
+        ui.horizontal(|ui| {
+            if image_button!(
+                ui,
+                images::DOWNLOAD,
+                IMAGE_BUTTON_SIZE,
+                !file_exists,
+            ).clicked() {
+                app_state.download_sfx(id);
+            }
 
-        let delete_button = Button::new(t!("sound.delete"));
-        if ui.add_enabled(file_exists, delete_button).clicked() {
-            app_state.delete_sfx(id);
-        }
+            if image_button!(
+                ui,
+                images::TRASH,
+                IMAGE_BUTTON_SIZE,
+                file_exists,
+            ).clicked() {
+                app_state.delete_sfx(id);
+            }
+        });
     } else {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
     
-    ui.add_space(10.0);
-
-    if ui.button(t!("sound.play")).clicked() {
-        app_state.play_sfx(id);
-    }
-
-    let stop_button = Button::new(t!("sound.stop"));
-    if ui.add_enabled(gdsfx_audio::is_playing_audio(), stop_button).clicked() {
-        gdsfx_audio::stop_all();
-    }
-    
-    ui.add_space(10.0);
+    ui.add_space(5.0);
 
     let favorite_button_label = match app_state.favorites.has_favorite(id) {
-        false => t!("sound.favorite.add"),
-        true => t!("sound.favorite.remove"),
+        true => images::STAR_SOLID,
+        false => images::STAR_REGULAR,
     };
-    if ui.button(favorite_button_label).clicked() {
+    if image_button!(
+        ui,
+        favorite_button_label,
+        IMAGE_BUTTON_SIZE,
+        true,
+    ).clicked() {
         app_state.favorites.toggle_favorite(id);
         ui.close_menu();
     }

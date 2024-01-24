@@ -8,6 +8,7 @@ use crate::{layout, backend::{AppState, settings::SearchFilterMode}};
 const UNLISTED_ID: EntryId = EntryId::MAX;
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+    layout::add_library_page_selection(ui, app_state);
     layout::add_search_area(ui, &mut app_state.search_settings);
 
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
