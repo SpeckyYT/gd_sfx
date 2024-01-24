@@ -1,7 +1,8 @@
 use std::{thread, fs, time::Instant};
 
 use eframe::egui::{Ui, ProgressBar};
-use gdsfx_library::{EntryId, FileEntry};
+use gdsfx_library::EntryId;
+use gdsfx_library::SfxFileEntry;
 use rayon::prelude::*;
 
 use super::AppState;
@@ -59,7 +60,7 @@ impl AppState {
     
         thread::spawn(move || {
             ids.into_par_iter().try_for_each(|id| {
-                let file_entry = FileEntry::new(id);
+                let file_entry = SfxFileEntry::new(id);
                 if !file_entry.file_exists(&gd_folder) {
                     let bytes = cache.lock().get(&id).cloned()
                         .or_else(|| file_entry.try_download_bytes());
@@ -90,7 +91,7 @@ impl AppState {
         thread::spawn(move || {
             let ids = downloaded_sfx.lock().clone();
             ids.into_iter().try_for_each(|id| {
-                if FileEntry::new(id).try_delete_file(&gd_folder).is_ok() {
+                if SfxFileEntry::new(id).try_delete_file(&gd_folder).is_ok() {
                     downloaded_sfx.lock().remove(&id);
                 }
                 progress.lock().as_mut().map(|progress| progress.finished += 1)

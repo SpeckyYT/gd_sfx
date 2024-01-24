@@ -1,5 +1,5 @@
 use eframe::egui::Ui;
-use gdsfx_library::Library;
+use gdsfx_library::SfxLibrary;
 use crate::{layout, backend::AppState};
 
 // this build output file contains the following function:
@@ -11,7 +11,7 @@ gdsfx_build::get_output!(include!("credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
-pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary) {
     layout::add_library_page_selection(ui, app_state);
 
     ui.heading(t!("credits.sfx"));

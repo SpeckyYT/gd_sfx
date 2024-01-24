@@ -4,9 +4,9 @@ use anyhow::Result;
 
 use crate::{EntryId, requests};
 
-pub struct FileEntry(EntryId);
+pub struct SfxFileEntry(EntryId);
 
-impl FileEntry {
+impl SfxFileEntry {
     pub fn new(id: EntryId) -> Self {
         Self(id)
     }

@@ -4,7 +4,8 @@ use ahash::{HashMap, HashSet};
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
+use gdsfx_library::{SfxLibrary, EntryId, SfxFileEntry};
+use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
@@ -20,8 +21,8 @@ pub mod tools;
 #[derive(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
-    pub library_page: LibraryPage,
-    pub selected_sfx: Option<LibraryEntry>,
+    pub library_page: LibraryPage, // todo: actually give this a better name
+    pub selected_sfx: Option<SfxLibraryEntry>,
 
     pub settings: PersistentSettings,
     pub favorites: Favorites,
@@ -41,7 +42,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn load(settings: PersistentSettings, library: &Library) -> Self {
+    pub fn load(settings: PersistentSettings, sfx_library: &SfxLibrary) -> Self {
         let downloaded_sfx: HashSet<EntryId> = fs::read_dir(&settings.gd_folder)
             .map(|read_dir| {
                 read_dir
@@ -59,7 +60,7 @@ impl AppState {
         // - favorites tab
         // - tools (un)registering sfx ids → thread safety
         // - storing unlisted sfx? or only show downloaded ones
-        let library_sfx = &library.sound_ids().iter().copied().collect();
+        let library_sfx = &sfx_library.sound_ids().iter().copied().collect();
         let unlisted_sfx = downloaded_sfx.difference(library_sfx).copied().collect();
 
         Self {
@@ -72,12 +73,12 @@ impl AppState {
         }
     }
 
-    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: &Library) -> bool {
+    pub fn is_matching_entry(&self, entry: &SfxLibraryEntry, sfx_library: &SfxLibrary) -> bool {
         match &entry.kind {
             EntryKind::Category => {
-                library
+                sfx_library
                     .iter_children(entry)
-                    .any(|child| self.is_matching_entry(child, library))
+                    .any(|child| self.is_matching_entry(child, sfx_library))
             }
 
             EntryKind::Sound { .. } => {
@@ -113,7 +114,7 @@ impl AppState {
             let bytes = {
                 let mut cache = cache.lock();
                 cache.get(&id).cloned().or_else(|| {
-                    let file_entry = FileEntry::new(id);
+                    let file_entry = SfxFileEntry::new(id);
                     let bytes = file_entry.try_read_bytes(gd_folder)
                         .or_else(|| file_entry.try_download_bytes());
 
@@ -135,7 +136,7 @@ impl AppState {
     pub fn download_sfx(&self, id: EntryId) {
         if !self.is_gd_folder_valid() { return }
 
-        let file_entry = FileEntry::new(id);
+        let file_entry = SfxFileEntry::new(id);
         let gd_folder = &self.settings.gd_folder;
 
         if file_entry.file_exists(gd_folder) { return }
@@ -156,7 +157,7 @@ impl AppState {
     }
 
     pub fn delete_sfx(&self, id: EntryId) {
-        if FileEntry::new(id).try_delete_file(&self.settings.gd_folder).is_ok() {
+        if SfxFileEntry::new(id).try_delete_file(&self.settings.gd_folder).is_ok() {
             self.downloaded_sfx.lock().remove(&id);
         }
     }

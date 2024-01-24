@@ -1,6 +1,7 @@
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{EntryKind, LibraryEntry, EntryId};
+use gdsfx_library::EntryId;
+use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use crate::images;
 
 use crate::backend::AppState;
@@ -32,7 +33,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
     });
 }
 
-fn render_sound_info(ui: &mut Ui, entry: &LibraryEntry) {
+fn render_sound_info(ui: &mut Ui, entry: &SfxLibraryEntry) {
     if let EntryKind::Sound { bytes, duration } = &entry.kind {
         ui.heading(t!("sound.info.id", id = entry.id));
 

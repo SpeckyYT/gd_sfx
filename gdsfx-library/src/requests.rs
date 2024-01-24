@@ -21,7 +21,7 @@ fn get_cdn_url() -> Url {
     Url::parse(&url).unwrap()
 }
 
-static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx/").unwrap());
+static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx").unwrap());
 
 pub(crate) fn request_file(path: &str) -> Result<Response> {
     let response = CLIENT

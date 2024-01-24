@@ -1,6 +1,7 @@
 use eframe::{egui::*, epaint::Vec2};
 use egui_modal::ModalStyle;
-use gdsfx_library::{Library, LibraryEntry};
+use gdsfx_library::SfxLibrary;
+use gdsfx_library::sfx::SfxLibraryEntry;
 use strum::IntoEnumIterator;
 
 use crate::{backend::{AppState, settings::*, search::*, LibraryPage}, i18n::LocalizedEnum, images};
@@ -53,7 +54,7 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.separator();
 }
 
-pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, entry: &LibraryEntry) {
+pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary, entry: &SfxLibraryEntry) {
     if !app_state.is_matching_entry(entry, library) {
         return // don't render filtered buttons at all
     }

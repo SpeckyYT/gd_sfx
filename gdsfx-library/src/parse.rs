@@ -1,10 +1,11 @@
 use std::str::FromStr;
 use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
+use crate::sfx::*;
 
 use crate::*;
 
-pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Result<Library> {
+pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Result<SfxLibrary> {
     let bytes = gdsfx_files::encoding::decode(&bytes);
     let string = std::str::from_utf8(&bytes)?;
 
@@ -29,7 +30,7 @@ impl EntryKind {
     const CATEGORY_KEY: &'static str = "1";
 }
 
-impl FromStr for LibraryEntry {
+impl FromStr for SfxLibraryEntry {
     type Err = anyhow::Error;
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {        
@@ -59,7 +60,7 @@ impl FromStr for LibraryEntry {
     }
 }
 
-impl ToString for LibraryEntry {
+impl ToString for SfxLibraryEntry {
     fn to_string(&self) -> String {
         let kind = match self.kind {
             EntryKind::Sound { .. } => EntryKind::SOUND_KEY,
@@ -98,7 +99,7 @@ impl FromStr for Credit {
     }
 }
 
-fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Library> {
+fn build_library(entries: Vec<SfxLibraryEntry>, credits: Vec<Credit>) -> Result<SfxLibrary> {
     // TODO: can the root id be (reasonably) evaluated programatically?
     let root_id = entries.first().context("No library entries")?.id;
     let mut sound_ids = Vec::new();
@@ -124,7 +125,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Lib
         entry_map.insert(entry.id, entry);
     }
 
-    Ok(Library {
+    Ok(SfxLibrary {
         root_id,
         sound_ids,
 
@@ -146,8 +147,8 @@ mod test {
     fn test_parse_library_entry() {
         const FIRE_IN_THE_HOLE: &str = "4451,Fire In The Hole,0,4442,29496,187";
 
-        let entry = LibraryEntry::from_str(FIRE_IN_THE_HOLE).unwrap();
-        assert_eq!(entry, LibraryEntry {
+        let entry = SfxLibraryEntry::from_str(FIRE_IN_THE_HOLE).unwrap();
+        assert_eq!(entry, SfxLibraryEntry {
             id: 4451,
             name: "Fire In The Hole".to_string(),
             parent_id: 4442,

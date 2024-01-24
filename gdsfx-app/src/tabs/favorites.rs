@@ -1,13 +1,14 @@
 use eframe::egui::Ui;
-use gdsfx_library::{Library, LibraryEntry};
+use gdsfx_library::SfxLibrary;
+use gdsfx_library::sfx::SfxLibraryEntry;
 
 use crate::{layout, backend::AppState};
 
-pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary) {
     layout::add_library_page_selection(ui, app_state);
     layout::add_search_area(ui, &mut app_state.search_settings);
 
-    let mut sounds: Vec<&LibraryEntry> = library.iter_sounds().collect();
+    let mut sounds: Vec<&SfxLibraryEntry> = library.iter_sounds().collect();
     sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
     for sound in sounds {

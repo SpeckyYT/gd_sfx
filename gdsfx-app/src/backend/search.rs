@@ -1,6 +1,6 @@
 use std::{cmp::Ordering, time::Duration};
 
-use gdsfx_library::{LibraryEntry, EntryKind};
+use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -29,19 +29,19 @@ localized_enum! {
 }
 
 impl Sorting {
-    pub fn compare_entries(&self, a: &LibraryEntry, b: &LibraryEntry) -> Ordering {
-        fn is_category(entry: &LibraryEntry) -> bool {
+    pub fn compare_entries(&self, a: &SfxLibraryEntry, b: &SfxLibraryEntry) -> Ordering {
+        fn is_category(entry: &SfxLibraryEntry) -> bool {
             matches!(entry.kind, EntryKind::Category)
         }
     
-        fn get_duration(entry: &LibraryEntry) -> Duration {
+        fn get_duration(entry: &SfxLibraryEntry) -> Duration {
             match entry.kind {
                 EntryKind::Sound { duration, .. } => duration,
                 _ => Duration::ZERO,
             }
         }
     
-        fn get_bytes(entry: &LibraryEntry) -> i64 {
+        fn get_bytes(entry: &SfxLibraryEntry) -> i64 {
             match entry.kind {
                 EntryKind::Sound { bytes, .. } => bytes,
                 _ => 0,

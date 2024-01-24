@@ -3,7 +3,7 @@ use std::sync::Arc;
 use backend::{AppState, settings::PersistentSettings};
 use eframe::{*, egui::{ViewportBuilder, IconData}};
 use gdsfx_files::paths;
-use gdsfx_library::Library;
+use gdsfx_library::SfxLibrary;
 
 mod backend;
 mod layout;
@@ -28,7 +28,7 @@ const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("icon.bin"));
 
 pub struct GdSfx {
     app_state: AppState,
-    library: Library,
+    sfx_library: SfxLibrary,
 }
 
 impl eframe::App for GdSfx {
@@ -36,7 +36,7 @@ impl eframe::App for GdSfx {
         use layout::*;
         
         tabs_panel::render(ctx, &mut self.app_state);
-        left_window::render(ctx, &mut self.app_state, &self.library);
+        left_window::render(ctx, &mut self.app_state, &self.sfx_library);
         right_window::render(ctx, &mut self.app_state);
 
         ctx.request_repaint();
@@ -76,9 +76,9 @@ impl GdSfx {
         egui_extras::install_image_loaders(&ctx.egui_ctx);
 
         let settings = PersistentSettings::load();
-        let library = Library::load(&settings.gd_folder).expect("TODO: info screen with error message and retry button");
-        let app_state = AppState::load(settings, &library);
+        let sfx_library = SfxLibrary::load(&settings.gd_folder).expect("TODO: info screen with error message and retry button");
+        let app_state = AppState::load(settings, &sfx_library);
 
-        Box::new(Self { app_state, library })
+        Box::new(Self { app_state, sfx_library })
     }
 }

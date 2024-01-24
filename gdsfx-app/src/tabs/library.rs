@@ -1,23 +1,24 @@
 use std::time::Duration;
 
 use eframe::egui::{Ui, CollapsingHeader};
-use gdsfx_library::{Library, LibraryEntry, EntryKind, EntryId};
+use gdsfx_library::{SfxLibrary, EntryId};
+use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
 
 use crate::{layout, backend::{AppState, settings::SearchFilterMode}};
 
 const UNLISTED_ID: EntryId = EntryId::MAX;
 
-pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary) {
     layout::add_library_page_selection(ui, app_state);
     layout::add_search_area(ui, &mut app_state.search_settings);
 
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
 
-    let categories: Vec<&LibraryEntry> = library.iter_children(library.get_root()).collect();
+    let categories: Vec<&SfxLibraryEntry> = library.iter_children(library.get_root()).collect();
     render_recursive(ui, app_state, library, categories, collapse_all);
 
-    let mut unlisted_sounds: Vec<LibraryEntry> = app_state.unlisted_sfx.iter()
-        .map(|&id| LibraryEntry {
+    let mut unlisted_sounds: Vec<SfxLibraryEntry> = app_state.unlisted_sfx.iter()
+        .map(|&id| SfxLibraryEntry {
             id,
             name: id.to_string(),
             parent_id: UNLISTED_ID,
@@ -53,7 +54,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
     });
 }
 
-fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library: &Library, mut entries: Vec<&LibraryEntry>, collapse_all: bool) {
+fn render_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary, mut entries: Vec<&SfxLibraryEntry>, collapse_all: bool) {
     entries.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
     for entry in entries {
         match entry.kind {

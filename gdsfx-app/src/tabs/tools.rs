@@ -1,10 +1,10 @@
 use eframe::{egui::{Ui, Context, Slider, Layout}, emath::Align};
 use egui_modal::Modal;
-use gdsfx_library::Library;
+use gdsfx_library::SfxLibrary;
 
 use crate::{backend::AppState, layout};
 
-pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &Library) {
+pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &SfxLibrary) {
     layout::add_library_page_selection(ui, app_state);
 
     ui.heading(t!("tools"));
