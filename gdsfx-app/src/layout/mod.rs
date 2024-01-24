@@ -14,7 +14,7 @@ pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
 
 pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
-pub const TOTAL_HEIGHT: f32 = 600.0; // enough to display all categories
+pub const TOTAL_HEIGHT: f32 = 650.0; // enough to display all categories
 
 pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
 pub const MIN_SCALE_FACTOR: f32 = 0.7;

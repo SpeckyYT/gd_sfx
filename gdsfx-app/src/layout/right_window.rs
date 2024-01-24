@@ -47,7 +47,7 @@ fn render_sound_info(ui: &mut Ui, entry: &LibraryEntry) {
     }
 }
 
-const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(64.0, 64.0);
+const IMAGE_BUTTON_SIZE: Vec2 = Vec2::new(32.0, 32.0);
 
 macro_rules! image_button {
     (
@@ -60,7 +60,7 @@ macro_rules! image_button {
             let image: Image<'static> = $source.into();
             let image = image.tint(Color32::GRAY)
                 $( .tint(Color32::from_rgb($r,$g,$b)) )?;
-            let download_button = Button::image(image.fit_to_exact_size($size * 0.8)).min_size($size);
+            let download_button = Button::image(image.fit_to_exact_size($size * 0.75)).min_size($size);
             $ui.add_enabled($enabled, download_button)
         }
     };
@@ -93,7 +93,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
 
-    ui.add_space(10.0);
+    ui.add_space(5.0);
 
     ui.horizontal(|ui| {
         if image_button!(
