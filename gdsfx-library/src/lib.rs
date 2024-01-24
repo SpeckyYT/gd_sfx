@@ -1,4 +1,4 @@
-use std::{path::Path, time::Duration};
+use std::time::Duration;
 use ahash::HashMap;
 use anyhow::Result;
 
@@ -28,5 +28,9 @@ pub struct SfxLibrary {
 
 #[derive(Debug)]
 pub struct MusicLibrary {
+    pub version: EntryId,
 
+    pub credits: HashMap<EntryId, music::Credit>,
+    pub songs: HashMap<EntryId, music::Song>,
+    pub tags: HashMap<EntryId, music::Tag>,
 }
