@@ -67,6 +67,28 @@ macro_rules! image_button {
 }
 
 fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
+    ui.horizontal(|ui| {
+        if image_button!(
+            ui,
+            images::PLAY,
+            IMAGE_BUTTON_SIZE,
+            true,
+        ).clicked() {
+            app_state.play_sfx(id);
+        }
+
+        if image_button!(
+            ui,
+            images::STOP,
+            IMAGE_BUTTON_SIZE,
+            gdsfx_audio::is_playing_audio(),
+        ).clicked() {
+            gdsfx_audio::stop_all();
+        }
+    });
+
+    ui.add_space(5.0);
+
     if app_state.is_gd_folder_valid() {
         let file_exists = app_state.is_sfx_downloaded(id);
 
@@ -92,28 +114,6 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
     } else {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
-
-    ui.add_space(5.0);
-
-    ui.horizontal(|ui| {
-        if image_button!(
-            ui,
-            images::PLAY,
-            IMAGE_BUTTON_SIZE,
-            true,
-        ).clicked() {
-            app_state.play_sfx(id);
-        }
-
-        if image_button!(
-            ui,
-            images::STOP,
-            IMAGE_BUTTON_SIZE,
-            gdsfx_audio::is_playing_audio(),
-        ).clicked() {
-            gdsfx_audio::stop_all();
-        }
-    });
     
     ui.add_space(5.0);
 
