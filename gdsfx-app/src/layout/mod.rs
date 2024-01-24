@@ -1,11 +1,11 @@
-use eframe::{egui::{self, *}, epaint::Vec2};
+use eframe::{egui::*, epaint::Vec2};
 use egui_modal::ModalStyle;
 use gdsfx_library::{Library, LibraryEntry};
 use strum::IntoEnumIterator;
 
-use crate::{backend::{AppState, settings::*, search::*}, i18n::LocalizedEnum};
+use crate::{backend::{AppState, settings::*, search::*, LibraryPage}, i18n::LocalizedEnum, images};
 
-pub mod top_panel;
+pub mod tabs_panel;
 pub mod left_window;
 pub mod right_window;
 
@@ -14,10 +14,19 @@ pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;
 pub const RIGHT_PANEL_WIDTH: f32 = 500.0;
 
 pub const TOTAL_WIDTH: f32 = DEFAULT_LIBRARY_WIDTH + RIGHT_PANEL_WIDTH;
-pub const TOTAL_HEIGHT: f32 = 600.0; // enough to display all categories
+pub const TOTAL_HEIGHT: f32 = 650.0; // enough to display all categories
 
 pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
 pub const MIN_SCALE_FACTOR: f32 = 0.7;
+
+pub fn add_library_page_selection(ui: &mut Ui, app_state: &mut AppState) {
+    ui.horizontal(|ui| {
+        for page in LibraryPage::iter() {
+            ui.selectable_value(&mut app_state.library_page, page, page.localize_variant());
+        }
+    });
+    ui.separator();
+}
 
 pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.heading(t!("search"));
@@ -45,15 +54,13 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
 }
 
 pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &Library, entry: &LibraryEntry) {
-    const FAVORITE_ICON: ImageSource = egui::include_image!("../../../assets/twemoji-white-medium-star.png");
-
     if !app_state.is_matching_entry(entry, library) {
         return // don't render filtered buttons at all
     }
 
     let image = app_state.favorites
         .has_favorite(entry.id)
-        .then_some(Image::new(FAVORITE_ICON).tint(Color32::from_white_alpha(100))); // set opacity 0-255
+        .then_some(Image::new(images::FAVORITE_STAR).tint(Color32::from_white_alpha(100))); // set opacity 0-255
 
     let text = WidgetText::from(&entry.name);
     let button = ui.add(Button::opt_image_and_text(image, Some(text)));

@@ -1,5 +1,6 @@
 use eframe::egui::Ui;
 use gdsfx_library::Library;
+use crate::{layout, backend::AppState};
 
 // this build output file contains the following function:
 // ```
@@ -10,7 +11,9 @@ gdsfx_build::get_output!(include!("credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
-pub fn render(ui: &mut Ui, library: &Library) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &Library) {
+    layout::add_library_page_selection(ui, app_state);
+
     ui.heading(t!("credits.sfx"));
 
     ui.add_space(10.0);
@@ -19,7 +22,11 @@ pub fn render(ui: &mut Ui, library: &Library) {
         ui.hyperlink_to(&credits.name, &credits.link);
     }
 
-    ui.add_space(20.0);
+    ui.add_space(10.0);
+
+    ui.separator();
+
+    ui.add_space(10.0);
 
     ui.heading(t!("credits.this_project"));
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");

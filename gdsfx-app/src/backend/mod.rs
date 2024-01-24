@@ -9,8 +9,9 @@ use parking_lot::{Mutex, RwLock};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
+use strum::EnumIter;
 
-use crate::tabs::Tab;
+use crate::{tabs::Tab, localized_enum};
 
 pub mod favorites;
 pub mod settings;
@@ -21,6 +22,7 @@ pub mod tools;
 #[educe(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
+    pub library_page: LibraryPage,
     pub selected_sfx: Option<LibraryEntry>,
 
     pub search_settings: SearchSettings,
@@ -166,5 +168,14 @@ impl AppState {
 
     pub fn get_sfx_count(&self) -> usize {
         self.downloaded_sfx.lock().len()
+    }
+}
+
+localized_enum! {
+    #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
+    pub enum LibraryPage = "library_page" {
+        #[default]
+        Sfx = "sfx",
+        Songs = "songs",
     }
 }
