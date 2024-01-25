@@ -1,6 +1,6 @@
 use eframe::egui::Ui;
-use gdsfx_library::SfxLibrary;
-use crate::{layout, backend::AppState};
+use gdsfx_library::{MusicLibrary, SfxLibrary};
+use crate::{layout, backend::{AppState, LibraryPage}};
 
 // this build output file contains the following function:
 // ```
@@ -11,15 +11,31 @@ gdsfx_build::get_output!(include!("credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
-pub fn render(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary) {
+pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);
 
     ui.heading(t!("credits.sfx"));
 
     ui.add_space(10.0);
 
-    for credits in library.credits() {
-        ui.hyperlink_to(&credits.name, &credits.link);
+    match app_state.library_page {
+        LibraryPage::Sfx => {
+            for credits in sfx_library.credits() {
+                ui.hyperlink_to(&credits.name, &credits.link);
+            }
+        },
+        LibraryPage::Music => {
+            for credits in &music_library.credits {
+                ui.hyperlink_to(
+                    &credits.name,
+                    if !credits.yt_channel_id.is_empty() {
+                        format!("https://youtube.com/channel/{}", credits.yt_channel_id)
+                    } else {
+                        credits.url.clone()
+                    }
+                );
+            }
+        },
     }
 
     ui.add_space(10.0);

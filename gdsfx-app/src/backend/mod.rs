@@ -172,6 +172,6 @@ localized_enum! {
     pub enum LibraryPage = "library_page" {
         #[default]
         Sfx = "sfx",
-        Songs = "songs",
+        Music = "music",
     }
 }

@@ -37,7 +37,7 @@ impl eframe::App for GdSfx {
         use layout::*;
         
         tabs_panel::render(ctx, &mut self.app_state);
-        left_window::render(ctx, &mut self.app_state, &self.sfx_library);
+        left_window::render(ctx, &mut self.app_state, &self.sfx_library, &self.music_library);
         right_window::render(ctx, &mut self.app_state);
 
         ctx.request_repaint();

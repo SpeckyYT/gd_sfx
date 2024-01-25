@@ -31,14 +31,14 @@ pub(crate) fn parse_music_library_from_bytes(bytes: Vec<u8>) -> Result<MusicLibr
     let bytes = gdsfx_files::encoding::decode(&bytes);
     let string = bytes.iter().map(|&byte| char::from(byte)).collect::<String>();
 
-    let parts @ [version, credits, songs, tags]: [&str; 4] = string.split("|")
+    let _parts @ [version, credits, songs, tags]: [&str; 4] = string.split("|")
         .collect::<Vec<&str>>()
         .try_into()
         .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
     
     Ok(MusicLibrary {
         version: version.parse()?,
-        credits: parse_semicolon_separated::<music::Credit, Vec<_>>(credits).into_iter().map(|c| (c.id, c)).collect(),
+        credits: parse_semicolon_separated::<music::Credit, Vec<_>>(credits),
         songs: parse_semicolon_separated::<music::Song, Vec<_>>(songs).into_iter().map(|s| (s.id, s)).collect(),
         tags: parse_semicolon_separated::<music::Tag, Vec<_>>(tags).into_iter().map(|t| (t.id, t)).collect(),
     })
@@ -127,10 +127,10 @@ impl FromStr for music::Credit {
             .collect::<Vec<&str>>()
             .try_into()
             .map(|[id, name, url, yt_channel_id]: [&str; 4]| Self {
-                id: id.parse().unwrap_or(0),
-                name: name.to_string(),
-                url: url.to_string(),
-                yt_channel_id: yt_channel_id.to_string(),
+                id: id.trim().parse().unwrap_or(0),
+                name: name.trim().to_string(),
+                url: url.trim().to_string(),
+                yt_channel_id: yt_channel_id.trim().to_string(),
             })
             .ok()
             .ok_or(anyhow!("Credits must have format \"id,name,url,yt_channel_id\", found {string}"))
