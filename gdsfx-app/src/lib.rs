@@ -3,7 +3,7 @@ use std::sync::Arc;
 use backend::{AppState, settings::PersistentSettings};
 use eframe::{*, egui::{ViewportBuilder, IconData}};
 use gdsfx_files::paths;
-use gdsfx_library::SfxLibrary;
+use gdsfx_library::{MusicLibrary, SfxLibrary};
 
 mod backend;
 mod layout;
@@ -29,6 +29,7 @@ const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("icon.bin"));
 pub struct GdSfx {
     app_state: AppState,
     sfx_library: SfxLibrary,
+    music_library: MusicLibrary,
 }
 
 impl eframe::App for GdSfx {
@@ -76,9 +77,22 @@ impl GdSfx {
         egui_extras::install_image_loaders(&ctx.egui_ctx);
 
         let settings = PersistentSettings::load();
-        let sfx_library = SfxLibrary::load(&settings.gd_folder).expect("TODO: info screen with error message and retry button");
-        let app_state = AppState::load(settings, &sfx_library);
 
-        Box::new(Self { app_state, sfx_library })
+        let gd_folder = settings.gd_folder.clone();
+        let sfx_handler = std::thread::spawn(move ||
+            SfxLibrary::load(&gd_folder)
+                .expect("TODO: info screen with error message and retry button")
+        );
+        let gd_folder = settings.gd_folder.clone();
+        let music_handler = std::thread::spawn(move ||
+            MusicLibrary::load(&gd_folder)
+                .expect("TODO: info screen with error message and retry button")
+        );
+
+        let sfx_library = sfx_handler.join().unwrap();
+        let app_state = AppState::load(settings, &sfx_library);
+        let music_library = music_handler.join().unwrap();
+
+        Box::new(Self { app_state, sfx_library, music_library })
     }
 }

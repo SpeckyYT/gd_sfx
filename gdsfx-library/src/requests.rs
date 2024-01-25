@@ -21,11 +21,21 @@ fn get_cdn_url() -> Url {
     Url::parse(&url).unwrap()
 }
 
-static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx").unwrap());
+static SFX_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("sfx/").unwrap());
+static MUSIC_URL_PATH: Lazy<Url> = Lazy::new(|| get_cdn_url().join("music/").unwrap());
 
-pub(crate) fn request_file(path: &str) -> Result<Response> {
+pub(crate) fn request_sfx_file(path: &str) -> Result<Response> {
     let response = CLIENT
         .get(SFX_URL_PATH.join(path).unwrap().as_str())
+        .send()
+        .and_then(|response| response.error_for_status())?;
+
+    Ok(response)
+}
+
+pub(crate) fn request_music_file(path: &str) -> Result<Response> {
+    let response = CLIENT
+        .get(MUSIC_URL_PATH.join(path).unwrap().as_str())
         .send()
         .and_then(|response| response.error_for_status())?;
 

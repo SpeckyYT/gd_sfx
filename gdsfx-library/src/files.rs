@@ -28,7 +28,7 @@ impl SfxFileEntry {
     }
 
     pub fn try_download_bytes(&self) -> Option<Vec<u8>> {
-        requests::request_file(&self.get_file_name()).ok()
+        requests::request_sfx_file(&self.get_file_name()).ok()
             .and_then(|response| response.bytes().ok())
             .map(|bytes| bytes.to_vec())
     }

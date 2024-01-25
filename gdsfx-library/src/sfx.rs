@@ -34,17 +34,17 @@ impl SfxLibrary {
         let file = gd_folder.as_ref().join(SFX_LIBRARY_FILE);
 
         let local_library = gdsfx_files::read_file(&file)
-            .and_then(parse::parse_library_from_bytes);
+            .and_then(parse::parse_sfx_library_from_bytes);
 
         if !Self::should_try_update(local_library.as_ref().ok()) {
             return local_library
         }
 
-        requests::request_file(SFX_LIBRARY_FILE)
+        requests::request_sfx_file(SFX_LIBRARY_FILE)
             .and_then(|response| {
                 let bytes = response.bytes()?.to_vec();
                 let _ = gdsfx_files::write_file(&file, &bytes);
-                parse::parse_library_from_bytes(bytes)
+                parse::parse_sfx_library_from_bytes(bytes)
             })
             .or_else(|download_err| local_library.map_err(|_| download_err))
     }
@@ -54,7 +54,7 @@ impl SfxLibrary {
 
         let Some(library) = library else { return true };
 
-        requests::request_file(SFX_VERSION_ENDPOINT).ok()
+        requests::request_sfx_file(SFX_VERSION_ENDPOINT).ok()
             .and_then(|response| response.text().ok())
             .map(|version| version != library.get_version())
             .unwrap_or(false) // request failed, don't bother updating
