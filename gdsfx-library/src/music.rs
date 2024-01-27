@@ -13,7 +13,7 @@ use crate::*;
 
 pub type TagId = u16;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Credit {
     pub id: EntryId,
     pub name: String,
@@ -21,7 +21,7 @@ pub struct Credit {
     pub yt_url: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Song {
     pub id: EntryId,
     pub name: String,
@@ -31,7 +31,7 @@ pub struct Song {
     pub tags: Vec<TagId>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Tag {
     pub id: TagId,
     pub name: String,
@@ -68,5 +68,11 @@ impl MusicLibrary {
             .and_then(|response| response.text().ok())
             .map(|version| version != library.version.to_string())
             .unwrap_or(false) // request failed, don't bother updating
+    }
+}
+
+impl ToString for Song {
+    fn to_string(&self) -> String {
+        format!("{}",self.name)
     }
 }

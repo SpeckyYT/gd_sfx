@@ -90,20 +90,16 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
 
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
-
-    let MusicFilters { tags, artists } = &app_state.music_filters;
-
+    
     for song in &library.songs {
-        if !tags.iter().all(|tag| song.tags.contains(tag)) {
-            continue
-        }
-        if !artists.is_empty() && !artists.iter().any(|artist| song.credit_id == *artist) {
-            continue
+        let MusicFilters { tags, artists } = &app_state.music_filters;
+
+        if  !tags.iter().all(|tag| song.tags.contains(tag))
+            || !artists.is_empty() && !artists.contains(&song.credit_id) {
+                continue
         }
 
-        if ui.button(&song.name).clicked() {
-            println!("song: {song:?}");
-        };
+        layout::add_music_button(ui, app_state, song);
     }
 }
 

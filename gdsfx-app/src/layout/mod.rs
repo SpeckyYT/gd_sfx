@@ -1,6 +1,6 @@
 use eframe::{egui::*, epaint::Vec2};
 use egui_modal::ModalStyle;
-use gdsfx_library::SfxLibrary;
+use gdsfx_library::{music::Song, SfxLibrary};
 use gdsfx_library::sfx::SfxLibraryEntry;
 use strum::IntoEnumIterator;
 
@@ -99,6 +99,17 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
             }
         }
     });
+}
+
+pub fn add_music_button(ui: &mut Ui, app_state: &mut AppState, song: &Song) {
+    let button = ui.button(&song.name);
+
+    if match app_state.settings.sfx_select_mode {
+        SfxSelectMode::Hover => button.hovered(),
+        SfxSelectMode::Click => button.clicked(),
+    } {
+        app_state.selected_music = Some(song.clone());
+    }
 }
 
 pub fn add_caution_button(ui: &mut Ui, text: impl Into<WidgetText>) -> Response {

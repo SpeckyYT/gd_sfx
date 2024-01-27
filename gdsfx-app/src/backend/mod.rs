@@ -4,7 +4,7 @@ use ahash::{HashMap, HashSet};
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{SfxLibrary, EntryId, SfxFileEntry};
+use gdsfx_library::{music, EntryId, SfxFileEntry, SfxLibrary};
 use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
@@ -25,6 +25,7 @@ pub struct AppState {
     pub selected_tab: Tab,
     pub library_page: LibraryPage, // todo: actually give this a better name
     pub selected_sfx: Option<SfxLibraryEntry>,
+    pub selected_music: Option<music::Song>,
 
     pub settings: PersistentSettings,
     pub favorites: Favorites,

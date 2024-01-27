@@ -4,33 +4,40 @@ use gdsfx_library::EntryId;
 use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use crate::images;
 
-use crate::backend::AppState;
+use crate::backend::{AppState, LibraryPage};
 
 // TODO can we make this less of a list of ui elements
 // and instead maybe put some stuff on the right side of the screen
 // also make sure everything fits on the ui
 pub fn render(ctx: &Context, app_state: &mut AppState) {
     CentralPanel::default().show(ctx, |ui| {
-        let Some(entry) = &app_state.selected_sfx else { return };
-
-        ui.heading(&entry.name);
-
-        ui.add_space(10.0);
-
-        ui.code(entry.to_string());
-
-        ui.add_space(10.0);
-
-        render_sound_info(ui, entry);
-
-        ui.add_space(25.0);
-
-        render_buttons(ui, app_state, entry.id);
-
-        ui.add_space(10.0);
-
-        render_audio_settings(ui, app_state);
+        match app_state.library_page {
+            LibraryPage::Sfx => render_sfx_window(ui, app_state),
+            LibraryPage::Music => render_music_window(ui, app_state),
+        }
     });
+}
+
+fn render_sfx_window(ui: &mut Ui, app_state: &mut AppState) {
+    let Some(entry) = &app_state.selected_sfx else { return };
+
+    ui.heading(&entry.name);
+
+    ui.add_space(10.0);
+
+    ui.code(entry.to_string());
+
+    ui.add_space(10.0);
+
+    render_sound_info(ui, entry);
+
+    ui.add_space(25.0);
+
+    render_buttons(ui, app_state, entry.id);
+
+    ui.add_space(10.0);
+
+    render_audio_settings(ui, app_state);
 }
 
 fn render_sound_info(ui: &mut Ui, entry: &SfxLibraryEntry) {
@@ -65,6 +72,28 @@ macro_rules! image_button {
             $ui.add_enabled($enabled, download_button)
         }
     };
+}
+
+fn render_music_window(ui: &mut Ui, app_state: &mut AppState) {
+    let Some(song) = &app_state.selected_music else { return };
+
+    ui.heading(&song.name);
+
+    ui.add_space(10.0);
+
+    ui.code(song.to_string());
+
+    ui.add_space(10.0);
+
+    // render_sound_info(ui, entry);
+
+    ui.add_space(25.0);
+
+    // render_buttons(ui, app_state, entry.id);
+
+    ui.add_space(10.0);
+
+    render_audio_settings(ui, app_state);
 }
 
 fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
