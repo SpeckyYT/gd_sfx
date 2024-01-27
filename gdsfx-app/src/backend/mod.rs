@@ -13,6 +13,8 @@ use strum::EnumIter;
 
 use crate::{tabs::Tab, localized_enum};
 
+use self::search::MusicFilters;
+
 pub mod favorites;
 pub mod settings;
 pub mod search;
@@ -28,6 +30,7 @@ pub struct AppState {
     pub favorites: Favorites,
 
     pub search_settings: SearchSettings,
+    pub music_filters: MusicFilters,
     pub audio_settings: AudioSettings,
 
     pub unlisted_sfx: Vec<EntryId>,

@@ -26,14 +26,17 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
         },
         LibraryPage::Music => {
             for credits in &music_library.credits {
-                ui.hyperlink_to(
-                    &credits.name,
-                    if !credits.yt_channel_id.is_empty() {
-                        format!("https://youtube.com/channel/{}", credits.yt_channel_id)
-                    } else {
-                        credits.url.clone()
-                    }
-                );
+                let links = [
+                    credits.url.as_ref(),
+                    credits.yt_url.as_ref(),
+                ];
+
+                let url = links.into_iter().find_map(|url| url);
+
+                match url {
+                    Some(url) => ui.hyperlink_to(&credits.name, url),
+                    None => ui.label(&credits.name),
+                };
             }
         },
     }

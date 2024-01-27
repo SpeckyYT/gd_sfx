@@ -6,16 +6,19 @@
 
 use std::time::Duration;
 use std::path::Path;
+
 use crate::MusicLibrary;
 use crate::EntryId;
 use crate::*;
+
+pub type TagId = u16;
 
 #[derive(Debug)]
 pub struct Credit {
     pub id: EntryId,
     pub name: String,
-    pub url: String,
-    pub yt_channel_id: String,
+    pub url: Option<String>,
+    pub yt_url: Option<String>,
 }
 
 #[derive(Debug)]
@@ -25,12 +28,12 @@ pub struct Song {
     pub credit_id: EntryId,
     pub bytes: i64,
     pub duration: Duration,
-    pub tags: Vec<EntryId>,
+    pub tags: Vec<TagId>,
 }
 
 #[derive(Debug)]
 pub struct Tag {
-    pub id: EntryId,
+    pub id: TagId,
     pub name: String,
 }
 

@@ -31,6 +31,6 @@ pub struct MusicLibrary {
     pub version: EntryId,
 
     pub credits: Vec<music::Credit>,
-    pub songs: HashMap<EntryId, music::Song>,
-    pub tags: HashMap<EntryId, music::Tag>,
+    pub songs: Vec<music::Song>,
+    pub tags: Vec<music::Tag>,
 }

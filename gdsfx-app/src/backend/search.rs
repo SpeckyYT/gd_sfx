@@ -1,6 +1,7 @@
 use std::{cmp::Ordering, time::Duration};
 
-use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
+use ahash::HashSet;
+use gdsfx_library::{music::TagId, sfx::{SfxLibraryEntry, EntryKind}, EntryId};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -61,4 +62,10 @@ impl Sorting {
                 Sorting::SizeDec => get_bytes(b).cmp(&get_bytes(a)),
             })
     }
+}
+
+#[derive(Default, Debug)]
+pub struct MusicFilters {
+    pub artists: HashSet<EntryId>,
+    pub tags: HashSet<TagId>,
 }
