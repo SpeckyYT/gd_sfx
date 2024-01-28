@@ -26,7 +26,7 @@ pub struct Song {
     pub id: EntryId,
     pub name: String,
     pub credit_id: EntryId,
-    pub bytes: i64,
+    pub bytes: BytesSize,
     pub duration: Duration,
     pub tags: Vec<TagId>,
 }
@@ -73,6 +73,16 @@ impl MusicLibrary {
 
 impl ToString for Song {
     fn to_string(&self) -> String {
-        format!("{}",self.name)
+        format!(
+            "{},{},{},{},{},{}.",
+            self.id,
+            self.name,
+            self.credit_id,
+            self.bytes,
+            self.duration.as_secs(),
+            self.tags.iter()
+                .map(|n| format!(".{}", n))
+                .collect::<String>(),
+        )
     }
 }

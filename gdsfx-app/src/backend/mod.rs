@@ -96,6 +96,13 @@ impl AppState {
         }
     }
 
+    pub fn is_matching_song(&self, song: &music::Song) -> bool {
+        // todo downloaded
+
+        let search = self.search_settings.search_query.to_lowercase();
+        song.name.to_lowercase().contains(&search) || song.id.to_string() == search
+    }
+
     pub fn is_gd_folder_valid(&self) -> bool {
         let path = Path::new(&self.settings.gd_folder);
         path.is_absolute() && path.is_dir()

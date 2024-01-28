@@ -67,8 +67,8 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
     let button = ui.add(Button::opt_image_and_text(image, Some(text)));
 
     if match app_state.settings.sfx_select_mode {
-        SfxSelectMode::Hover => button.hovered(),
-        SfxSelectMode::Click => button.clicked(),
+        SelectMode::Hover => button.hovered(),
+        SelectMode::Click => button.clicked(),
     } {
         app_state.selected_sfx = Some(entry.clone());
     }
@@ -102,11 +102,15 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
 }
 
 pub fn add_music_button(ui: &mut Ui, app_state: &mut AppState, song: &Song) {
+    if !app_state.is_matching_song(song) {
+        return
+    }
+
     let button = ui.button(&song.name);
 
     if match app_state.settings.sfx_select_mode {
-        SfxSelectMode::Hover => button.hovered(),
-        SfxSelectMode::Click => button.clicked(),
+        SelectMode::Hover => button.hovered(),
+        SelectMode::Click => button.clicked(),
     } {
         app_state.selected_music = Some(song.clone());
     }

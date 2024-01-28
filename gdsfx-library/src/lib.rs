@@ -11,6 +11,7 @@ pub mod files;
 pub use files::*;
 
 pub type EntryId = u32;
+pub type BytesSize = u64;
 
 #[derive(Debug)]
 pub struct SfxLibrary {
@@ -20,7 +21,7 @@ pub struct SfxLibrary {
     pub entries: HashMap<EntryId, sfx::SfxLibraryEntry>,
     pub child_map: HashMap<EntryId, Vec<EntryId>>,
 
-    pub total_bytes: i64,
+    pub total_bytes: BytesSize,
     pub total_duration: Duration,
 
     pub credits: Vec<sfx::Credit>,

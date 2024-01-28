@@ -1,7 +1,7 @@
 use std::{cmp::Ordering, time::Duration};
 
 use ahash::HashSet;
-use gdsfx_library::{music::TagId, sfx::{SfxLibraryEntry, EntryKind}, EntryId};
+use gdsfx_library::{music::TagId, sfx::{SfxLibraryEntry, EntryKind}, BytesSize, EntryId};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -42,7 +42,7 @@ impl Sorting {
             }
         }
     
-        fn get_bytes(entry: &SfxLibraryEntry) -> i64 {
+        fn get_bytes(entry: &SfxLibraryEntry) -> BytesSize {
             match entry.kind {
                 EntryKind::Sound { bytes, .. } => bytes,
                 _ => 0,

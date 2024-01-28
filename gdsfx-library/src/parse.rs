@@ -141,11 +141,7 @@ impl FromStr for music::Credit {
                 },
                 yt_url: {
                     let yt_channel_id = yt_channel_id.trim();
-                    if yt_channel_id.is_empty() {
-                        None
-                    } else {
-                        Some(format!("https://youtube.com/channel/{yt_channel_id}"))
-                    }
+                    (!yt_channel_id.is_empty()).then_some(format!("https://youtube.com/channel/{yt_channel_id}"))
                 },
             })
             .ok()

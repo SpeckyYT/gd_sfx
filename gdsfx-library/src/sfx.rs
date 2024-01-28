@@ -1,5 +1,6 @@
 use crate::parse;
 use crate::requests;
+use crate::BytesSize;
 use crate::EntryId;
 use crate::SfxLibrary;
 use std::path::Path;
@@ -18,7 +19,7 @@ pub struct SfxLibraryEntry {
 #[derive(Debug, Clone, PartialEq)]
 pub enum EntryKind {
     Category,
-    Sound { bytes: i64, duration: Duration },
+    Sound { bytes: BytesSize, duration: Duration },
 }
 
 #[derive(Debug, PartialEq)]
@@ -84,7 +85,7 @@ impl SfxLibrary {
         self.sound_ids.iter().flat_map(|id| self.entries.get(id))
     }
 
-    pub fn total_bytes(&self) -> i64 {
+    pub fn total_bytes(&self) -> BytesSize {
         self.total_bytes
     }
 
@@ -98,5 +99,20 @@ impl SfxLibrary {
 
     pub fn credits(&self) -> &Vec<Credit> {
         &self.credits
+    }
+}
+
+impl SfxLibraryEntry {
+    pub fn bytes(&self) -> Option<BytesSize> {
+        match self.kind {
+            EntryKind::Category => None,
+            EntryKind::Sound { bytes, .. } => Some(bytes),
+        }
+    }
+    pub fn duration(&self) -> Option<Duration> {
+        match self.kind {
+            EntryKind::Category => None,
+            EntryKind::Sound { duration, .. } => Some(duration),
+        }
     }
 }
