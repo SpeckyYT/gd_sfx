@@ -20,6 +20,8 @@ pub const TOTAL_HEIGHT: f32 = 650.0; // enough to display all categories
 pub const DEFAULT_WINDOW_SIZE: Vec2 = Vec2 { x: TOTAL_WIDTH, y: TOTAL_HEIGHT };
 pub const MIN_SCALE_FACTOR: f32 = 0.7;
 
+pub const FAVORITE_ALPHA: u8 = 100;
+
 pub fn add_library_page_selection(ui: &mut Ui, app_state: &mut AppState) {
     ui.horizontal(|ui| {
         for page in LibraryPage::iter() {
@@ -61,7 +63,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
 
     let image = app_state.favorites
         .has_favorite(entry.id)
-        .then_some(Image::new(images::FAVORITE_STAR).tint(Color32::from_white_alpha(100))); // set opacity 0-255
+        .then_some(Image::new(images::FAVORITE_STAR).tint(Color32::from_white_alpha(FAVORITE_ALPHA))); // set opacity 0-255
 
     let text = WidgetText::from(&entry.name);
     let button = ui.add(Button::opt_image_and_text(image, Some(text)));
@@ -106,7 +108,12 @@ pub fn add_music_button(ui: &mut Ui, app_state: &mut AppState, song: &Song) {
         return
     }
 
-    let button = ui.button(&song.name);
+    let image = app_state.favorites
+    .has_favorite(song.id)
+    .then_some(Image::new(images::FAVORITE_STAR).tint(Color32::from_white_alpha(FAVORITE_ALPHA))); // set opacity 0-255
+
+    let text = WidgetText::from(&song.name);
+    let button = ui.add(Button::opt_image_and_text(image, Some(text)));
 
     if match app_state.settings.sfx_select_mode {
         SelectMode::Hover => button.hovered(),

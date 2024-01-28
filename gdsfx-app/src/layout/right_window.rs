@@ -100,6 +100,8 @@ macro_rules! image_button {
 fn render_music_window(ui: &mut Ui, app_state: &mut AppState) {
     let Some(song) = &app_state.selected_music else { return };
 
+    let song_id = song.id;
+
     ui.heading(&song.name);
 
     ui.add_space(10.0);
@@ -116,11 +118,11 @@ fn render_music_window(ui: &mut Ui, app_state: &mut AppState) {
         ui,
         app_state,
         false,
-        false,
+        app_state.favorites.has_favorite(song_id),
         |app_state| (),
         |app_state| (),
         |app_state| (),
-        |app_state| (),
+        |app_state| app_state.favorites.toggle_favorite(song_id),
     );
 
     ui.add_space(10.0);
