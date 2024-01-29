@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{BytesSize, EntryId};
+use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, SfxFileEntry};
 use crate::images;
 
 use crate::backend::{AppState, LibraryPage};
@@ -47,9 +47,9 @@ fn render_sfx_window(ui: &mut Ui, app_state: &mut AppState) {
         app_state,
         app_state.is_sfx_downloaded(entry_id),
         app_state.favorites.has_favorite(entry_id),
-        |app_state| app_state.play_sfx(entry_id),
-        |app_state| app_state.download_sfx(entry_id),
-        |app_state| app_state.delete_sfx(entry_id),
+        |app_state| app_state.play_sound(SfxFileEntry::new(entry_id)),
+        |app_state| app_state.download_sound(SfxFileEntry::new(entry_id)),
+        |app_state| app_state.delete_sound(SfxFileEntry::new(entry_id)),
         |app_state| app_state.favorites.toggle_favorite(entry_id),
     );
 
@@ -117,11 +117,11 @@ fn render_music_window(ui: &mut Ui, app_state: &mut AppState) {
     render_buttons(
         ui,
         app_state,
-        false,
+        app_state.is_music_downloaded(song_id),
         app_state.favorites.has_favorite(song_id),
-        |app_state| (),
-        |app_state| (),
-        |app_state| (),
+        |app_state| app_state.play_sound(MusicFileEntry::new(song_id)),
+        |app_state| app_state.download_sound(MusicFileEntry::new(song_id)),
+        |app_state| app_state.delete_sound(MusicFileEntry::new(song_id)),
         |app_state| app_state.favorites.toggle_favorite(song_id),
     );
 

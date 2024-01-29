@@ -1,8 +1,7 @@
 use std::{thread, fs, time::Instant};
 
 use eframe::egui::{Ui, ProgressBar};
-use gdsfx_library::EntryId;
-use gdsfx_library::SfxFileEntry;
+use gdsfx_library::{FileEntry, FileEntryKind, SfxFileEntry};
 use rayon::prelude::*;
 
 use super::AppState;
@@ -48,18 +47,22 @@ impl ToolProgress {
 }
 
 impl AppState {
-    pub fn download_multiple_sfx(&self, translation_key: &'static str, ids: Vec<EntryId>) {
+    pub fn download_multiple_sfx(&self, translation_key: &'static str, files: Vec<impl FileEntry + 'static>) {
         if !self.is_gd_folder_valid() { return }
 
         let progress = self.tool_progress.clone();
-        *progress.lock() = Some(ToolProgress::new(translation_key, ids.len()));
+        *progress.lock() = Some(ToolProgress::new(translation_key, files.len()));
 
-        let cache = self.sfx_cache.clone();
+        let cache = match files[0].kind() {
+            FileEntryKind::Sound => self.sfx_cache.clone(),
+            FileEntryKind::Song => self.music_cache.clone(),
+        };
         let gd_folder = self.settings.gd_folder.clone();
         let downloaded_sfx = self.downloaded_sfx.clone();
     
         thread::spawn(move || {
-            ids.into_par_iter().try_for_each(|id| {
+            files.into_par_iter().try_for_each(|file| {
+                let id = file.id();
                 let file_entry = SfxFileEntry::new(id);
                 if !file_entry.file_exists(&gd_folder) {
                     let bytes = cache.lock().get(&id).cloned()

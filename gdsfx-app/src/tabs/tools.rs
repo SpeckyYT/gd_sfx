@@ -1,6 +1,6 @@
 use eframe::{egui::{Ui, Context, Slider, Layout}, emath::Align};
 use egui_modal::Modal;
-use gdsfx_library::SfxLibrary;
+use gdsfx_library::{FileEntry, SfxFileEntry, SfxLibrary};
 
 use crate::{backend::AppState, layout};
 
@@ -20,7 +20,10 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &Sf
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            app_state.download_multiple_sfx("tools.download_all_sfx", library.sound_ids().clone());
+            app_state.download_multiple_sfx(
+                "tools.download_all_sfx",
+                library.sound_ids().iter().map(|&i| SfxFileEntry::new(i)).collect(),
+            );
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();
@@ -80,7 +83,7 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
         modal.buttons(ui, |ui| {
             if ui.button(t!("tools.confirm")).triple_clicked() {
                 let range = app_state.download_id_range;
-                app_state.download_multiple_sfx("tools.download_from_range", (range.0..=range.1).collect());
+                app_state.download_multiple_sfx("tools.download_from_range", (range.0..=range.1).map(SfxFileEntry::new).collect());
                 modal.close();
             }
             modal.caution_button(ui, t!("tools.cancel"));

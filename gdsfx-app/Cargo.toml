@@ -16,6 +16,7 @@ gdsfx-library = { workspace = true }
 ahash = { workspace = true }
 anyhow = { workspace = true }
 educe = { workspace = true }
+itertools = { workspace = true }
 once_cell = { workspace = true }
 pretty-bytes = { workspace = true }
 rayon = { workspace = true }

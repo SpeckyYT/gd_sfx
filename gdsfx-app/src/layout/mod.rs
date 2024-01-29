@@ -76,7 +76,7 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
     }
 
     if button.clicked() && app_state.settings.play_sfx_on_click {
-        app_state.play_sfx(entry.id);
+        app_state.play_sound(entry.into_file_entry());
     }
 
     button.context_menu(|ui: &mut Ui| {
@@ -92,11 +92,11 @@ pub fn add_sfx_button(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
         if app_state.is_gd_folder_valid() {
             if app_state.is_sfx_downloaded(entry.id) {
                 if ui.button(t!("sound.delete")).clicked() {
-                    app_state.delete_sfx(entry.id);
+                    app_state.delete_sound(entry.into_file_entry());
                     ui.close_menu();
                 }
             } else if ui.button(t!("sound.download")).clicked() {
-                app_state.download_sfx(entry.id);
+                app_state.download_sound(entry.into_file_entry());
                 ui.close_menu();
             }
         }
@@ -121,6 +121,33 @@ pub fn add_music_button(ui: &mut Ui, app_state: &mut AppState, song: &Song) {
     } {
         app_state.selected_music = Some(song.clone());
     }
+
+    if button.clicked() && app_state.settings.play_sfx_on_click {
+        app_state.play_sound(song.into_file_entry());
+    }
+
+    button.context_menu(|ui: &mut Ui| {
+        let favorite_button_label = match app_state.favorites.has_favorite(song.id) {
+            false => t!("sound.favorite.add"),
+            true => t!("sound.favorite.remove"),
+        };
+        if ui.button(favorite_button_label).clicked() {
+            app_state.favorites.toggle_favorite(song.id);
+            ui.close_menu();
+        }
+
+        if app_state.is_gd_folder_valid() {
+            if app_state.is_music_downloaded(song.id) {
+                if ui.button(t!("sound.delete")).clicked() {
+                    app_state.delete_sound(song.into_file_entry());
+                    ui.close_menu();
+                }
+            } else if ui.button(t!("sound.download")).clicked() {
+                app_state.download_sound(song.into_file_entry());
+                ui.close_menu();
+            }
+        }
+    });
 }
 
 pub fn add_caution_button(ui: &mut Ui, text: impl Into<WidgetText>) -> Response {

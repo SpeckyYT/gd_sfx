@@ -4,12 +4,13 @@ use ahash::{HashMap, HashSet};
 use eframe::epaint::mutex::Mutex;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{music, EntryId, SfxFileEntry, SfxLibrary};
+use gdsfx_library::{music, EntryId, FileEntry, FileEntryKind, SfxLibrary};
 use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
 use strum::EnumIter;
+use itertools::{Either, Itertools};
 
 use crate::{tabs::Tab, localized_enum};
 
@@ -43,18 +44,30 @@ pub struct AppState {
     // to keep track of externally added and removed SFX?
     downloaded_sfx: Arc<Mutex<HashSet<EntryId>>>,
     sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
+
+    downloaded_music: Arc<Mutex<HashSet<EntryId>>>,
+    music_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
 
 impl AppState {
     pub fn load(settings: PersistentSettings, sfx_library: &SfxLibrary) -> Self {
-        let downloaded_sfx: HashSet<EntryId> = fs::read_dir(&settings.gd_folder)
-            .map(|read_dir| {
+        let (downloaded_sfx, downloaded_music): (HashSet<EntryId>, HashSet<EntryId>) =
+            fs::read_dir(&settings.gd_folder).map(|read_dir| {
                 read_dir
                     .flatten()
                     .flat_map(|file| file.file_name().into_string())
-                    .filter(|file_name| file_name.starts_with('s') && file_name.ends_with(".ogg"))
-                    .flat_map(|file_name| file_name[1..file_name.len()-4].parse())
-                    .collect()
+                    .filter(|file_name| file_name.ends_with(".ogg"))
+                    .filter_map(|file_name| {
+                        let is_sfx = file_name.starts_with('s');
+                        let numbers: Option<EntryId> = file_name[is_sfx as usize..file_name.len() - 4].parse().ok();
+                        numbers.map(|i| (is_sfx, i))
+                    })
+                    .partition_map(|(is_sfx, entry_id)|
+                        match is_sfx {
+                            true => Either::Left(entry_id),
+                            false => Either::Right(entry_id),
+                        }
+                    )
             })
             .unwrap_or_default();
 
@@ -72,6 +85,7 @@ impl AppState {
             favorites: Favorites::load_or_default(),
             download_id_range: (0, 14500),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
+            downloaded_music: Arc::new(Mutex::new(downloaded_music)),
             unlisted_sfx,
             ..Default::default()
         }
@@ -97,7 +111,9 @@ impl AppState {
     }
 
     pub fn is_matching_song(&self, song: &music::Song) -> bool {
-        // todo downloaded
+        if self.search_settings.show_downloaded && !self.is_music_downloaded(song.id) {
+            return false
+        }
 
         let search = self.search_settings.search_query.to_lowercase();
         song.name.to_lowercase().contains(&search) || song.id.to_string() == search
@@ -116,21 +132,29 @@ impl AppState {
         self.downloaded_sfx.lock().contains(&id)
     }
 
-    pub fn play_sfx(&self, id: EntryId) {
-        let cache = self.sfx_cache.clone();
+    pub fn is_music_downloaded(&self, id: EntryId) -> bool {
+        self.downloaded_music.lock().contains(&id)
+    }
+
+    pub fn play_sound(&self, file_entry: impl FileEntry + 'static) {
+        let cache = match file_entry.kind() {
+            FileEntryKind::Sound => self.sfx_cache.clone(),
+            FileEntryKind::Song => self.music_cache.clone(),
+        };
         let gd_folder = self.settings.gd_folder.clone();
         let audio_settings = self.audio_settings;
+
+        let file_entry = file_entry.clone();
 
         thread::spawn(move || {
             let bytes = {
                 let mut cache = cache.lock();
-                cache.get(&id).cloned().or_else(|| {
-                    let file_entry = SfxFileEntry::new(id);
+                cache.get(&file_entry.id()).cloned().or_else(|| {
                     let bytes = file_entry.try_read_bytes(gd_folder)
                         .or_else(|| file_entry.try_download_bytes());
 
                     if let Some(bytes) = bytes.as_ref() {
-                        cache.insert(id, bytes.clone());
+                        cache.insert(file_entry.id(), bytes.clone());
                     }
 
                     bytes
@@ -144,37 +168,51 @@ impl AppState {
         });
     }
 
-    pub fn download_sfx(&self, id: EntryId) {
+    pub fn download_sound(&self, file_entry: impl FileEntry + 'static) {
         if !self.is_gd_folder_valid() { return }
 
-        let file_entry = SfxFileEntry::new(id);
         let gd_folder = &self.settings.gd_folder;
 
         if file_entry.file_exists(gd_folder) { return }
 
-        let cache = self.sfx_cache.clone();
+        let cache = match file_entry.kind() {
+            FileEntryKind::Sound => self.sfx_cache.clone(),
+            FileEntryKind::Song => self.music_cache.clone(),
+        };
+
         let gd_folder = gd_folder.clone();
         let downloaded_sfx = self.downloaded_sfx.clone();
+        let downloaded_music = self.downloaded_music.clone();
 
         thread::spawn(move || {
-            let bytes = cache.lock().get(&id).cloned()
+            let bytes = cache.lock().get(&file_entry.id()).cloned()
                 .or_else(|| file_entry.try_download_bytes());
 
             let Some(bytes) = bytes else { return };
             if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
-                downloaded_sfx.lock().insert(id);
+                match file_entry.kind() {
+                    FileEntryKind::Sound => downloaded_sfx,
+                    FileEntryKind::Song => downloaded_music,
+                }.lock().insert(file_entry.id());
             }
         });
     }
 
-    pub fn delete_sfx(&self, id: EntryId) {
-        if SfxFileEntry::new(id).try_delete_file(&self.settings.gd_folder).is_ok() {
-            self.downloaded_sfx.lock().remove(&id);
+    pub fn delete_sound(&self, file_entry: impl FileEntry) {
+        if file_entry.try_delete_file(&self.settings.gd_folder).is_ok() {
+            match file_entry.kind() {
+                FileEntryKind::Sound => self.downloaded_sfx.lock(),
+                FileEntryKind::Song => self.downloaded_music.lock(),
+            }.remove(&file_entry.id());
         }
     }
 
     pub fn get_sfx_count(&self) -> usize {
         self.downloaded_sfx.lock().len()
+    }
+
+    pub fn get_songs_count(&self) -> usize {
+        self.downloaded_music.lock().len()
     }
 }
 

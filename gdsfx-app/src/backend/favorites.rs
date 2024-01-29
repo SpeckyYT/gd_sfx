@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use ahash::{HashSet, HashSetExt};
+use ahash::HashSet;
 
 use anyhow::Result;
 use gdsfx_files::paths;
@@ -17,9 +17,7 @@ pub struct Favorites(HashSet<EntryId>);
 
 impl Default for Favorites {
     fn default() -> Self {
-        let mut favorites = HashSet::new();
-        favorites.insert(4451); // FIRE IN THE HOLE
-        Self(favorites)
+        Self([4451].into_iter().collect())
     }
 }
 
