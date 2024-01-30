@@ -59,6 +59,18 @@ impl MusicLibrary {
             .or_else(|download_err| local_library.map_err(|_| download_err))
     }
 
+    pub fn total_bytes(&self) -> BytesSize {
+        self.songs.iter()
+            .map(|song| song.bytes)
+            .sum()
+    }
+
+    pub fn total_duration(&self) -> Duration {
+        self.songs.iter()
+            .map(|song| song.duration)
+            .sum()
+    }
+
     fn should_try_update(library: Option<&MusicLibrary>) -> bool {
         const MUSIC_VERSION_ENDPOINT: &str = "musiclibrary_version.txt";
 
