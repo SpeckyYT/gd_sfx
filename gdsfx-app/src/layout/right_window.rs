@@ -81,9 +81,9 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId) {
             ui,
             images::STOP,
             IMAGE_BUTTON_SIZE,
-            gdsfx_audio::is_playing_audio(),
+            app_state.audio_system.read().is_playing(),
         ).clicked() {
-            gdsfx_audio::stop_all();
+            let _ = app_state.audio_system.write().stop_audio();
         }
     });
 

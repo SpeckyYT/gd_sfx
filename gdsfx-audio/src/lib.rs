@@ -78,17 +78,20 @@ impl AudioSystem {
     }
 
     // TODO: https://github.com/lebedec/libfmod-gen/issues/13
-    pub fn play_file(audio_system: Arc<RwLock<AudioSystem>>, file_name: &str) -> Result<()> {
+    pub fn play_file(audio_system: Arc<RwLock<AudioSystem>>, data: &[u8]) -> Result<()> {
         let mut setup_system = audio_system.write();
 
         setup_system.stop_audio()?;
 
         let settings = setup_system.settings;
 
-        let mut mode = Mode::DEFAULT;
+        let mut mode = Mode::OPENMEMORY;
         if settings.looping { mode |= Mode::LOOP_NORMAL };
 
-        let sound = setup_system.system.create_sound(file_name, mode, None)?;
+        let mut info = CreateSoundexInfo::default();
+        info.length = data.len() as u32;
+
+        let sound = setup_system.system.create_sound_from(data, mode, info)?;
 
         // Calculate start/end points
         let (sample_rate, _, _) = setup_system.system.get_software_format()?;

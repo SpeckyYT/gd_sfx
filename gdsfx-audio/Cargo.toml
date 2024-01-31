@@ -10,7 +10,7 @@ edition = "2021"
 educe = { workspace = true }
 parking_lot = { workspace = true }
 
-libfmod = "2.206.3"
+libfmod = "2.206.4"
 
 [build-dependencies]
 gdsfx-build = { workspace = true }

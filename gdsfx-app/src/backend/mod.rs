@@ -130,9 +130,7 @@ impl AppState {
             };
 
             if let Some(bytes) = bytes {
-                // TODO
-                let _ = bytes;
-                let _ = AudioSystem::play_file(audio_system, &format!("{gd_folder}/s{id}.ogg"));
+                let _ = AudioSystem::play_file(audio_system, &bytes);
             }
         });        
     }
