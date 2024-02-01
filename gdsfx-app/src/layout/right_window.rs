@@ -42,16 +42,7 @@ fn render_sfx_window(ui: &mut Ui, app_state: &mut AppState) {
 
     ui.add_space(25.0);
 
-    render_buttons(
-        ui,
-        app_state,
-        app_state.is_sfx_downloaded(entry_id),
-        app_state.favorites.has_favorite(entry_id),
-        |app_state| app_state.play_sound(SfxFileEntry::new(entry_id)),
-        |app_state| app_state.download_sound(SfxFileEntry::new(entry_id)),
-        |app_state| app_state.delete_sound(SfxFileEntry::new(entry_id)),
-        |app_state| app_state.favorites.toggle_favorite(entry_id),
-    );
+    render_buttons(ui, app_state, entry_id, SfxFileEntry::new(entry_id), app_state.is_sfx_downloaded(entry_id));
 
     ui.add_space(10.0);
 
@@ -114,32 +105,14 @@ fn render_music_window(ui: &mut Ui, app_state: &mut AppState) {
 
     ui.add_space(25.0);
 
-    render_buttons(
-        ui,
-        app_state,
-        app_state.is_music_downloaded(song_id),
-        app_state.favorites.has_favorite(song_id),
-        |app_state| app_state.play_sound(MusicFileEntry::new(song_id)),
-        |app_state| app_state.download_sound(MusicFileEntry::new(song_id)),
-        |app_state| app_state.delete_sound(MusicFileEntry::new(song_id)),
-        |app_state| app_state.favorites.toggle_favorite(song_id),
-    );
+    render_buttons(ui, app_state, song_id, MusicFileEntry::new(song_id), app_state.is_music_downloaded(song_id));
 
     ui.add_space(10.0);
 
     render_audio_settings(ui, app_state);
 }
 
-fn render_buttons<A,B,C,D>(
-    ui: &mut Ui,
-    app_state: &mut AppState,
-    exists: bool,
-    is_favorite: bool,
-    play_cb: impl FnOnce(&mut AppState) -> A,
-    download_cb: impl FnOnce(&mut AppState) -> B,
-    delete_cb: impl FnOnce(&mut AppState) -> C,
-    toggle_favorite_cb: impl FnOnce(&mut AppState) -> D,
-) {
+fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry: impl FileEntry + 'static, is_downloaded: bool) {
     ui.horizontal(|ui| {
         if image_button!(
             ui,
@@ -147,7 +120,7 @@ fn render_buttons<A,B,C,D>(
             IMAGE_BUTTON_SIZE,
             true,
         ).clicked() {
-            play_cb(app_state);
+            app_state.play_sound(file_entry);
         }
 
         if image_button!(
@@ -168,18 +141,18 @@ fn render_buttons<A,B,C,D>(
                 ui,
                 images::DOWNLOAD,
                 IMAGE_BUTTON_SIZE,
-                !exists,
+                !is_downloaded,
             ).clicked() {
-                download_cb(app_state);
+                app_state.download_sound(file_entry);
             }
 
             if image_button!(
                 ui,
                 images::TRASH,
                 IMAGE_BUTTON_SIZE,
-                exists,
+                is_downloaded,
             ).clicked() {
-                delete_cb(app_state);
+                app_state.delete_sound(file_entry);
             }
         });
     } else {
@@ -188,7 +161,7 @@ fn render_buttons<A,B,C,D>(
     
     ui.add_space(5.0);
 
-    let favorite_button_label = match is_favorite {
+    let favorite_button_label = match app_state.favorites.has_favorite(id) {
         true => images::STAR_SOLID,
         false => images::STAR_REGULAR,
     };
@@ -198,7 +171,7 @@ fn render_buttons<A,B,C,D>(
         IMAGE_BUTTON_SIZE,
         true,
     ).clicked() {
-        toggle_favorite_cb(app_state);
+        app_state.favorites.toggle_favorite(id);
         ui.close_menu();
     }
 }

@@ -78,20 +78,13 @@ impl GdSfx {
 
         let settings = PersistentSettings::load();
 
-        let gd_folder = settings.gd_folder.clone();
-        let sfx_handler = std::thread::spawn(move ||
-            SfxLibrary::load(&gd_folder)
-                .expect("TODO: info screen with error message and retry button")
-        );
-        let gd_folder = settings.gd_folder.clone();
-        let music_handler = std::thread::spawn(move ||
-            MusicLibrary::load(&gd_folder)
-                .expect("TODO: info screen with error message and retry button")
-        );
+        let sfx_library = SfxLibrary::load(&settings.gd_folder)
+                .expect("TODO: info screen with error message and retry button");
 
-        let sfx_library = sfx_handler.join().unwrap();
+        let music_library = MusicLibrary::load(&settings.gd_folder)
+                .expect("TODO: info screen with error message and retry button");
+
         let app_state = AppState::load(settings, &sfx_library);
-        let music_library = music_handler.join().unwrap();
 
         Box::new(Self { app_state, sfx_library, music_library })
     }

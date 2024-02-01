@@ -25,7 +25,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
             }
         },
         LibraryPage::Music => {
-            for credits in &music_library.credits {
+            for credits in music_library.credits.values() {
                 let links = [
                     credits.url.as_ref(),
                     credits.yt_url.as_ref(),

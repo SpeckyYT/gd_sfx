@@ -141,10 +141,9 @@ impl AppState {
             FileEntryKind::Sound => self.sfx_cache.clone(),
             FileEntryKind::Song => self.music_cache.clone(),
         };
+        
         let gd_folder = self.settings.gd_folder.clone();
         let audio_settings = self.audio_settings;
-
-        let file_entry = file_entry.clone();
 
         thread::spawn(move || {
             let bytes = {

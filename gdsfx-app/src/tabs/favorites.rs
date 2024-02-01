@@ -20,7 +20,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
             }
         },
         LibraryPage::Music => {
-            for song in &music_library.songs {
+            for song in music_library.songs.values() {
                 if app_state.favorites.has_favorite(song.id) {
                     layout::add_music_button(ui, app_state, song);
                 }

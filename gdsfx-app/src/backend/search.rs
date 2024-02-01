@@ -34,8 +34,8 @@ impl Sorting {
         b.is_category().cmp(&a.is_category()) // categories on top
             .then(match self {
                 Sorting::Default => Ordering::Equal,
-                Sorting::NameInc => a.get_name().cmp(&b.get_name()),
-                Sorting::NameDec => b.get_name().cmp(&a.get_name()),
+                Sorting::NameInc => a.get_name().cmp(b.get_name()),
+                Sorting::NameDec => b.get_name().cmp(a.get_name()),
                 Sorting::LengthInc => a.get_duration().cmp(&b.get_duration()),
                 Sorting::LengthDec => b.get_duration().cmp(&a.get_duration()),
                 Sorting::IdInc => a.get_id().cmp(&b.get_id()),

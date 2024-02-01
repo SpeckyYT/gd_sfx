@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use ahash::{HashSet, HashSetExt};
 use eframe::egui::{CollapsingHeader, ComboBox, Ui};
 use gdsfx_library::{EntryId, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
@@ -91,7 +90,7 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
 
-    let mut songs = library.songs.iter().collect::<Vec<_>>();
+    let mut songs = library.songs.values().collect::<Vec<_>>();
 
     songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
     
@@ -109,75 +108,58 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
 }
 
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
-    let mut available_tags = HashSet::new();
-    let mut available_artists = HashSet::new();
-
-    for song in &library.songs {
-        if app_state.search_settings.show_downloaded && !app_state.is_music_downloaded(song.id) {
-            continue
-        }
-
-        let is_artist = app_state.music_filters.artists.is_empty() || app_state.music_filters.artists.contains(&song.credit_id);
-        let contains_tag = app_state.music_filters.tags.is_empty() || app_state.music_filters.tags.iter().all(|tag| song.tags.contains(tag));
-
-        if contains_tag {
-            available_artists.insert(song.credit_id);
-            if is_artist {
-                song.tags.iter().for_each(|tag| { available_tags.insert(*tag); });
-            }
-        }
-    }
-
-    let available_tags = library.tags.iter()
-        .filter(|&tag| app_state.music_filters.tags.is_empty() && app_state.music_filters.artists.is_empty() || available_tags.contains(&tag.id))
-        .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
-        .collect::<Vec<_>>();
-    let available_artists = library.credits.iter()
-        .filter(|&artist| app_state.music_filters.artists.is_empty() || available_artists.contains(&artist.id))
-        .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
+    let songs_matching_tags = library.songs.values()
+        .filter(|song| app_state.music_filters.tags.is_empty() || app_state.music_filters.tags.iter().all(|tag| song.tags.contains(tag)))
         .collect::<Vec<_>>();
 
-    // todo: remove selected tags that aren't available
+    let available_artists = songs_matching_tags.iter()
+        .map(|song| song.credit_id)
+        .unique()
+        .flat_map(|id| library.credits.get(&id))
+        .sorted_unstable_by_key(|credit| &credit.name);
 
+    let available_tags = songs_matching_tags.iter()
+        .filter(|song| app_state.music_filters.artists.is_empty() || app_state.music_filters.artists.contains(&song.credit_id))
+        .flat_map(|song| &song.tags)
+        .unique()
+        .flat_map(|id| library.tags.get(id))
+        .sorted_unstable_by_key(|tag| &tag.name);
+
+    // TODO specky would you like to add song count and tag count and artist count etc for example Tags (1) → Action [5]
     ui.horizontal(|ui| {
         ComboBox::from_id_source("music_tags_dropdown")
-        .selected_text("Tags")
-        .show_ui(ui, |ui| {
-            for tag in available_tags {
-                let mut has_tag = app_state.music_filters.tags.contains(&tag.id);
-                ui.checkbox(
-                    &mut has_tag,
-                    &tag.name,
-                );
-                if has_tag {
-                    app_state.music_filters.tags.insert(tag.id);
-                } else {
-                    app_state.music_filters.tags.remove(&tag.id);
+            .selected_text("Tags")
+            .show_ui(ui, |ui| {
+                for tag in available_tags {
+                    let mut has_tag = app_state.music_filters.tags.contains(&tag.id);
+                    ui.checkbox(&mut has_tag, &tag.name);
+                    if has_tag {
+                        app_state.music_filters.tags.insert(tag.id);
+                    } else {
+                        app_state.music_filters.tags.remove(&tag.id);
+                    }
                 }
-            }
-        });
+            });
 
         ComboBox::from_id_source("music_artists_dropdown")
-        .selected_text("Artists")
-        .show_ui(ui, |ui| {
-            for credit in available_artists {
-                let mut has_artist = app_state.music_filters.artists.contains(&credit.id);
-                ui.checkbox(
-                    &mut has_artist,
-                    &credit.name,
-                );
-                if has_artist {
-                    app_state.music_filters.artists.insert(credit.id);
-                } else {
-                    app_state.music_filters.artists.remove(&credit.id);
+            .selected_text("Artists")
+            .show_ui(ui, |ui| {
+                for artist in available_artists {
+                    let mut has_artist = app_state.music_filters.artists.contains(&artist.id);
+                    ui.checkbox(&mut has_artist, &artist.name);
+                    if has_artist {
+                        app_state.music_filters.artists.insert(artist.id);
+                    } else {
+                        app_state.music_filters.artists.remove(&artist.id);
+                    }
                 }
-            }
-        });
+            });
 
         if ui.button("Reset filters").clicked() {
             app_state.music_filters.tags.clear();
             app_state.music_filters.artists.clear();
         }
     });
+
     ui.separator();
 }

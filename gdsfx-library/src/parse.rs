@@ -1,13 +1,12 @@
 use std::str::FromStr;
 use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
-use std::iter::FromIterator;
 use crate::sfx;
 use crate::music;
 use crate::sfx::SfxLibraryEntry;
 use crate::*;
 
-fn parse_semicolon_separated<T: FromStr, S: FromIterator<T>>(string: &str) -> S {
+fn parse_semicolon_separated<T: FromStr>(string: &str) -> Vec<T> {
     string.split(';')
         .flat_map(T::from_str)
         .collect()
@@ -31,16 +30,17 @@ pub(crate) fn parse_music_library_from_bytes(bytes: Vec<u8>) -> Result<MusicLibr
     let bytes = gdsfx_files::encoding::decode(&bytes);
     let string = bytes.iter().map(|&byte| char::from(byte)).collect::<String>();
 
-    let [version, credits, songs, tags]: [&str; 4] = string.split("|")
+    let [version, credits, songs, tags]: [&str; 4] = string
+        .split('|')
         .collect::<Vec<&str>>()
         .try_into()
         .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
 
     Ok(MusicLibrary {
         version: version.parse()?,
-        credits: parse_semicolon_separated::<music::Credit, Vec<_>>(credits),
-        songs: parse_semicolon_separated::<music::Song, Vec<_>>(songs),
-        tags: parse_semicolon_separated::<music::Tag, Vec<_>>(tags),
+        credits: parse_semicolon_separated(credits).into_iter().map(|x: music::Credit| (x.id, x)).collect(),
+        songs: parse_semicolon_separated(songs).into_iter().map(|x: music::Song| (x.id, x)).collect(),
+        tags: parse_semicolon_separated(tags).into_iter().map(|x: music::Tag| (x.id, x)).collect(),
     })
 }
 
@@ -237,7 +237,7 @@ mod test {
             id: 4451,
             name: "Fire In The Hole".to_string(),
             parent_id: 4442,
-            kind: EntryKind::Sound {
+            kind: sfx::EntryKind::Sound {
                 bytes: 29496,
                 duration: Duration::from_millis(187 * 10),
             }
@@ -251,8 +251,8 @@ mod test {
     fn test_parse_credit() {
         const SHARKS_CREDIT: &str = "Sharks,https://www.sharkstunes.com";
 
-        let credit = Credit::from_str(SHARKS_CREDIT).unwrap();
-        assert_eq!(credit, Credit {
+        let credit = sfx::Credit::from_str(SHARKS_CREDIT).unwrap();
+        assert_eq!(credit, sfx::Credit {
             name: "Sharks".to_string(),
             link: "https://www.sharkstunes.com".to_string(),
         });

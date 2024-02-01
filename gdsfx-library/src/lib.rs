@@ -31,7 +31,7 @@ pub struct SfxLibrary {
 pub struct MusicLibrary {
     pub version: EntryId,
 
-    pub credits: Vec<music::Credit>,
-    pub songs: Vec<music::Song>,
-    pub tags: Vec<music::Tag>,
+    pub credits: HashMap<EntryId, music::Credit>,
+    pub songs: HashMap<EntryId, music::Song>,
+    pub tags: HashMap<music::TagId, music::Tag>,
 }

@@ -31,7 +31,6 @@ pub struct Song {
     pub tags: Vec<TagId>,
 }
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tag {
     pub id: TagId,
@@ -61,13 +60,13 @@ impl MusicLibrary {
     }
 
     pub fn total_bytes(&self) -> BytesSize {
-        self.songs.iter()
+        self.songs.values()
             .map(|song| song.bytes)
             .sum()
     }
 
     pub fn total_duration(&self) -> Duration {
-        self.songs.iter()
+        self.songs.values()
             .map(|song| song.duration)
             .sum()
     }
@@ -94,8 +93,7 @@ impl ToString for Song {
             self.bytes,
             self.duration.as_secs(),
             self.tags.iter()
-                .map(|n| format!(".{}", n))
-                .collect::<String>(),
+                .fold(String::new(), |s, n| format!("{s}.{n}"))
         )
     }
 }
