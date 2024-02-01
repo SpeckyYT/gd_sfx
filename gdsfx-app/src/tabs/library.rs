@@ -64,7 +64,7 @@ fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
 }
 
 fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary, mut entries: Vec<&SfxLibraryEntry>, collapse_all: bool) {
-    entries.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+    entries.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
     for entry in entries {
         match entry.kind {
             EntryKind::Category => {
@@ -90,8 +90,13 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
 
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
+
+    let mut songs = library.songs.iter().collect::<Vec<_>>();
+
+    songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
     
-    for song in &library.songs {
+
+    for song in &songs {
         let MusicFilters { tags, artists } = &app_state.music_filters;
 
         if  !tags.iter().all(|tag| song.tags.contains(tag))

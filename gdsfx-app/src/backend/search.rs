@@ -1,7 +1,7 @@
-use std::{cmp::Ordering, time::Duration};
+use std::cmp::Ordering;
 
 use ahash::HashSet;
-use gdsfx_library::{music::TagId, sfx::{SfxLibraryEntry, EntryKind}, BytesSize, EntryId};
+use gdsfx_library::{music::TagId, EntryId, SortingGetter};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -30,36 +30,18 @@ localized_enum! {
 }
 
 impl Sorting {
-    pub fn compare_entries(&self, a: &SfxLibraryEntry, b: &SfxLibraryEntry) -> Ordering {
-        fn is_category(entry: &SfxLibraryEntry) -> bool {
-            matches!(entry.kind, EntryKind::Category)
-        }
-    
-        fn get_duration(entry: &SfxLibraryEntry) -> Duration {
-            match entry.kind {
-                EntryKind::Sound { duration, .. } => duration,
-                _ => Duration::ZERO,
-            }
-        }
-    
-        fn get_bytes(entry: &SfxLibraryEntry) -> BytesSize {
-            match entry.kind {
-                EntryKind::Sound { bytes, .. } => bytes,
-                _ => 0,
-            }
-        }
-        
-        is_category(b).cmp(&is_category(a)) // categories on top
+    pub fn compare_entries(&self, a: impl SortingGetter, b: impl SortingGetter) -> Ordering {
+        b.get_is_category().cmp(&a.get_is_category()) // categories on top
             .then(match self {
                 Sorting::Default => Ordering::Equal,
-                Sorting::NameInc => a.name.cmp(&b.name),
-                Sorting::NameDec => b.name.cmp(&a.name),
-                Sorting::LengthInc => get_duration(a).cmp(&get_duration(b)),
-                Sorting::LengthDec => get_duration(b).cmp(&get_duration(a)),
-                Sorting::IdInc => a.id.cmp(&b.id),
-                Sorting::IdDec => b.id.cmp(&a.id),
-                Sorting::SizeInc => get_bytes(a).cmp(&get_bytes(b)),
-                Sorting::SizeDec => get_bytes(b).cmp(&get_bytes(a)),
+                Sorting::NameInc => a.get_name().cmp(&b.get_name()),
+                Sorting::NameDec => b.get_name().cmp(&a.get_name()),
+                Sorting::LengthInc => a.get_duration().cmp(&b.get_duration()),
+                Sorting::LengthDec => b.get_duration().cmp(&a.get_duration()),
+                Sorting::IdInc => a.get_id().cmp(&b.get_id()),
+                Sorting::IdDec => b.get_id().cmp(&a.get_id()),
+                Sorting::SizeInc => a.get_bytes().cmp(&b.get_bytes()),
+                Sorting::SizeDec => b.get_bytes().cmp(&a.get_bytes()),
             })
     }
 }

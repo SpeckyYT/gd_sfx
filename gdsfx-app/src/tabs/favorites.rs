@@ -11,7 +11,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
     match app_state.library_page {
         LibraryPage::Sfx => {
             let mut sounds: Vec<&SfxLibraryEntry> = sfx_library.iter_sounds().collect();
-            sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+            sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
         
             for sound in sounds {
                 if app_state.favorites.has_favorite(sound.id) {

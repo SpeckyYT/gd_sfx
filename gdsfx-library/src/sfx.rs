@@ -3,6 +3,7 @@ use crate::requests;
 use crate::BytesSize;
 use crate::EntryId;
 use crate::SfxLibrary;
+use crate::SortingGetter;
 use std::path::Path;
 use std::time::Duration;
 use anyhow::Result;
@@ -14,6 +15,19 @@ pub struct SfxLibraryEntry {
     pub name: String,
     pub parent_id: EntryId,
     pub kind: EntryKind,
+}
+
+impl SortingGetter for &SfxLibraryEntry {
+    fn get_name(&self) -> &str { &self.name }
+    fn get_id(&self) -> EntryId { self.id }
+    fn get_duration(&self) -> Duration { self.duration().unwrap_or_default() }
+    fn get_bytes(&self) -> BytesSize { self.bytes().unwrap_or_default() }
+    fn get_is_category(&self) -> bool {
+        match self.kind {
+            EntryKind::Category => true,
+            EntryKind::Sound { .. } => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
