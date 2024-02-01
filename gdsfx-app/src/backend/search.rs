@@ -1,7 +1,7 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, time::Duration};
 
 use ahash::HashSet;
-use gdsfx_library::{music::TagId, EntryId, SortingGetter};
+use gdsfx_library::{music::{Song, TagId}, sfx::{EntryKind, SfxLibraryEntry}, BytesSize, EntryId};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -30,8 +30,8 @@ localized_enum! {
 }
 
 impl Sorting {
-    pub fn compare_entries(&self, a: impl SortingGetter, b: impl SortingGetter) -> Ordering {
-        b.get_is_category().cmp(&a.get_is_category()) // categories on top
+    pub fn compare_entries(&self, a: impl EntrySorting, b: impl EntrySorting) -> Ordering {
+        b.is_category().cmp(&a.is_category()) // categories on top
             .then(match self {
                 Sorting::Default => Ordering::Equal,
                 Sorting::NameInc => a.get_name().cmp(&b.get_name()),
@@ -50,4 +50,29 @@ impl Sorting {
 pub struct MusicFilters {
     pub artists: HashSet<EntryId>,
     pub tags: HashSet<TagId>,
+}
+
+pub trait EntrySorting {
+    fn get_name(&self) -> &str;
+    fn get_id(&self) -> EntryId;
+    fn get_duration(&self) -> Duration;
+    fn get_bytes(&self) -> BytesSize;
+    fn is_category(&self) -> bool { false }
+}
+
+impl EntrySorting for &Song {
+    fn get_name(&self) -> &str { &self.name }
+    fn get_id(&self) -> EntryId { self.id }
+    fn get_duration(&self) -> Duration { self.duration }
+    fn get_bytes(&self) -> BytesSize { self.bytes }
+}
+
+impl EntrySorting for &SfxLibraryEntry {
+    fn get_name(&self) -> &str { &self.name }
+    fn get_id(&self) -> EntryId { self.id }
+    fn get_duration(&self) -> Duration { self.duration().unwrap_or_default() }
+    fn get_bytes(&self) -> BytesSize { self.bytes().unwrap_or_default() }
+    fn is_category(&self) -> bool {
+        matches!(self.kind, EntryKind::Category)
+    }
 }

@@ -35,11 +35,3 @@ pub struct MusicLibrary {
     pub songs: Vec<music::Song>,
     pub tags: Vec<music::Tag>,
 }
-
-pub trait SortingGetter {
-    fn get_name(&self) -> &str;
-    fn get_id(&self) -> EntryId;
-    fn get_duration(&self) -> Duration;
-    fn get_bytes(&self) -> BytesSize;
-    fn get_is_category(&self) -> bool { false }
-}

@@ -31,12 +31,6 @@ pub struct Song {
     pub tags: Vec<TagId>,
 }
 
-impl SortingGetter for &Song {
-    fn get_name(&self) -> &str { &self.name }
-    fn get_id(&self) -> EntryId { self.id }
-    fn get_duration(&self) -> Duration { self.duration }
-    fn get_bytes(&self) -> BytesSize { self.bytes }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Tag {

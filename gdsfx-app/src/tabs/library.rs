@@ -36,21 +36,22 @@ fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
                 duration: Duration::ZERO,
             },
         })
+        .filter(|entry| app_state.is_matching_entry(entry, library))
         .collect();
 
-    let unlisted_sfx_empty = unlisted_sounds.is_empty();
-
-    if unlisted_sfx_empty && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
-        return
-    }
+    let enabled = match (unlisted_sounds.is_empty(), app_state.settings.search_filter_mode) {
+        (true, SearchFilterMode::Hide) => return,
+        (true, SearchFilterMode::GrayOut) => false,
+        _ => true,
+    };
 
     unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
     ui.separator();
 
-    ui.add_enabled_ui(!unlisted_sfx_empty, |ui| {
+    ui.add_enabled_ui(enabled, |ui| {
         let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx"))
-            .open((unlisted_sfx_empty || collapse_all).then_some(false));
+            .open((!enabled || collapse_all).then_some(false));
 
         let response = collapsing.show(ui, |ui| {
             for entry in unlisted_sounds {
