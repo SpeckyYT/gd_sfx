@@ -91,34 +91,30 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
     music_filters(ui, app_state, library);
 
     let mut songs = library.songs.values().collect::<Vec<_>>();
-
-    songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
-    
+    songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
     for song in &songs {
         let MusicFilters { tags, artists } = &app_state.music_filters;
 
-        if  !tags.iter().all(|tag| song.tags.contains(tag))
-            || !artists.is_empty() && !artists.contains(&song.credit_id) {
-                continue
+        if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
+            layout::add_music_button(ui, app_state, song);
         }
-
-        layout::add_music_button(ui, app_state, song);
     }
 }
 
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
-    let songs_matching_tags = library.songs.values()
+    let available_songs = library.songs.values()
         .filter(|song| app_state.music_filters.tags.is_empty() || app_state.music_filters.tags.iter().all(|tag| song.tags.contains(tag)))
+        .filter(|song| !app_state.search_settings.show_downloaded || app_state.is_music_downloaded(song.id))
         .collect::<Vec<_>>();
 
-    let available_artists = songs_matching_tags.iter()
+    let available_artists = available_songs.iter()
         .map(|song| song.credit_id)
         .unique()
         .flat_map(|id| library.credits.get(&id))
         .sorted_unstable_by_key(|credit| &credit.name);
 
-    let available_tags = songs_matching_tags.iter()
+    let available_tags = available_songs.iter()
         .filter(|song| app_state.music_filters.artists.is_empty() || app_state.music_filters.artists.contains(&song.credit_id))
         .flat_map(|song| &song.tags)
         .unique()
@@ -127,6 +123,8 @@ fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) 
 
     // TODO specky would you like to add song count and tag count and artist count etc for example Tags (1) → Action [5]
     ui.horizontal(|ui| {
+        ui.set_enabled(!available_songs.is_empty());
+
         ComboBox::from_id_source("music_tags_dropdown")
             .selected_text("Tags")
             .show_ui(ui, |ui| {

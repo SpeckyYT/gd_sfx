@@ -9,15 +9,14 @@ use crate::localized_enum;
 #[derive(Default, Debug)]
 pub struct SearchSettings {
     pub search_query: String,
-    pub sorting_mode: Sorting,
+    pub sorting_mode: SortingMode,
     pub show_downloaded: bool,
 }
 
 localized_enum! {
     #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
-    pub enum Sorting = "search.sort" {
+    pub enum SortingMode = "search.sort" {
         #[default]
-        Default = "default",
         NameInc = "name.ascending",      // a - z
         NameDec = "name.descending",     // z - a
         LengthInc = "length.ascending",  // 0.00 - 1.00
@@ -29,19 +28,18 @@ localized_enum! {
     }
 }
 
-impl Sorting {
+impl SortingMode {
     pub fn compare_entries(&self, a: impl EntrySorting, b: impl EntrySorting) -> Ordering {
         b.is_category().cmp(&a.is_category()) // categories on top
             .then(match self {
-                Sorting::Default => Ordering::Equal,
-                Sorting::NameInc => a.get_name().cmp(b.get_name()),
-                Sorting::NameDec => b.get_name().cmp(a.get_name()),
-                Sorting::LengthInc => a.get_duration().cmp(&b.get_duration()),
-                Sorting::LengthDec => b.get_duration().cmp(&a.get_duration()),
-                Sorting::IdInc => a.get_id().cmp(&b.get_id()),
-                Sorting::IdDec => b.get_id().cmp(&a.get_id()),
-                Sorting::SizeInc => a.get_bytes().cmp(&b.get_bytes()),
-                Sorting::SizeDec => b.get_bytes().cmp(&a.get_bytes()),
+                Self::NameInc => a.get_name().cmp(b.get_name()),
+                Self::NameDec => b.get_name().cmp(a.get_name()),
+                Self::LengthInc => a.get_duration().cmp(&b.get_duration()),
+                Self::LengthDec => b.get_duration().cmp(&a.get_duration()),
+                Self::IdInc => a.get_id().cmp(&b.get_id()),
+                Self::IdDec => b.get_id().cmp(&a.get_id()),
+                Self::SizeInc => a.get_bytes().cmp(&b.get_bytes()),
+                Self::SizeDec => b.get_bytes().cmp(&a.get_bytes()),
             })
     }
 }

@@ -37,9 +37,9 @@ pub fn add_search_area(ui: &mut Ui, search_settings: &mut SearchSettings) {
     ui.add(TextEdit::singleline(&mut search_settings.search_query).hint_text(t!("search")));
     
     ui.horizontal(|ui| {
-        let label = format!("{}: {}", Sorting::localize_enum(), search_settings.sorting_mode.localize_variant());
+        let label = format!("{}: {}", SortingMode::localize_enum(), search_settings.sorting_mode.localize_variant());
         ui.menu_button(label, |ui| {
-            for mode in Sorting::iter() {
+            for mode in SortingMode::iter() {
                 let radio_button = ui.radio_value(
                     &mut search_settings.sorting_mode,
                     mode, mode.localize_variant()
