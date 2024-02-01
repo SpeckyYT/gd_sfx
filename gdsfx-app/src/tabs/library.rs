@@ -1,8 +1,10 @@
 use std::time::Duration;
 
+use ahash::{HashSet, HashSetExt};
 use eframe::egui::{CollapsingHeader, ComboBox, Ui};
 use gdsfx_library::{EntryId, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
+use itertools::Itertools;
 
 use crate::backend::search::MusicFilters;
 use crate::backend::LibraryPage;
@@ -39,11 +41,8 @@ fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
         .filter(|entry| app_state.is_matching_entry(entry, library))
         .collect();
 
-    let enabled = match (unlisted_sounds.is_empty(), app_state.settings.search_filter_mode) {
-        (true, SearchFilterMode::Hide) => return,
-        (true, SearchFilterMode::GrayOut) => false,
-        _ => true,
-    };
+    let enabled = !unlisted_sounds.is_empty();
+    if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { return }
 
     unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
@@ -110,11 +109,41 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
 }
 
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
+    let mut available_tags = HashSet::new();
+    let mut available_artists = HashSet::new();
+
+    for song in &library.songs {
+        if app_state.search_settings.show_downloaded && !app_state.is_music_downloaded(song.id) {
+            continue
+        }
+
+        let is_artist = app_state.music_filters.artists.is_empty() || app_state.music_filters.artists.contains(&song.credit_id);
+        let contains_tag = app_state.music_filters.tags.is_empty() || app_state.music_filters.tags.iter().all(|tag| song.tags.contains(tag));
+
+        if contains_tag {
+            available_artists.insert(song.credit_id);
+            if is_artist {
+                song.tags.iter().for_each(|tag| { available_tags.insert(*tag); });
+            }
+        }
+    }
+
+    let available_tags = library.tags.iter()
+        .filter(|&tag| app_state.music_filters.tags.is_empty() && app_state.music_filters.artists.is_empty() || available_tags.contains(&tag.id))
+        .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
+        .collect::<Vec<_>>();
+    let available_artists = library.credits.iter()
+        .filter(|&artist| app_state.music_filters.artists.is_empty() || available_artists.contains(&artist.id))
+        .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
+        .collect::<Vec<_>>();
+
+    // todo: remove selected tags that aren't available
+
     ui.horizontal(|ui| {
         ComboBox::from_id_source("music_tags_dropdown")
         .selected_text("Tags")
         .show_ui(ui, |ui| {
-            for tag in &library.tags {
+            for tag in available_tags {
                 let mut has_tag = app_state.music_filters.tags.contains(&tag.id);
                 ui.checkbox(
                     &mut has_tag,
@@ -131,7 +160,7 @@ fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) 
         ComboBox::from_id_source("music_artists_dropdown")
         .selected_text("Artists")
         .show_ui(ui, |ui| {
-            for credit in &library.credits {
+            for credit in available_artists {
                 let mut has_artist = app_state.music_filters.artists.contains(&credit.id);
                 ui.checkbox(
                     &mut has_artist,
