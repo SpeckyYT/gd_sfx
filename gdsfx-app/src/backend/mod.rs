@@ -130,7 +130,7 @@ impl AppState {
             };
 
             if let Some(bytes) = bytes {
-                let _ = AudioSystem::play_file(audio_system, &bytes);
+                let _ = AudioSystem::play_audio(audio_system, &bytes);
             }
         });        
     }
