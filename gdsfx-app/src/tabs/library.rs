@@ -63,24 +63,19 @@ fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
 }
 
 fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary, mut entries: Vec<&SfxLibraryEntry>, collapse_all: bool) {
-    entries.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(*a, *b));
+    entries.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
     for entry in entries {
         match entry.kind {
             EntryKind::Category => {
-                let is_enabled = app_state.is_matching_entry(entry, library);
-    
-                if !is_enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide {
-                    continue // skip rendering entirely
-                }
-    
-                ui.add_enabled_ui(is_enabled, |ui| {
-                    let collapsing = CollapsingHeader::new(&entry.name)
-                        .open((!is_enabled || collapse_all).then_some(false));
-    
-                    collapsing.show(ui, |ui| {
+                let enabled = app_state.is_matching_entry(entry, library);
+                if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { continue }
+
+                ui.add_enabled_ui(enabled, |ui| CollapsingHeader::new(&entry.name)
+                    .open((!enabled || collapse_all).then_some(false))
+                    .show(ui, |ui| {
                         render_sfx_recursive(ui, app_state, library, library.iter_children(entry).collect(), collapse_all);
-                    });
-                });
+                    })
+                );
             }
             EntryKind::Sound { .. } => layout::add_sfx_button(ui, app_state, library, entry),
         }
@@ -95,7 +90,6 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
 
     for song in &songs {
         let MusicFilters { tags, artists } = &app_state.music_filters;
-
         if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
             layout::add_music_button(ui, app_state, song);
         }
