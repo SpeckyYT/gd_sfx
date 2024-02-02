@@ -115,6 +115,11 @@ fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) 
         .flat_map(|id| library.tags.get(id))
         .sorted_unstable_by_key(|tag| &tag.name);
 
+    if !app_state.music_filters.artists.is_empty() {
+        let tags_set = available_tags.clone().map(|tag| tag.id).collect();
+        app_state.music_filters.tags = app_state.music_filters.tags.intersection(&tags_set).copied().collect();
+    }
+
     // TODO specky would you like to add song count and tag count and artist count etc for example Tags (1) → Action [5]
     ui.horizontal(|ui| {
         ui.set_enabled(!available_songs.is_empty());
