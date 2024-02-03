@@ -1,10 +1,10 @@
 use eframe::{egui::{Ui, Context, Slider, Layout}, emath::Align};
 use egui_modal::Modal;
-use gdsfx_library::{FileEntry, SfxFileEntry, SfxLibrary};
+use gdsfx_library::{FileEntry, MusicFileEntry, MusicLibrary, SfxFileEntry, SfxLibrary};
 
-use crate::{backend::AppState, layout};
+use crate::{backend::{AppState, LibraryPage}, layout};
 
-pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &SfxLibrary) {
+pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);
 
     ui.heading(t!("tools"));
@@ -20,10 +20,18 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, library: &Sf
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
         if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
-            app_state.download_multiple_sfx(
-                "tools.download_all_sfx",
-                library.sound_ids().iter().map(|&i| SfxFileEntry::new(i)).collect(),
-            );
+            match app_state.library_page {
+                LibraryPage::Sfx =>
+                    app_state.download_multiple_sfx(
+                        "tools.download_all_sfx",
+                        sfx_library.sound_ids().iter().map(|&i| SfxFileEntry::new(i)).collect(),
+                    ),
+                LibraryPage::Music =>
+                    app_state.download_multiple_sfx(
+                        "tools.download_all_sfx",
+                        music_library.songs.keys().map(|&i| MusicFileEntry::new(i)).collect(),
+                    ),
+            }
         }
         if ui.button(t!("tools.download_from_range")).clicked() {
             download_select_range_modal.open();
@@ -61,11 +69,12 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
         modal.title(ui, t!("tools.download_from_range"));
 
         modal.frame(ui, |ui| {
-            const MAX_ID_RANGE: u32 = 99999;
+            let (min_id_range, max_id_range, range) = match app_state.library_page {
+                LibraryPage::Sfx => (0, 100000, &mut app_state.download_id_range_sfx),
+                LibraryPage::Music => (10000000, 10010000, &mut app_state.download_id_range_music),
+            };
 
-            let range = &mut app_state.download_id_range;
-
-            let from_slider = Slider::new(&mut range.0, 0..=MAX_ID_RANGE)
+            let from_slider = Slider::new(&mut range.0, min_id_range..=max_id_range)
                 .text(t!("tools.download_from_range.from_id"));
 
             ui.add(from_slider);
@@ -73,7 +82,7 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
 
             ui.add_space(10.0);
 
-            let to_slider = Slider::new(&mut range.1, 0..=MAX_ID_RANGE)
+            let to_slider = Slider::new(&mut range.1, min_id_range..=max_id_range)
                 .text(t!("tools.download_from_range.to_id"));
 
             ui.add(to_slider);
@@ -82,8 +91,22 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
 
         modal.buttons(ui, |ui| {
             if ui.button(t!("tools.confirm")).triple_clicked() {
-                let range = app_state.download_id_range;
-                app_state.download_multiple_sfx("tools.download_from_range", (range.0..=range.1).map(SfxFileEntry::new).collect());
+                match app_state.library_page {
+                    LibraryPage::Sfx => {
+                        let range = app_state.download_id_range_sfx;
+                        app_state.download_multiple_sfx(
+                            "tools.download_from_range",
+                            (range.0..=range.1).map(|id| SfxFileEntry::new(id)).collect()
+                        );
+                    },
+                    LibraryPage::Music => {
+                        let range = app_state.download_id_range_music;
+                        app_state.download_multiple_sfx(
+                            "tools.download_from_range",
+                            (range.0..=range.1).map(|id| MusicFileEntry::new(id)).collect()
+                        );
+                    }
+                }
                 modal.close();
             }
             modal.caution_button(ui, t!("tools.cancel"));

@@ -44,8 +44,11 @@ pub struct AppState {
     pub unlisted_sfx: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+
     #[educe(Default = (0, 14500))]
-    pub download_id_range: (EntryId, EntryId),
+    pub download_id_range_sfx: (EntryId, EntryId),
+    #[educe(Default = (10000000, 10010000))]
+    pub download_id_range_music: (EntryId, EntryId),
 
     // TODO https://docs.rs/notify/6.1.1/notify/
     // to keep track of externally added and removed SFX?

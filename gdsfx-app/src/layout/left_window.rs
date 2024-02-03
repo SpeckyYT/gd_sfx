@@ -15,7 +15,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState, sfx_library: &SfxLibrary,
                 match app_state.selected_tab {
                     Tab::Library => library::render(ui, app_state, sfx_library, music_library),
                     Tab::Favorites => favorites::render(ui, app_state, sfx_library, music_library),
-                    Tab::Tools => tools::render(ui, ctx, app_state, sfx_library),
+                    Tab::Tools => tools::render(ui, ctx, app_state, sfx_library, music_library),
                     Tab::Settings => settings::render(ui, app_state),
                     Tab::Stats => stats::render(ui, app_state, sfx_library, music_library),
                     Tab::Credits => credits::render(ui, app_state, sfx_library, music_library),
