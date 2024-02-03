@@ -159,17 +159,6 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
 
-    ui.add_space(10.0);
-
-    if ui.button(t!("sound.play")).clicked() {
-        app_state.play_sound(file_entry);
-    }
-
-    let stop_button = Button::new(t!("sound.stop"));
-    if ui.add_enabled(app_state.audio_system.read().is_playing(), stop_button).clicked() {
-        let _ = app_state.audio_system.write().stop_audio();
-    }
-
     ui.add_space(5.0);
 
     let favorite_button_label = match app_state.favorites.has_favorite(id) {
