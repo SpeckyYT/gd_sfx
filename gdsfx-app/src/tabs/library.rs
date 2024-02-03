@@ -43,22 +43,19 @@ fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrar
     let enabled = !unlisted_sounds.is_empty();
     if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { return }
 
-    unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
-
     ui.separator();
 
     ui.add_enabled_ui(enabled, |ui| {
-        let collapsing = CollapsingHeader::new(t!("library.unlisted_sfx"))
-            .open((!enabled || collapse_all).then_some(false));
-
-        let response = collapsing.show(ui, |ui| {
-            for entry in unlisted_sounds {
-                layout::add_sfx_button(ui, app_state, library, &entry);
-            }
-        });
-
-        let text = t!("library.unlisted_sfx.hint", tool = t!("tools.download_from_range"));
-        response.header_response.on_disabled_hover_text(text);
+        CollapsingHeader::new(t!("library.unlisted_sfx"))
+            .open((!enabled || collapse_all).then_some(false))
+            .show(ui, |ui| {
+                unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+                for entry in unlisted_sounds {
+                    layout::add_sfx_button(ui, app_state, library, &entry);
+                }
+            })
+            .header_response
+            .on_disabled_hover_text(t!("library.unlisted_sfx.hint", tool = t!("tools.download_from_range")))
     });
 }
 
@@ -70,12 +67,13 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
                 let enabled = app_state.is_matching_entry(entry, library);
                 if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { continue }
 
-                ui.add_enabled_ui(enabled, |ui| CollapsingHeader::new(&entry.name)
-                    .open((!enabled || collapse_all).then_some(false))
-                    .show(ui, |ui| {
-                        render_sfx_recursive(ui, app_state, library, library.iter_children(entry).collect(), collapse_all);
-                    })
-                );
+                ui.add_enabled_ui(enabled, |ui| {
+                    CollapsingHeader::new(&entry.name)
+                        .open((!enabled || collapse_all).then_some(false))
+                        .show(ui, |ui| {
+                            render_sfx_recursive(ui, app_state, library, library.iter_children(entry).collect(), collapse_all);
+                        })
+                });
             }
             EntryKind::Sound { .. } => layout::add_sfx_button(ui, app_state, library, entry),
         }

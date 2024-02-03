@@ -29,7 +29,7 @@ localized_enum! {
 }
 
 impl SortingMode {
-    pub fn compare_entries(&self, a: impl EntrySorting, b: impl EntrySorting) -> Ordering {
+    pub fn compare_entries(&self, a: &impl EntrySorting, b: &impl EntrySorting) -> Ordering {
         b.is_category().cmp(&a.is_category()) // categories on top
             .then(match self {
                 Self::NameInc => a.get_name().cmp(b.get_name()),
@@ -58,19 +58,17 @@ pub trait EntrySorting {
     fn is_category(&self) -> bool { false }
 }
 
-impl EntrySorting for &Song {
+impl EntrySorting for Song {
     fn get_name(&self) -> &str { &self.name }
     fn get_id(&self) -> EntryId { self.id }
     fn get_duration(&self) -> Duration { self.duration }
     fn get_bytes(&self) -> BytesSize { self.bytes }
 }
 
-impl EntrySorting for &SfxLibraryEntry {
+impl EntrySorting for SfxLibraryEntry {
     fn get_name(&self) -> &str { &self.name }
     fn get_id(&self) -> EntryId { self.id }
     fn get_duration(&self) -> Duration { self.duration().unwrap_or_default() }
     fn get_bytes(&self) -> BytesSize { self.bytes().unwrap_or_default() }
-    fn is_category(&self) -> bool {
-        matches!(self.kind, EntryKind::Category)
-    }
+    fn is_category(&self) -> bool { matches!(self.kind, EntryKind::Category) }
 }
