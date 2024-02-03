@@ -162,7 +162,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
     ui.add_space(10.0);
 
     if ui.button(t!("sound.play")).clicked() {
-        app_state.play_sfx(id);
+        app_state.play_sound(file_entry);
     }
 
     let stop_button = Button::new(t!("sound.stop"));
