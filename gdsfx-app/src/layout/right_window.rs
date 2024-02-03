@@ -127,9 +127,9 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             ui,
             images::STOP,
             IMAGE_BUTTON_SIZE,
-            gdsfx_audio::is_playing_audio(),
+            app_state.audio_system.read().is_playing(),
         ).clicked() {
-            gdsfx_audio::stop_all();
+            let _ = app_state.audio_system.write().stop_audio();
         }
     });
 
@@ -158,7 +158,18 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
     } else {
         ui.colored_label(Color32::KHAKI, t!("settings.gd_folder.not_found"));
     }
-    
+
+    ui.add_space(10.0);
+
+    if ui.button(t!("sound.play")).clicked() {
+        app_state.play_sfx(id);
+    }
+
+    let stop_button = Button::new(t!("sound.stop"));
+    if ui.add_enabled(app_state.audio_system.read().is_playing(), stop_button).clicked() {
+        let _ = app_state.audio_system.write().stop_audio();
+    }
+
     ui.add_space(5.0);
 
     let favorite_button_label = match app_state.favorites.has_favorite(id) {
@@ -177,20 +188,23 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
 }
 
 fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
-    ui.label(t!("sound.speed"));
-    ui.add(Slider::new(&mut app_state.audio_settings.speed, -12.0..=12.0));
-    
-    ui.label(t!("sound.pitch"));
-    ui.add(Slider::new(&mut app_state.audio_settings.pitch, -12.0..=12.0));
+    let mut audio_system = app_state.audio_system.write();
+    let audio_settings = &mut audio_system.settings;
 
-    ui.label(t!("sound.volume"));
-    ui.add(Slider::new(&mut app_state.audio_settings.volume, 0.0..=2.0));
+    ui.add(Slider::new(&mut audio_settings.speed, -12..=12).text(t!("sound.speed")));
+    ui.add(Slider::new(&mut audio_settings.pitch, -12..=12).text(t!("sound.pitch")));
+    ui.add(Slider::new(&mut audio_settings.volume, 0.0..=2.0).text(t!("sound.volume")));
+    ui.checkbox(&mut audio_settings.looping, t!("sound.loop"));
+    ui.add(Slider::new(&mut audio_settings.start, 0..=1000).text(t!("sound.start")).clamp_to_range(false)); // TODO limit slider to sound length in ms
+    ui.add(Slider::new(&mut audio_settings.end, 0..=1000).text(t!("sound.end")).clamp_to_range(false)); // TODO limit slider to sound length in ms
+    ui.add(Slider::new(&mut audio_settings.fade_in, 0..=1000).text(t!("sound.fade_in")).clamp_to_range(false));
+    ui.add(Slider::new(&mut audio_settings.fade_out, 0..=1000).text(t!("sound.fade_out")).clamp_to_range(false));
 
     ui.add_space(10.0);
 
     let reset_button = Button::new(t!("sound.reset"));
     let default_audio_settings = AudioSettings::default();
-    if ui.add_enabled(app_state.audio_settings != default_audio_settings, reset_button).clicked() {
-        app_state.audio_settings = default_audio_settings;
+    if ui.add_enabled(*audio_settings != default_audio_settings, reset_button).clicked() {
+        *audio_settings = default_audio_settings;
     }
 }

@@ -1,11 +1,13 @@
 use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
-use eframe::epaint::mutex::Mutex;
+use educe::Educe;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{music, EntryId, FileEntry, FileEntryKind, SfxLibrary};
 use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
+use gdsfx_audio::AudioSystem;
+use parking_lot::{Mutex, RwLock};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
@@ -21,7 +23,8 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
-#[derive(Default)]
+#[derive(Educe)]
+#[educe(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub library_page: LibraryPage, // todo: actually give this a better name
@@ -30,14 +33,18 @@ pub struct AppState {
 
     pub settings: PersistentSettings,
     pub favorites: Favorites,
-
+    
     pub search_settings: SearchSettings,
     pub music_filters: MusicFilters,
     pub audio_settings: AudioSettings,
 
+    #[educe(Default = AudioSystem::new().unwrap())]
+    pub audio_system: Arc<RwLock<AudioSystem>>,
+
     pub unlisted_sfx: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+    #[educe(Default = (0, 14500))]
     pub download_id_range: (EntryId, EntryId),
 
     // TODO https://docs.rs/notify/6.1.1/notify/
@@ -82,8 +89,7 @@ impl AppState {
 
         Self {
             settings,
-            favorites: Favorites::load_or_default(),
-            download_id_range: (0, 14500),
+            favorites: Favorites::load(),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
             downloaded_music: Arc::new(Mutex::new(downloaded_music)),
             unlisted_sfx,
@@ -143,7 +149,7 @@ impl AppState {
         };
         
         let gd_folder = self.settings.gd_folder.clone();
-        let audio_settings = self.audio_settings;
+        let audio_system = Arc::clone(&self.audio_system);
 
         thread::spawn(move || {
             let bytes = {
@@ -161,10 +167,9 @@ impl AppState {
             };
 
             if let Some(bytes) = bytes {
-                gdsfx_audio::stop_all();
-                gdsfx_audio::play_sound(bytes, audio_settings);
+                let _ = AudioSystem::play_audio(audio_system, &bytes);
             }
-        });
+        });        
     }
 
     pub fn download_sound(&self, file_entry: impl FileEntry + 'static) {
@@ -178,10 +183,13 @@ impl AppState {
             FileEntryKind::Sound => self.sfx_cache.clone(),
             FileEntryKind::Song => self.music_cache.clone(),
         };
+        let downloaded = match file_entry.kind() {
+            FileEntryKind::Sound => self.downloaded_sfx.clone(),
+            FileEntryKind::Song => self.downloaded_music.clone(),
+        };
 
         let gd_folder = gd_folder.clone();
-        let downloaded_sfx = self.downloaded_sfx.clone();
-        let downloaded_music = self.downloaded_music.clone();
+        let gd_folder = gd_folder.clone();
 
         thread::spawn(move || {
             let bytes = cache.lock().get(&file_entry.id()).cloned()
@@ -189,10 +197,7 @@ impl AppState {
 
             let Some(bytes) = bytes else { return };
             if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
-                match file_entry.kind() {
-                    FileEntryKind::Sound => downloaded_sfx,
-                    FileEntryKind::Song => downloaded_music,
-                }.lock().insert(file_entry.id());
+                downloaded.lock().insert(file_entry.id());
             }
         });
     }

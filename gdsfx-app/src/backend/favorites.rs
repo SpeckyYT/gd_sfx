@@ -22,7 +22,7 @@ impl Default for Favorites {
 }
 
 impl Favorites {
-    pub fn load_or_default() -> Self {
+    pub fn load() -> Self {
         gdsfx_files::read_json_file(&*FAVORITES_FILE).unwrap_or_default()
     }
 
