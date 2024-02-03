@@ -1,4 +1,4 @@
-use std::{thread, fs, time::Instant};
+use std::{thread, fs, time::Instant, sync::Arc};
 
 use eframe::egui::{Ui, ProgressBar};
 use gdsfx_library::{EntryId, FileEntry};
@@ -53,9 +53,9 @@ impl AppState {
         let progress = self.tool_progress.clone();
         *progress.lock() = Some(ToolProgress::new(translation_key, ids.len()));
 
-        let cache = self.sfx_cache.clone();
         let gd_folder = self.settings.gd_folder.clone();
-        let downloaded_sfx = self.downloaded_sfx.clone();
+        let cache = Arc::clone(&self.sfx_cache);
+        let downloaded_sfx = Arc::clone(&self.downloaded_sfx);
     
         thread::spawn(move || {
             ids.into_par_iter().try_for_each(|id| {
@@ -81,11 +81,11 @@ impl AppState {
         let Ok(read_dir) = fs::read_dir(&self.settings.gd_folder) else { return };
         let read_dir = read_dir.flatten().collect::<Vec<_>>();
         
-        let progress = self.tool_progress.clone();
+        let progress = Arc::clone(&self.tool_progress);
         *progress.lock() = Some(ToolProgress::new(translation_key, read_dir.len()));
 
         let gd_folder = self.settings.gd_folder.clone();
-        let downloaded_sfx = self.downloaded_sfx.clone();
+        let downloaded_sfx = Arc::clone(&self.downloaded_sfx);
 
         thread::spawn(move || {
             let ids = downloaded_sfx.lock().clone();

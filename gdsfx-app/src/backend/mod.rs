@@ -1,10 +1,11 @@
 use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
-use eframe::epaint::mutex::Mutex;
+use educe::Educe;
 use favorites::Favorites;
-use gdsfx_audio::AudioSettings;
+use gdsfx_audio::AudioSystem;
 use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
+use parking_lot::{Mutex, RwLock};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
@@ -17,21 +18,25 @@ pub mod settings;
 pub mod search;
 pub mod tools;
 
-#[derive(Default)]
+#[derive(Educe)]
+#[educe(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
     pub library_page: LibraryPage,
     pub selected_sfx: Option<LibraryEntry>,
 
+    pub search_settings: SearchSettings,
+
     pub settings: PersistentSettings,
     pub favorites: Favorites,
 
-    pub search_settings: SearchSettings,
-    pub audio_settings: AudioSettings,
+    #[educe(Default = AudioSystem::new().unwrap())]
+    pub audio_system: Arc<RwLock<AudioSystem>>,
 
     pub unlisted_sfx: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+    #[educe(Default = (0, 14500))]
     pub download_id_range: (EntryId, EntryId),
 
     // TODO https://docs.rs/notify/6.1.1/notify/
@@ -64,8 +69,7 @@ impl AppState {
 
         Self {
             settings,
-            favorites: Favorites::load_or_default(),
-            download_id_range: (0, 14500),
+            favorites: Favorites::load(),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
             unlisted_sfx,
             ..Default::default()
@@ -104,17 +108,17 @@ impl AppState {
         self.downloaded_sfx.lock().contains(&id)
     }
 
-    pub fn play_sfx(&self, id: EntryId) {
-        let cache = self.sfx_cache.clone();
+    pub fn play_sfx(&mut self, id: EntryId) {
         let gd_folder = self.settings.gd_folder.clone();
-        let audio_settings = self.audio_settings;
+        let cache = Arc::clone(&self.sfx_cache);
+        let audio_system = Arc::clone(&self.audio_system);
 
         thread::spawn(move || {
             let bytes = {
                 let mut cache = cache.lock();
                 cache.get(&id).cloned().or_else(|| {
                     let file_entry = FileEntry::new(id);
-                    let bytes = file_entry.try_read_bytes(gd_folder)
+                    let bytes = file_entry.try_read_bytes(&gd_folder)
                         .or_else(|| file_entry.try_download_bytes());
 
                     if let Some(bytes) = bytes.as_ref() {
@@ -126,10 +130,9 @@ impl AppState {
             };
 
             if let Some(bytes) = bytes {
-                gdsfx_audio::stop_all();
-                gdsfx_audio::play_sound(bytes, audio_settings);
+                let _ = AudioSystem::play_audio(audio_system, &bytes);
             }
-        });
+        });        
     }
 
     pub fn download_sfx(&self, id: EntryId) {
@@ -140,16 +143,16 @@ impl AppState {
 
         if file_entry.file_exists(gd_folder) { return }
 
-        let cache = self.sfx_cache.clone();
         let gd_folder = gd_folder.clone();
-        let downloaded_sfx = self.downloaded_sfx.clone();
+        let cache = Arc::clone(&self.sfx_cache);
+        let downloaded_sfx = Arc::clone(&self.downloaded_sfx);
 
         thread::spawn(move || {
             let bytes = cache.lock().get(&id).cloned()
                 .or_else(|| file_entry.try_download_bytes());
 
             let Some(bytes) = bytes else { return };
-            if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
+            if file_entry.try_write_bytes(&gd_folder, bytes).is_ok() {
                 downloaded_sfx.lock().insert(id);
             }
         });

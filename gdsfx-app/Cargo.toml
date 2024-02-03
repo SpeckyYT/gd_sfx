@@ -17,6 +17,7 @@ ahash = { workspace = true }
 anyhow = { workspace = true }
 educe = { workspace = true }
 once_cell = { workspace = true }
+parking_lot = { workspace = true }
 pretty-bytes = { workspace = true }
 rayon = { workspace = true }
 serde = { workspace = true }
