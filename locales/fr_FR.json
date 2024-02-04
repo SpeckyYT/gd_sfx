@@ -23,6 +23,11 @@
     "sound.pitch": "Hauteur",
     "sound.volume": "Volume",
     "sound.reset": "Réinitialiser",
+    "sound.loop": "Boucle",
+    "sound.start": "Début",
+    "sound.end": "Fin",
+    "sound.fade_in": "Fondu d'entrée",
+    "sound.fade_out": "Fondu de sortie",
 
     "search": "Rechercher",
     "search.sort": "Tri",
@@ -38,8 +43,8 @@
     "search.show_downloaded": "Montrer Téléchargés",
 
     "library.collapse_all": "Effondrer tout",
-    "library.unlisted_sfx": "SFX Non listés",
-    "library.unlisted_sfx.hint": "Utilises l'outil \"%{tool}\" pour découvrir des SFX Non listés",
+    "library.unlisted_sfx": "SFX non listés",
+    "library.unlisted_sfx.hint": "Utilise l'outil \"%{tool}\" pour découvrir des SFX non listés",
 
     "tools": "Outils",
     "tools.instruction": "Clique trois fois les boutons pour exécuter",
