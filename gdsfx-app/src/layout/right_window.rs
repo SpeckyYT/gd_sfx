@@ -189,11 +189,25 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
                 &file_entry.get_file_name(),
             );
 
-            #[cfg(windows)]
+            #[cfg(target_os = "windows")]
             {
                 let _ = Command::new("explorer")
                     .args(&[ "/select,", &path ])
                     .spawn();
+            }
+
+            #[cfg(target_os = "macos")]
+            {
+                let _ = Command::new("open")
+                .args(&[ "-R", &path ])
+                .spawn();
+            }
+
+            #[cfg(target_os = "linux")]
+            {
+                let _ = Command::new("xdg-open")
+                .args(&[ &path ])
+                .spawn();
             }
         }
     });
