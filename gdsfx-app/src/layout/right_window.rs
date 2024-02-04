@@ -1,10 +1,12 @@
+use std::path::MAIN_SEPARATOR;
+use std::process::Command;
 use std::time::Duration;
 
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, SfxFileEntry};
-use crate::images;
 
+use crate::images;
 use crate::backend::{AppState, LibraryPage};
 
 // TODO can we make this less of a list of ui elements
@@ -161,19 +163,40 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
 
     ui.add_space(5.0);
 
-    let favorite_button_label = match app_state.favorites.has_favorite(id) {
-        true => images::STAR_SOLID,
-        false => images::STAR_REGULAR,
-    };
-    if image_button!(
-        ui,
-        favorite_button_label,
-        IMAGE_BUTTON_SIZE,
-        true,
-    ).clicked() {
-        app_state.favorites.toggle_favorite(id);
-        ui.close_menu();
-    }
+    ui.horizontal(|ui| {
+        if image_button!(
+            ui,
+            match app_state.favorites.has_favorite(id) {
+                true => images::STAR_SOLID,
+                false => images::STAR_REGULAR,
+            },
+            IMAGE_BUTTON_SIZE,
+            true,
+        ).clicked() {
+            app_state.favorites.toggle_favorite(id);
+            ui.close_menu();
+        }
+
+        if image_button!(
+            ui,
+            images::RIGHT_TO_BRACKET,
+            IMAGE_BUTTON_SIZE,
+            true,
+        ).clicked() {
+            let path = format!(
+                "{}{MAIN_SEPARATOR}{}",
+                &app_state.settings.gd_folder,
+                &file_entry.get_file_name(),
+            );
+
+            #[cfg(windows)]
+            {
+                let _ = Command::new("explorer")
+                    .args(&[ "/select,", &path ])
+                    .spawn();
+            }
+        }
+    });
 }
 
 fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
