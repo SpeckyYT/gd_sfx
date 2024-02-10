@@ -41,6 +41,9 @@
     "library.unlisted_sfx": "Unlisted SFX",
     "library.unlisted_sfx.hint": "Use the \"%{tool}\" tool to discover unlisted SFX",
 
+    "library_page.sfx": "Sound Effects",
+    "library_page.music": "Music",
+    
     "tools": "Tools",
     "tools.instruction": "Triple click the buttons to run",
     "tools.download_all.sfx": "Download all SFX",

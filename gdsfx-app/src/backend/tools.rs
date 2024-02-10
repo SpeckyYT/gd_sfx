@@ -7,14 +7,14 @@ use rayon::prelude::*;
 use super::{AppState, LibraryPage};
 
 pub struct ToolProgress {
-    translation_key: &'static str,
+    translation_key: String,
     start_time: Instant,
     finished: usize,
     total: usize,
 }
 
 impl ToolProgress {
-    fn new(translation_key: &'static str, total: usize) -> Self {
+    fn new(translation_key: String, total: usize) -> Self {
         Self {
             translation_key,
             start_time: Instant::now(),
@@ -24,7 +24,7 @@ impl ToolProgress {
     }
 
     pub fn show_progress(&self, ui: &mut Ui) {
-        ui.label(format!("{} – {}", t!(self.translation_key), self.format_time()));
+        ui.label(format!("{} – {}", t!(&self.translation_key), self.format_time()));
 
         let progress = self.finished as f32 / self.total as f32;
         let text = format!("{}/{} ({:.2}%)", self.finished, self.total, progress * 100.0);
@@ -47,7 +47,7 @@ impl ToolProgress {
 }
 
 impl AppState {
-    pub fn download_multiple_sfx(&self, translation_key: &'static str, files: Vec<impl FileEntry + 'static>) {
+    pub fn download_multiple_sfx(&self, translation_key: String, files: Vec<impl FileEntry + 'static>) {
         if !self.is_gd_folder_valid() { return }
 
         let progress = self.tool_progress.clone();
@@ -78,7 +78,7 @@ impl AppState {
         });
     }
     
-    pub fn delete_all_sfx(&self, translation_key: &'static str) {
+    pub fn delete_all_sfx(&self, translation_key: String) {
         let Ok(read_dir) = fs::read_dir(&self.settings.gd_folder) else { return };
         let read_dir = read_dir.flatten().collect::<Vec<_>>();
         

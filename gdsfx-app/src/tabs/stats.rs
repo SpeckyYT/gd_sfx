@@ -3,7 +3,7 @@ use gdsfx_library::{MusicLibrary, SfxLibrary};
 use pretty_bytes::converter::convert as pretty_bytes;
 use pretty_duration::pretty_duration;
 
-use crate::{layout, backend::{AppState, LibraryPage}};
+use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);
@@ -17,10 +17,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
         };
     }
 
-    ui.heading(t!(match app_state.library_page {
-        LibraryPage::Sfx => "stats.library.sfx",
-        LibraryPage::Music => "stats.library.music",
-    }));
+    ui.heading(t!(&format!("stats.library.{}", app_state.library_page.localization_key())));
 
     ui.add_space(10.0);
 
@@ -41,10 +38,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.add_space(20.0);
 
-    ui.heading(t!(match app_state.library_page {
-        LibraryPage::Sfx => "stats.files.sfx",
-        LibraryPage::Music => "stats.files.music",
-    }));
+    ui.heading(t!(&format!("stats.files.{}", app_state.library_page.localization_key())));
     
     ui.add_space(10.0);
 

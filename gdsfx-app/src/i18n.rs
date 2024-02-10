@@ -3,6 +3,7 @@ use std::borrow::Cow;
 pub trait LocalizedEnum {
     fn localize_enum() -> Cow<'static, str>;
     fn localize_variant(&self) -> Cow<'_, str>;
+    fn localization_key(&self) -> &'static str;
 }
 
 #[macro_export]
@@ -20,14 +21,23 @@ macro_rules! localized_enum {
 
         impl $crate::i18n::LocalizedEnum for $name {
             #[allow(unused)]
+            #[inline(always)]
             fn localize_enum() -> std::borrow::Cow<'static, str> {
                 t!($enum_tkey)
             }
 
+            #[inline(always)]
             fn localize_variant(&self) -> std::borrow::Cow<'_, str> {
                 t!(match self {
                     $($name::$variant => concat!($enum_tkey, ".", $tkey),)*
                 })
+            }
+
+            #[inline(always)]
+            fn localization_key(&self) -> &'static str {
+                match self {
+                    $($name::$variant => $tkey,)*
+                }
             }
         }
     }
