@@ -17,7 +17,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
         };
     }
 
-    ui.heading(t!("stats.library"));
+    ui.heading(t!(match app_state.library_page {
+        LibraryPage::Sfx => "stats.library.sfx",
+        LibraryPage::Music => "stats.library.music",
+    }));
 
     ui.add_space(10.0);
 
@@ -38,7 +41,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.add_space(20.0);
 
-    ui.heading(t!("stats.files"));
+    ui.heading(t!(match app_state.library_page {
+        LibraryPage::Sfx => "stats.files.sfx",
+        LibraryPage::Music => "stats.files.music",
+    }));
     
     ui.add_space(10.0);
 

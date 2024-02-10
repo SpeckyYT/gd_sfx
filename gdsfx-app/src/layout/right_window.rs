@@ -192,7 +192,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             #[cfg(target_os = "windows")]
             {
                 let _ = Command::new("explorer")
-                    .args(&[ "/select,", &path ])
+                    .args([ "/select,", &path ])
                     .spawn();
             }
 

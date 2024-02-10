@@ -14,7 +14,10 @@ const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);
 
-    ui.heading(t!("credits.sfx"));
+    ui.heading(t!(match app_state.library_page {
+        LibraryPage::Sfx => "credits.sfx",
+        LibraryPage::Music => "credits.music",
+    }));
 
     ui.add_space(10.0);
 

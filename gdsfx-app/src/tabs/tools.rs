@@ -19,16 +19,21 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, sfx_library:
     let download_select_range_modal = download_range_select_modal(ctx, app_state);
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
-        if ui.button(t!("tools.download_all_sfx")).triple_clicked() {
+        let download_all_key = match app_state.library_page {
+            LibraryPage::Sfx => "tools.download_all.sfx",
+            LibraryPage::Music => "tools.download_all.music",
+        };
+
+        if ui.button(t!(download_all_key)).triple_clicked() {
             match app_state.library_page {
                 LibraryPage::Sfx =>
                     app_state.download_multiple_sfx(
-                        "tools.download_all_sfx",
+                        download_all_key,
                         sfx_library.sound_ids().iter().map(|&i| SfxFileEntry::new(i)).collect(),
                     ),
                 LibraryPage::Music =>
                     app_state.download_multiple_sfx(
-                        "tools.download_all_sfx",
+                        download_all_key,
                         music_library.songs.keys().map(|&i| MusicFileEntry::new(i)).collect(),
                     ),
             }
@@ -41,8 +46,13 @@ pub fn render(ui: &mut Ui, ctx: &Context, app_state: &mut AppState, sfx_library:
     ui.add_space(10.0);
 
     ui.add_enabled_ui(!is_tool_running, |ui| {
-        if ui.button(t!("tools.delete_all_sfx")).triple_clicked() {
-            app_state.delete_all_sfx("tools.delete_all_sfx");
+        let delete_all_key = match app_state.library_page {
+            LibraryPage::Sfx => "tools.delete_all.sfx",
+            LibraryPage::Music => "tools.delete_all.music",
+        };
+
+        if ui.button(t!(delete_all_key)).triple_clicked() {
+            app_state.delete_all_sfx(delete_all_key);
         }
     });
 }
@@ -96,14 +106,14 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
                         let range = app_state.download_id_range_sfx;
                         app_state.download_multiple_sfx(
                             "tools.download_from_range",
-                            (range.0..=range.1).map(|id| SfxFileEntry::new(id)).collect()
+                            (range.0..=range.1).map(SfxFileEntry::new).collect()
                         );
                     },
                     LibraryPage::Music => {
                         let range = app_state.download_id_range_music;
                         app_state.download_multiple_sfx(
                             "tools.download_from_range",
-                            (range.0..=range.1).map(|id| MusicFileEntry::new(id)).collect()
+                            (range.0..=range.1).map(MusicFileEntry::new).collect()
                         );
                     }
                 }
