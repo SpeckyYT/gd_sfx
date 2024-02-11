@@ -2,8 +2,15 @@ use std::{fs, path::Path};
 
 use gdsfx_files::paths;
 
+
+#[cfg(target_os = "windows")]
+const INCLUDE_DIR: &str = "include/windows";
+#[cfg(target_os = "linux")]
+const INCLUDE_DIR: &str = "include/linux";
+#[cfg(target_os = "macos")]
+const INCLUDE_DIR: &str = "include/macos";
+
 fn main() {
-    const INCLUDE_DIR: &str = "include";
     let target_dir = paths::build::get_dynamic_library_dir().expect("No dynamic library directory found");
 
     for file in gdsfx_files::read_dir(INCLUDE_DIR).unwrap() {
