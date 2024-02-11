@@ -1,5 +1,6 @@
 use eframe::egui::Ui;
 use gdsfx_library::{MusicLibrary, SfxLibrary};
+use itertools::Itertools;
 use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
 
 // this build output file contains the following function:
@@ -20,22 +21,29 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     match app_state.library_page {
         LibraryPage::Sfx => {
-            for credits in sfx_library.credits() {
-                ui.hyperlink_to(&credits.name, &credits.link);
+            let credits: Vec<_> = sfx_library.credits()
+                .iter()
+                .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
+                .collect();
+
+            for credit in credits {
+                ui.hyperlink_to(&credit.name, &credit.link);
             }
         },
         LibraryPage::Music => {
-            for credits in music_library.credits.values() {
+            let credits: Vec<_> = music_library.credits.values()
+                .sorted_unstable_by(|a,b| a.name.cmp(&b.name))
+                .collect();
+
+            for credit in credits {
                 let links = [
-                    credits.url.as_ref(),
-                    credits.yt_url.as_ref(),
+                    credit.url.as_ref(),
+                    credit.yt_url.as_ref(),
                 ];
-
                 let url = links.into_iter().find_map(|url| url);
-
                 match url {
-                    Some(url) => ui.hyperlink_to(&credits.name, url),
-                    None => ui.label(&credits.name),
+                    Some(url) => ui.hyperlink_to(&credit.name, url),
+                    None => ui.label(&credit.name),
                 };
             }
         },
