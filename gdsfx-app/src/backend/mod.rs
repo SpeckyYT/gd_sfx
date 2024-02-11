@@ -4,7 +4,7 @@ use ahash::{HashMap, HashSet};
 use educe::Educe;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{music, EntryId, FileEntry, FileEntryKind, SfxLibrary};
+use gdsfx_library::{music, EntryId, FileEntry, FileEntryKind, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use gdsfx_audio::AudioSystem;
 use parking_lot::{Mutex, RwLock};
@@ -42,6 +42,7 @@ pub struct AppState {
     pub audio_system: Arc<RwLock<AudioSystem>>,
 
     pub unlisted_sfx: Vec<EntryId>,
+    pub unlisted_music: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
 
@@ -60,7 +61,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn load(settings: PersistentSettings, sfx_library: &SfxLibrary) -> Self {
+    pub fn load(settings: PersistentSettings, sfx_library: &SfxLibrary, music_library: &MusicLibrary) -> Self {
         let (downloaded_sfx, downloaded_music): (HashSet<EntryId>, HashSet<EntryId>) =
             fs::read_dir(&settings.gd_folder).map(|read_dir| {
                 read_dir
@@ -87,8 +88,10 @@ impl AppState {
         // - favorites tab
         // - tools (un)registering sfx ids → thread safety
         // - storing unlisted sfx? or only show downloaded ones
-        let library_sfx = &sfx_library.sound_ids().iter().copied().collect();
-        let unlisted_sfx = downloaded_sfx.difference(library_sfx).copied().collect();
+        let library_sfx = sfx_library.sound_ids().iter().copied().collect();
+        let library_music = music_library.songs.keys().copied().collect();
+        let unlisted_sfx = downloaded_sfx.difference(&library_sfx).copied().collect();
+        let unlisted_music = downloaded_music.difference(&library_music).copied().collect();
 
         Self {
             settings,
@@ -96,6 +99,7 @@ impl AppState {
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
             downloaded_music: Arc::new(Mutex::new(downloaded_music)),
             unlisted_sfx,
+            unlisted_music,
             ..Default::default()
         }
     }

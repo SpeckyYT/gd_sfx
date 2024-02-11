@@ -92,7 +92,7 @@ impl GdSfx {
 
             let sfx_library = sfx_library_handle.join().unwrap();
             let music_library = music_library_handle.join().unwrap();
-            let app_state = AppState::load(settings, &sfx_library);
+            let app_state = AppState::load(settings, &sfx_library, &music_library);
 
             Box::new(Self { app_state, sfx_library, music_library })
         })

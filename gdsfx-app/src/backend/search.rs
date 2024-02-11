@@ -44,10 +44,20 @@ impl SortingMode {
     }
 }
 
+localized_enum!{
+    #[derive(EnumIter, Default, Debug, PartialEq, Eq, Clone, Copy)]
+    pub enum ListedMode = "listed_mode" {
+        #[default]
+        Listed = "listed",
+        Unlisted = "unlisted",
+    }
+}
+
 #[derive(Default, Debug)]
 pub struct MusicFilters {
     pub artists: HashSet<EntryId>,
     pub tags: HashSet<TagId>,
+    pub listed_mode: ListedMode,
 }
 
 pub trait EntrySorting {

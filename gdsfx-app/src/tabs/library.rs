@@ -1,12 +1,15 @@
 use std::time::Duration;
 
 use eframe::egui::{CollapsingHeader, ComboBox, Ui};
+use gdsfx_library::music::Song;
 use gdsfx_library::{EntryId, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
 use itertools::Itertools;
+use strum::IntoEnumIterator;
 
-use crate::backend::search::MusicFilters;
+use crate::backend::search::{ListedMode, MusicFilters};
 use crate::backend::LibraryPage;
+use crate::i18n::LocalizedEnum;
 use crate::{layout, backend::{AppState, settings::SearchFilterMode}};
 
 const UNLISTED_ID: EntryId = EntryId::MAX;
@@ -83,18 +86,57 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
 
-    let mut songs = library.songs.values().collect::<Vec<_>>();
-    songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+    match app_state.music_filters.listed_mode {
+        ListedMode::Listed => {
+            let mut songs: Vec<_> = library.songs.values().collect();
+            songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
-    for song in &songs {
-        let MusicFilters { tags, artists } = &app_state.music_filters;
-        if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
-            layout::add_music_button(ui, app_state, song);
+            for song in &songs {
+                let MusicFilters { tags, artists, .. } = &app_state.music_filters;
+                if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
+                    layout::add_music_button(ui, app_state, song);
+                }
+            }
+        },
+        ListedMode::Unlisted => {
+            let mut songs: Vec<_> = app_state.unlisted_music.iter()
+                .map(|&id| Song {
+                    id,
+                    name: id.to_string(),
+                    bytes: 0,
+                    credit_id: UNLISTED_ID,
+                    duration: Duration::ZERO,
+                    tags: Vec::new(),
+                })
+                .collect();
+            songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+
+            for song in songs {
+                layout::add_music_button(ui, app_state, &song);
+            }
         }
     }
 }
 
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
+    ui.horizontal(|ui| {
+        for listed_mode in ListedMode::iter() {
+            ui.radio_value(
+                &mut app_state.music_filters.listed_mode,
+                listed_mode,
+                listed_mode.localize_variant()
+            );
+        }
+    });
+
+    if let ListedMode::Listed = app_state.music_filters.listed_mode {
+        music_listed_filters(ui, app_state, library);
+    }
+
+    ui.separator();
+}
+
+fn music_listed_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     let available_songs = library.songs.values()
         .filter(|song| app_state.music_filters.tags.is_empty() || app_state.music_filters.tags.iter().all(|tag| song.tags.contains(tag)))
         .filter(|song| !app_state.search_settings.show_downloaded || app_state.is_music_downloaded(song.id))
@@ -155,6 +197,4 @@ fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) 
             app_state.music_filters.artists.clear();
         }
     });
-
-    ui.separator();
 }
