@@ -40,6 +40,7 @@
     "library.collapse_all": "Collapse all",
     "library.unlisted_sfx": "Unlisted SFX",
     "library.unlisted_sfx.hint": "Use the \"%{tool}\" tool to discover unlisted SFX",
+    "library.unlisted_music.hint": "Use the \"%{tool}\" tool to discover unlisted songs",
 
     "library_page.sfx": "Sound Effects",
     "library_page.music": "Music",

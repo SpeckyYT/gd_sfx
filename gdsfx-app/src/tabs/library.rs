@@ -121,10 +121,18 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     ui.horizontal(|ui| {
         for listed_mode in ListedMode::iter() {
-            ui.radio_value(
-                &mut app_state.music_filters.listed_mode,
-                listed_mode,
-                listed_mode.localize_variant()
+            ui.add_enabled_ui(
+                listed_mode == ListedMode::Listed || !app_state.unlisted_music.is_empty(), // this is bad, but works ig
+                |ui| {
+                    ui.radio_value(
+                        &mut app_state.music_filters.listed_mode,
+                        listed_mode,
+                        listed_mode.localize_variant()
+                    )
+                    .on_disabled_hover_text( // this is also bad, but also works ig
+                        t!("library.unlisted_music.hint", tool = t!("tools.download_from_range"))
+                    );
+                }
             );
         }
     });

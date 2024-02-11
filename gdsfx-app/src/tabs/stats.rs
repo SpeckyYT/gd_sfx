@@ -44,7 +44,5 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.label(t!("stats.files.downloaded", files = matcher!(app_state.get_sfx_count(), app_state.get_songs_count())));
 
-    if let LibraryPage::Sfx = app_state.library_page {
-        ui.label(t!("stats.sounds.unlisted", sounds = app_state.unlisted_sfx.len()));
-    }
+    ui.label(t!("stats.sounds.unlisted", sounds = matcher!(app_state.unlisted_sfx.len(), app_state.unlisted_music.len())));
 }
