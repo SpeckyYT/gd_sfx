@@ -1,4 +1,4 @@
-use eframe::egui::Ui;
+use eframe::{egui::{RichText, Ui}, epaint::Color32};
 use gdsfx_library::{MusicLibrary, SfxLibrary};
 use itertools::Itertools;
 use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
@@ -56,6 +56,9 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
     ui.add_space(10.0);
 
     ui.heading(t!("credits.this_project"));
+
+    ui.add_space(5.0);
+
     ui.hyperlink_to("GitHub", "https://github.com/SpeckyYT/gd_sfx");
 
     ui.add_space(10.0);
@@ -76,7 +79,10 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
         for &translator in translators {
             add_optional_link(ui, translator);
         }
+        ui.add_space(10.0);
     }
+
+    ui.label(RichText::new(t!("credits.this_project.disaffiliation")).color(Color32::KHAKI));
 }
 
 fn add_optional_link(ui: &mut Ui, name: &str) {

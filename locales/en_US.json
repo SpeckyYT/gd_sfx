@@ -94,5 +94,6 @@
     "credits.music": "Music Credits",
     "credits.this_project": "This project",
     "credits.this_project.developers": "Developers",
-    "credits.this_project.translations": "Translations for %{lang}"
+    "credits.this_project.translations": "Translations for %{lang}",
+    "credits.this_project.disaffiliation": "This project is independent and unaffiliated with Geometry Dash or RobTop Games."
 }
