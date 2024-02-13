@@ -36,8 +36,8 @@ gdsfx-files = { workspace = true }
 
 ahash = { workspace = true }
 anyhow = { workspace = true }
+quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
 image = { version = "0.24.8", default_features = false, features = ["png"] }
-quote = "1.0.35"
