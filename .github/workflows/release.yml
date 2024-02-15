@@ -1,19 +1,11 @@
 on:
-  # debug build
-  push:
-    branches: "**"
-  pull_request: 
-    types:
-      - opened
-      - edited
-
   # release build
   release:
     types: [created]
 
 jobs:
   build:
-    name: ${{ github.event_name == 'release' && 'release' || 'build' }} ${{ matrix.target }}
+    name: release ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
