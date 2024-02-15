@@ -40,14 +40,23 @@
     "library.collapse_all": "Collapse all",
     "library.unlisted_sfx": "Unlisted SFX",
     "library.unlisted_sfx.hint": "Use the \"%{tool}\" tool to discover unlisted SFX",
+    "library.unlisted_music.hint": "Use the \"%{tool}\" tool to discover unlisted songs",
 
+    "library_page.sfx": "Sound Effects",
+    "library_page.music": "Music",
+    
+    "listed_mode.listed": "Listed",
+    "listed_mode.unlisted": "Unlisted",
+    
     "tools": "Tools",
     "tools.instruction": "Triple click the buttons to run",
-    "tools.download_all_sfx": "Download all SFX",
+    "tools.download_all.sfx": "Download all SFX",
+    "tools.download_all.music": "Download all songs",
     "tools.download_from_range": "Download from ID range",
     "tools.download_from_range.from_id": "from ID",
     "tools.download_from_range.to_id": "to ID",
-    "tools.delete_all_sfx": "Delete all SFX",
+    "tools.delete_all.sfx": "Delete all SFX",
+    "tools.delete_all.music": "Delete all songs",
     "tools.progress": "Progress",
     "tools.confirm": "Confirm",
     "tools.cancel": "Cancel",
@@ -70,17 +79,21 @@
     "settings.reset": "Reset settings",
     "settings.reset.instruction": "Triple click to confirm",
 
-    "stats.library": "SFX Library",
+    "stats.library.sfx": "SFX Library",
+    "stats.library.music": "Music Library",
     "stats.library.duration": "Total duration: %{duration}",
     "stats.library.files": "Total files: %{files}",
     "stats.library.size": "Total size: %{size}",
     "stats.library.version": "Library version: %{version}",
-    "stats.files": "SFX Files",
-    "stats.files.downloaded": "Downloaded SFX files: %{files}",
-    "stats.sounds.unlisted": "Unlisted SFX: %{sounds}",
+    "stats.files.sfx": "SFX Files",
+    "stats.files.music": "Music Files",
+    "stats.files.downloaded": "Downloaded files: %{files}",
+    "stats.sounds.unlisted": "Unlisted files: %{sounds}",
 
     "credits.sfx": "SFX Credits",
+    "credits.music": "Music Credits",
     "credits.this_project": "This project",
     "credits.this_project.developers": "Developers",
-    "credits.this_project.translations": "Translations for %{lang}"
+    "credits.this_project.translations": "Translations for %{lang}",
+    "credits.this_project.disaffiliation": "This project is independent and unaffiliated with Geometry Dash or RobTop Games."
 }

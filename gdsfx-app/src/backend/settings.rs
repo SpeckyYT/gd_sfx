@@ -20,7 +20,7 @@ pub struct PersistentSettings {
 
     pub search_filter_mode: SearchFilterMode,
 
-    pub sfx_select_mode: SfxSelectMode,
+    pub sfx_select_mode: SelectMode,
 
     #[educe(Default = true)]
     pub play_sfx_on_click: bool,
@@ -44,7 +44,7 @@ localized_enum! {
 
 localized_enum! {
     #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
-    pub enum SfxSelectMode = "settings.sfx_select_mode" {
+    pub enum SelectMode = "settings.sfx_select_mode" {
         #[default]
         Hover = "hover",
         Click = "click",

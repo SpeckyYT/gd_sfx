@@ -3,15 +3,20 @@ use ahash::{HashMap, HashSet};
 
 use educe::Educe;
 use favorites::Favorites;
+use gdsfx_audio::AudioSettings;
+use gdsfx_library::{music, EntryId, FileEntry, FileEntryKind, MusicLibrary, SfxLibrary};
+use gdsfx_library::sfx::{EntryKind, SfxLibraryEntry};
 use gdsfx_audio::AudioSystem;
-use gdsfx_library::{Library, LibraryEntry, EntryId, EntryKind, FileEntry};
 use parking_lot::{Mutex, RwLock};
 use search::SearchSettings;
 use settings::PersistentSettings;
 use tools::ToolProgress;
 use strum::EnumIter;
+use itertools::{Either, Itertools};
 
 use crate::{tabs::Tab, localized_enum};
+
+use self::search::MusicFilters;
 
 pub mod favorites;
 pub mod settings;
@@ -22,39 +27,58 @@ pub mod tools;
 #[educe(Default)]
 pub struct AppState {
     pub selected_tab: Tab,
-    pub library_page: LibraryPage,
-    pub selected_sfx: Option<LibraryEntry>,
-
-    pub search_settings: SearchSettings,
+    pub library_page: LibraryPage, // todo: actually give this a better name
+    pub selected_sfx: Option<SfxLibraryEntry>,
+    pub selected_music: Option<music::Song>,
 
     pub settings: PersistentSettings,
     pub favorites: Favorites,
+    
+    pub search_settings: SearchSettings,
+    pub music_filters: MusicFilters,
+    pub audio_settings: AudioSettings,
 
     #[educe(Default = AudioSystem::new().unwrap())]
     pub audio_system: Arc<RwLock<AudioSystem>>,
 
     pub unlisted_sfx: Vec<EntryId>,
+    pub unlisted_music: Vec<EntryId>,
 
     pub tool_progress: Arc<Mutex<Option<ToolProgress>>>,
+
     #[educe(Default = (0, 14500))]
-    pub download_id_range: (EntryId, EntryId),
+    pub download_id_range_sfx: (EntryId, EntryId),
+    #[educe(Default = (10000000, 10010000))]
+    pub download_id_range_music: (EntryId, EntryId),
 
     // TODO https://docs.rs/notify/6.1.1/notify/
     // to keep track of externally added and removed SFX?
     downloaded_sfx: Arc<Mutex<HashSet<EntryId>>>,
     sfx_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
+
+    downloaded_music: Arc<Mutex<HashSet<EntryId>>>,
+    music_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
 }
 
 impl AppState {
-    pub fn load(settings: PersistentSettings, library: &Library) -> Self {
-        let downloaded_sfx: HashSet<EntryId> = fs::read_dir(&settings.gd_folder)
-            .map(|read_dir| {
+    pub fn load(settings: PersistentSettings, sfx_library: &SfxLibrary, music_library: &MusicLibrary) -> Self {
+        let (downloaded_sfx, downloaded_music): (HashSet<EntryId>, HashSet<EntryId>) =
+            fs::read_dir(&settings.gd_folder).map(|read_dir| {
                 read_dir
                     .flatten()
                     .flat_map(|file| file.file_name().into_string())
-                    .filter(|file_name| file_name.starts_with('s') && file_name.ends_with(".ogg"))
-                    .flat_map(|file_name| file_name[1..file_name.len()-4].parse())
-                    .collect()
+                    .filter(|file_name| file_name.ends_with(".ogg"))
+                    .filter_map(|file_name| {
+                        let is_sfx = file_name.starts_with('s');
+                        let numbers: Option<EntryId> = file_name[is_sfx as usize..file_name.len() - 4].parse().ok();
+                        numbers.map(|i| (is_sfx, i))
+                    })
+                    .partition_map(|(is_sfx, entry_id)|
+                        match is_sfx {
+                            true => Either::Left(entry_id),
+                            false => Either::Right(entry_id),
+                        }
+                    )
             })
             .unwrap_or_default();
 
@@ -64,24 +88,28 @@ impl AppState {
         // - favorites tab
         // - tools (un)registering sfx ids → thread safety
         // - storing unlisted sfx? or only show downloaded ones
-        let library_sfx = &library.sound_ids().iter().copied().collect();
-        let unlisted_sfx = downloaded_sfx.difference(library_sfx).copied().collect();
+        let library_sfx = sfx_library.sound_ids().iter().copied().collect();
+        let library_music = music_library.songs.keys().copied().collect();
+        let unlisted_sfx = downloaded_sfx.difference(&library_sfx).copied().collect();
+        let unlisted_music = downloaded_music.difference(&library_music).copied().collect();
 
         Self {
             settings,
             favorites: Favorites::load(),
             downloaded_sfx: Arc::new(Mutex::new(downloaded_sfx)),
+            downloaded_music: Arc::new(Mutex::new(downloaded_music)),
             unlisted_sfx,
+            unlisted_music,
             ..Default::default()
         }
     }
 
-    pub fn is_matching_entry(&self, entry: &LibraryEntry, library: &Library) -> bool {
+    pub fn is_matching_entry(&self, entry: &SfxLibraryEntry, sfx_library: &SfxLibrary) -> bool {
         match &entry.kind {
             EntryKind::Category => {
-                library
+                sfx_library
                     .iter_children(entry)
-                    .any(|child| self.is_matching_entry(child, library))
+                    .any(|child| self.is_matching_entry(child, sfx_library))
             }
 
             EntryKind::Sound { .. } => {
@@ -93,6 +121,15 @@ impl AppState {
                 entry.name.to_lowercase().contains(&search) || entry.id.to_string() == search
             }
         }
+    }
+
+    pub fn is_matching_song(&self, song: &music::Song) -> bool {
+        if self.search_settings.show_downloaded && !self.is_music_downloaded(song.id) {
+            return false
+        }
+
+        let search = self.search_settings.search_query.to_lowercase();
+        song.name.to_lowercase().contains(&search) || song.id.to_string() == search
     }
 
     pub fn is_gd_folder_valid(&self) -> bool {
@@ -108,21 +145,28 @@ impl AppState {
         self.downloaded_sfx.lock().contains(&id)
     }
 
-    pub fn play_sfx(&mut self, id: EntryId) {
+    pub fn is_music_downloaded(&self, id: EntryId) -> bool {
+        self.downloaded_music.lock().contains(&id)
+    }
+
+    pub fn play_sound(&self, file_entry: impl FileEntry + 'static) {
+        let cache = match file_entry.kind() {
+            FileEntryKind::Sound => self.sfx_cache.clone(),
+            FileEntryKind::Song => self.music_cache.clone(),
+        };
+        
         let gd_folder = self.settings.gd_folder.clone();
-        let cache = Arc::clone(&self.sfx_cache);
         let audio_system = Arc::clone(&self.audio_system);
 
         thread::spawn(move || {
             let bytes = {
                 let mut cache = cache.lock();
-                cache.get(&id).cloned().or_else(|| {
-                    let file_entry = FileEntry::new(id);
-                    let bytes = file_entry.try_read_bytes(&gd_folder)
+                cache.get(&file_entry.id()).cloned().or_else(|| {
+                    let bytes = file_entry.try_read_bytes(gd_folder)
                         .or_else(|| file_entry.try_download_bytes());
 
                     if let Some(bytes) = bytes.as_ref() {
-                        cache.insert(id, bytes.clone());
+                        cache.insert(file_entry.id(), bytes.clone());
                     }
 
                     bytes
@@ -135,37 +179,51 @@ impl AppState {
         });        
     }
 
-    pub fn download_sfx(&self, id: EntryId) {
+    pub fn download_sound(&self, file_entry: impl FileEntry + 'static) {
         if !self.is_gd_folder_valid() { return }
 
-        let file_entry = FileEntry::new(id);
         let gd_folder = &self.settings.gd_folder;
 
         if file_entry.file_exists(gd_folder) { return }
 
+        let cache = match file_entry.kind() {
+            FileEntryKind::Sound => self.sfx_cache.clone(),
+            FileEntryKind::Song => self.music_cache.clone(),
+        };
+        let downloaded = match file_entry.kind() {
+            FileEntryKind::Sound => self.downloaded_sfx.clone(),
+            FileEntryKind::Song => self.downloaded_music.clone(),
+        };
+
         let gd_folder = gd_folder.clone();
-        let cache = Arc::clone(&self.sfx_cache);
-        let downloaded_sfx = Arc::clone(&self.downloaded_sfx);
+        let gd_folder = gd_folder.clone();
 
         thread::spawn(move || {
-            let bytes = cache.lock().get(&id).cloned()
+            let bytes = cache.lock().get(&file_entry.id()).cloned()
                 .or_else(|| file_entry.try_download_bytes());
 
             let Some(bytes) = bytes else { return };
-            if file_entry.try_write_bytes(&gd_folder, bytes).is_ok() {
-                downloaded_sfx.lock().insert(id);
+            if file_entry.try_write_bytes(gd_folder, bytes).is_ok() {
+                downloaded.lock().insert(file_entry.id());
             }
         });
     }
 
-    pub fn delete_sfx(&self, id: EntryId) {
-        if FileEntry::new(id).try_delete_file(&self.settings.gd_folder).is_ok() {
-            self.downloaded_sfx.lock().remove(&id);
+    pub fn delete_sound(&self, file_entry: impl FileEntry) {
+        if file_entry.try_delete_file(&self.settings.gd_folder).is_ok() {
+            match file_entry.kind() {
+                FileEntryKind::Sound => self.downloaded_sfx.lock(),
+                FileEntryKind::Song => self.downloaded_music.lock(),
+            }.remove(&file_entry.id());
         }
     }
 
     pub fn get_sfx_count(&self) -> usize {
         self.downloaded_sfx.lock().len()
+    }
+
+    pub fn get_songs_count(&self) -> usize {
+        self.downloaded_music.lock().len()
     }
 }
 
@@ -174,6 +232,6 @@ localized_enum! {
     pub enum LibraryPage = "library_page" {
         #[default]
         Sfx = "sfx",
-        Songs = "songs",
+        Music = "music",
     }
 }

@@ -1,10 +1,18 @@
 use std::str::FromStr;
 use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
-
+use crate::sfx;
+use crate::music;
+use crate::sfx::SfxLibraryEntry;
 use crate::*;
 
-pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Result<Library> {
+fn parse_semicolon_separated<T: FromStr>(string: &str) -> Vec<T> {
+    string.split(';')
+        .flat_map(T::from_str)
+        .collect()
+}
+
+pub(crate) fn parse_sfx_library_from_bytes(bytes: Vec<u8>) -> Result<SfxLibrary> {
     let bytes = gdsfx_files::encoding::decode(&bytes);
     let string = std::str::from_utf8(&bytes)?;
 
@@ -12,24 +20,36 @@ pub(crate) fn parse_library_from_bytes(bytes: Vec<u8>) -> Result<Library> {
         .split_once('|')
         .unwrap_or((string, ""));
 
-    fn parse_semicolon_separated<T: FromStr>(string: &str) -> Vec<T> {
-        string.split(';')
-            .flat_map(T::from_str)
-            .collect()
-    }
-
     let entries = parse_semicolon_separated(library_string);
     let credits = parse_semicolon_separated(credits_string);
 
-    build_library(entries, credits)
+    build_sfx_library(entries, credits)
 }
 
-impl EntryKind {
+pub(crate) fn parse_music_library_from_bytes(bytes: Vec<u8>) -> Result<MusicLibrary> {
+    let bytes = gdsfx_files::encoding::decode(&bytes);
+    let string = bytes.iter().map(|&byte| char::from(byte)).collect::<String>();
+
+    let [version, credits, songs, tags]: [&str; 4] = string
+        .split('|')
+        .collect::<Vec<&str>>()
+        .try_into()
+        .map_err(|vec| anyhow!("Invalid library entry data: {vec:?}"))?;
+
+    Ok(MusicLibrary {
+        version: version.parse()?,
+        credits: parse_semicolon_separated(credits).into_iter().map(|x: music::Credit| (x.id, x)).collect(),
+        songs: parse_semicolon_separated(songs).into_iter().map(|x: music::Song| (x.id, x)).collect(),
+        tags: parse_semicolon_separated(tags).into_iter().map(|x: music::Tag| (x.id, x)).collect(),
+    })
+}
+
+impl sfx::EntryKind {
     const SOUND_KEY: &'static str = "0";
     const CATEGORY_KEY: &'static str = "1";
 }
 
-impl FromStr for LibraryEntry {
+impl FromStr for SfxLibraryEntry {
     type Err = anyhow::Error;
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {        
@@ -45,11 +65,11 @@ impl FromStr for LibraryEntry {
             parent_id: parent_id.parse()?,
 
             kind: match kind {
-                EntryKind::SOUND_KEY => EntryKind::Sound {
+                sfx::EntryKind::SOUND_KEY => sfx::EntryKind::Sound {
                     bytes: parts[4].parse()?,
                     duration: Duration::from_millis(10 * parts[5].parse::<u64>()?),
                 },
-                EntryKind::CATEGORY_KEY => EntryKind::Category,
+                sfx::EntryKind::CATEGORY_KEY => sfx::EntryKind::Category,
 
                 _ => anyhow::bail!("Unknown library entry type")
             }
@@ -59,15 +79,15 @@ impl FromStr for LibraryEntry {
     }
 }
 
-impl ToString for LibraryEntry {
+impl ToString for SfxLibraryEntry {
     fn to_string(&self) -> String {
         let kind = match self.kind {
-            EntryKind::Sound { .. } => EntryKind::SOUND_KEY,
-            EntryKind::Category => EntryKind::CATEGORY_KEY,
+            sfx::EntryKind::Sound { .. } => sfx::EntryKind::SOUND_KEY,
+            sfx::EntryKind::Category => sfx::EntryKind::CATEGORY_KEY,
         };
 
         let (bytes, duration) = match self.kind {
-            EntryKind::Sound { bytes, duration } => (bytes, duration),
+            sfx::EntryKind::Sound { bytes, duration } => (bytes, duration),
             _ => (0, Duration::ZERO),
         };
 
@@ -84,7 +104,7 @@ impl ToString for LibraryEntry {
     }
 }
 
-impl FromStr for Credit {
+impl FromStr for sfx::Credit {
     type Err = anyhow::Error;
 
     fn from_str(string: &str) -> Result<Self, Self::Err> {
@@ -98,7 +118,73 @@ impl FromStr for Credit {
     }
 }
 
-fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Library> {
+impl FromStr for music::Credit {
+    type Err = anyhow::Error;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        string
+            .split(',')
+            .collect::<Vec<&str>>()
+            .try_into()
+            .map(|[id, name, url, yt_channel_id]: [&str; 4]| Self {
+                id: id.trim().parse().unwrap_or(0),
+                name: name.trim().to_string(),
+                url: {
+                    let url = url.trim();
+                    if url.is_empty() {
+                        None
+                    } else {
+                        urlencoding::decode(url)
+                            .map(|url| url.to_string())
+                            .ok()
+                    }
+                },
+                yt_url: {
+                    let yt_channel_id = yt_channel_id.trim();
+                    (!yt_channel_id.is_empty()).then_some(format!("https://youtube.com/channel/{yt_channel_id}"))
+                },
+            })
+            .ok()
+            .ok_or(anyhow!("Credits must have format \"id,name,url,yt_channel_id\", found {string}"))
+    }
+}
+
+impl FromStr for music::Song {
+    type Err = anyhow::Error;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        string
+            .split(',')
+            .collect::<Vec<&str>>()
+            .try_into()
+            .map(|[id, name, credit_id, bytes, duration, tags ]: [&str; 6]| Self {
+                id: id.parse().unwrap_or(0),
+                name: name.to_string(),
+                credit_id: credit_id.parse().unwrap_or(0),
+                bytes: bytes.parse().unwrap_or(0),
+                duration: Duration::from_secs(duration.parse().unwrap_or(0)),
+                tags: tags.split('.').filter_map(|s| s.parse().ok()).collect(),
+            })
+            .ok()
+            .ok_or(anyhow!("Credits must have format \"id,name,url,yt_channel_id\", found {string}"))
+    }
+}
+
+impl FromStr for music::Tag {
+    type Err = anyhow::Error;
+
+    fn from_str(string: &str) -> Result<Self, Self::Err> {
+        string
+            .split_once(',')
+            .map(|(id, name)| Self {
+                id: id.parse().unwrap_or(0),
+                name: name.to_string(),
+            })
+            .ok_or(anyhow!("Tags must have format \"id,name\", found {string}"))
+    }
+}
+
+fn build_sfx_library(entries: Vec<SfxLibraryEntry>, credits: Vec<sfx::Credit>) -> Result<SfxLibrary> {
     // TODO: can the root id be (reasonably) evaluated programatically?
     let root_id = entries.first().context("No library entries")?.id;
     let mut sound_ids = Vec::new();
@@ -110,7 +196,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Lib
     let mut total_duration = Duration::ZERO;
 
     for entry in entries {
-        if let EntryKind::Sound { bytes, duration } = &entry.kind {
+        if let sfx::EntryKind::Sound { bytes, duration } = &entry.kind {
             total_bytes += *bytes;
             total_duration += *duration;
 
@@ -124,7 +210,7 @@ fn build_library(entries: Vec<LibraryEntry>, credits: Vec<Credit>) -> Result<Lib
         entry_map.insert(entry.id, entry);
     }
 
-    Ok(Library {
+    Ok(SfxLibrary {
         root_id,
         sound_ids,
 
@@ -146,12 +232,12 @@ mod test {
     fn test_parse_library_entry() {
         const FIRE_IN_THE_HOLE: &str = "4451,Fire In The Hole,0,4442,29496,187";
 
-        let entry = LibraryEntry::from_str(FIRE_IN_THE_HOLE).unwrap();
-        assert_eq!(entry, LibraryEntry {
+        let entry = SfxLibraryEntry::from_str(FIRE_IN_THE_HOLE).unwrap();
+        assert_eq!(entry, SfxLibraryEntry {
             id: 4451,
             name: "Fire In The Hole".to_string(),
             parent_id: 4442,
-            kind: EntryKind::Sound {
+            kind: sfx::EntryKind::Sound {
                 bytes: 29496,
                 duration: Duration::from_millis(187 * 10),
             }
@@ -165,8 +251,8 @@ mod test {
     fn test_parse_credit() {
         const SHARKS_CREDIT: &str = "Sharks,https://www.sharkstunes.com";
 
-        let credit = Credit::from_str(SHARKS_CREDIT).unwrap();
-        assert_eq!(credit, Credit {
+        let credit = sfx::Credit::from_str(SHARKS_CREDIT).unwrap();
+        assert_eq!(credit, sfx::Credit {
             name: "Sharks".to_string(),
             link: "https://www.sharkstunes.com".to_string(),
         });

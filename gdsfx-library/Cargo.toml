@@ -11,6 +11,7 @@ gdsfx-files = { workspace = true }
 ahash = { workspace = true }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
+reqwest = { workspace = true }
+urlencoding = { workspace = true }
 
-reqwest = { version = "0.11.23", features = ["blocking"] }
 url = "2.5.0"

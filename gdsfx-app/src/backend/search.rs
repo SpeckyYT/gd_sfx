@@ -1,6 +1,7 @@
 use std::{cmp::Ordering, time::Duration};
 
-use gdsfx_library::{LibraryEntry, EntryKind};
+use ahash::HashSet;
+use gdsfx_library::{music::{Song, TagId}, sfx::{EntryKind, SfxLibraryEntry}, BytesSize, EntryId};
 use strum::EnumIter;
 
 use crate::localized_enum;
@@ -8,15 +9,14 @@ use crate::localized_enum;
 #[derive(Default, Debug)]
 pub struct SearchSettings {
     pub search_query: String,
-    pub sorting_mode: Sorting,
+    pub sorting_mode: SortingMode,
     pub show_downloaded: bool,
 }
 
 localized_enum! {
     #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, EnumIter)]
-    pub enum Sorting = "search.sort" {
+    pub enum SortingMode = "search.sort" {
         #[default]
-        Default = "default",
         NameInc = "name.ascending",      // a - z
         NameDec = "name.descending",     // z - a
         LengthInc = "length.ascending",  // 0.00 - 1.00
@@ -28,37 +28,57 @@ localized_enum! {
     }
 }
 
-impl Sorting {
-    pub fn compare_entries(&self, a: &LibraryEntry, b: &LibraryEntry) -> Ordering {
-        fn is_category(entry: &LibraryEntry) -> bool {
-            matches!(entry.kind, EntryKind::Category)
-        }
-    
-        fn get_duration(entry: &LibraryEntry) -> Duration {
-            match entry.kind {
-                EntryKind::Sound { duration, .. } => duration,
-                _ => Duration::ZERO,
-            }
-        }
-    
-        fn get_bytes(entry: &LibraryEntry) -> i64 {
-            match entry.kind {
-                EntryKind::Sound { bytes, .. } => bytes,
-                _ => 0,
-            }
-        }
-        
-        is_category(b).cmp(&is_category(a)) // categories on top
+impl SortingMode {
+    pub fn compare_entries(&self, a: &impl EntrySorting, b: &impl EntrySorting) -> Ordering {
+        b.is_category().cmp(&a.is_category()) // categories on top
             .then(match self {
-                Sorting::Default => Ordering::Equal,
-                Sorting::NameInc => a.name.cmp(&b.name),
-                Sorting::NameDec => b.name.cmp(&a.name),
-                Sorting::LengthInc => get_duration(a).cmp(&get_duration(b)),
-                Sorting::LengthDec => get_duration(b).cmp(&get_duration(a)),
-                Sorting::IdInc => a.id.cmp(&b.id),
-                Sorting::IdDec => b.id.cmp(&a.id),
-                Sorting::SizeInc => get_bytes(a).cmp(&get_bytes(b)),
-                Sorting::SizeDec => get_bytes(b).cmp(&get_bytes(a)),
+                Self::NameInc => a.get_name().cmp(b.get_name()),
+                Self::NameDec => b.get_name().cmp(a.get_name()),
+                Self::LengthInc => a.get_duration().cmp(&b.get_duration()),
+                Self::LengthDec => b.get_duration().cmp(&a.get_duration()),
+                Self::IdInc => a.get_id().cmp(&b.get_id()),
+                Self::IdDec => b.get_id().cmp(&a.get_id()),
+                Self::SizeInc => a.get_bytes().cmp(&b.get_bytes()),
+                Self::SizeDec => b.get_bytes().cmp(&a.get_bytes()),
             })
     }
+}
+
+localized_enum!{
+    #[derive(EnumIter, Default, Debug, PartialEq, Eq, Clone, Copy)]
+    pub enum ListedMode = "listed_mode" {
+        #[default]
+        Listed = "listed",
+        Unlisted = "unlisted",
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct MusicFilters {
+    pub artists: HashSet<EntryId>,
+    pub tags: HashSet<TagId>,
+    pub listed_mode: ListedMode,
+}
+
+pub trait EntrySorting {
+    fn get_name(&self) -> &str;
+    fn get_id(&self) -> EntryId;
+    fn get_duration(&self) -> Duration;
+    fn get_bytes(&self) -> BytesSize;
+    fn is_category(&self) -> bool { false }
+}
+
+impl EntrySorting for Song {
+    fn get_name(&self) -> &str { &self.name }
+    fn get_id(&self) -> EntryId { self.id }
+    fn get_duration(&self) -> Duration { self.duration }
+    fn get_bytes(&self) -> BytesSize { self.bytes }
+}
+
+impl EntrySorting for SfxLibraryEntry {
+    fn get_name(&self) -> &str { &self.name }
+    fn get_id(&self) -> EntryId { self.id }
+    fn get_duration(&self) -> Duration { self.duration().unwrap_or_default() }
+    fn get_bytes(&self) -> BytesSize { self.bytes().unwrap_or_default() }
+    fn is_category(&self) -> bool { matches!(self.kind, EntryKind::Category) }
 }

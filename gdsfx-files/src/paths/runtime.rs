@@ -16,7 +16,7 @@ pub static GD_FOLDER: Lazy<Option<PathBuf>> = Lazy::new(|| {
     }
 
     if cfg!(target_os = "macos") {
-        return Some(PathBuf::from(&env::var_os("HOME")?).join("Library/Application Support/GeometryDash"))
+        return Some(PathBuf::from(&env::var_os("HOME")?).join("SfxLibrary/Application Support/GeometryDash"))
     }
 
     if cfg!(target_os = "linux") {

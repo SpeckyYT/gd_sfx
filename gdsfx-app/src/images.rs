@@ -23,4 +23,5 @@ images!{
     CHART: "../../assets/svg/chart-simple-solid.svg"
     GEAR: "../../assets/svg/gear-solid.svg"
     PEOPLE_GROUP: "../../assets/svg/people-group-solid.svg"
+    RIGHT_TO_BRACKET: "../../assets/svg/right-to-bracket-solid.svg"
 }

@@ -16,19 +16,23 @@ gdsfx-library = { workspace = true }
 ahash = { workspace = true }
 anyhow = { workspace = true }
 educe = { workspace = true }
+itertools = { workspace = true }
 once_cell = { workspace = true }
 parking_lot = { workspace = true }
 pretty-bytes = { workspace = true }
+pretty-duration = { workspace = true }
 rayon = { workspace = true }
+reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 strum = { workspace = true }
 
-eframe = "0.25.0"
-egui-modal = "0.3.2"
-egui_extras = { version = "0.25.0", features = ["image","svg"] }
+eframe = "0.26.2"
+egui-modal = "0.3.4"
+egui_extras = { version = "0.26.2", features = ["image","svg"] }
+open = "5.0.1"
 rfd = "0.13.0"
-rust-i18n = "3.0.0"
+rust-i18n = "3.0.1"
 
 [build-dependencies]
 gdsfx-build = { workspace = true }
