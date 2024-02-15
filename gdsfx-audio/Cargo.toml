@@ -9,9 +9,11 @@ edition = "2021"
 [dependencies]
 educe = { workspace = true }
 parking_lot = { workspace = true }
+include_dir = { workspace = true }
 
 libfmod = "2.206.4"
 
 [build-dependencies]
 gdsfx-build = { workspace = true }
 gdsfx-files = { workspace = true }
+quote = { workspace = true }
