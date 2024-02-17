@@ -7,7 +7,7 @@ use std::time::Duration;
 use eframe::epaint::mutex::Mutex;
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
-use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, SfxFileEntry};
+use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, MusicLibrary, SfxFileEntry, SfxLibrary};
 use once_cell::sync::Lazy;
 
 use crate::backend::konami::KonamiString;
@@ -17,14 +17,14 @@ use crate::backend::{AppState, LibraryPage};
 // TODO can we make this less of a list of ui elements
 // and instead maybe put some stuff on the right side of the screen
 // also make sure everything fits on the ui
-pub fn render(ctx: &Context, app_state: &mut AppState) {
+pub fn render(ctx: &Context, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     CentralPanel::default().show(ctx, |ui| {
         match app_state.library_page {
             LibraryPage::Sfx => render_sfx_window(ui, app_state),
             LibraryPage::Music => render_music_window(ui, app_state),
         }
     });
-    debug_display(ctx, app_state);
+    debug_display(ctx, app_state, sfx_library, music_library);
 }
 
 fn render_sfx_window(ui: &mut Ui, app_state: &mut AppState) {
@@ -247,11 +247,9 @@ static FPS_HISTORY: Lazy<Arc<Mutex<Option<VecDeque<(f64,f64)>>>>> = Lazy::new(||
     Arc::new(Mutex::new(None))
 });
 
-fn enable_fps_history() {
+fn toggle_fps_history() {
     let mut history = FPS_HISTORY.lock();
-    if let None = *history {
-        *history = Some(VecDeque::new())
-    }
+    *history = history.take().xor(Some(Default::default()));
 }
 
 const DEBUG_KONAMI: KonamiString = {
@@ -264,11 +262,11 @@ const DEBUG_KONAMI: KonamiString = {
             ArrowLeft, ArrowRight,
             B, A,
         ],
-        &enable_fps_history,
+        &toggle_fps_history,
     )
 };
 
-fn debug_display(ctx: &Context, app_state: &mut AppState) {
+fn debug_display(ctx: &Context, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     app_state.konami.push(DEBUG_KONAMI);
 
     if let Some(ref mut history) = *FPS_HISTORY.lock() {
@@ -293,8 +291,19 @@ fn debug_display(ctx: &Context, app_state: &mut AppState) {
                     .map(|(_, i)| i)
                     .sum::<f64>() / average_size as f64;
 
-                ui.label(format!("{}", t!("debug.average_frame_time", ms = format!("{:.2}", average * 1000.0))));
-                ui.label(format!("{}", t!("debug.average_fps", fps = format!("{:.2}", 1.0 / average))));
+                ui.label(t!(
+                    "debug.build_kind",
+                    kind = if cfg!(debug_assertions) {
+                        t!("debug.build_kind.debug")
+                    } else {
+                        t!("debug.build_kind.release")
+                    }
+                ));
+                ui.label(t!("debug.memory.app_state", bytes = std::mem::size_of_val(app_state)));
+                ui.label(t!("debug.memory.sfx_library", bytes = std::mem::size_of_val(sfx_library)));
+                ui.label(t!("debug.memory.music_library", bytes = std::mem::size_of_val(music_library)));
+                ui.label(t!("debug.average_frame_time", ms = format!("{:.2}", average * 1000.0)));
+                ui.label(t!("debug.average_fps", fps = format!("{:.2}", 1.0 / average)));
             });
     }
 }

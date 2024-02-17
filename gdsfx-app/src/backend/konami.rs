@@ -57,20 +57,16 @@ impl KonamiString {
     }
     pub fn update(&mut self, ctx: &egui::Context) {
         ctx.input(|i| {
-            match self.index.1 {
-                false =>
-                    if i.key_pressed(self.keys[self.index.0]) {
-                        self.index.1 = true;
+            if self.index.1 == i.key_down(self.keys[self.index.0]) {
+                if self.index.1 {
+                    self.index.0 += 1;
+                    if self.index.0 >= self.keys.len() {
+                        self.index.0 = 0;
+                        (&self.callback)();
                     }
-                true =>
-                    if i.key_released(self.keys[self.index.0]) {
-                        self.index.0 += 1;
-                        if self.index.0 >= self.keys.len() {
-                            self.index.0 = 0;
-                            (&self.callback)();
-                        }
-                        self.index.1 = false;
-                    }
+                    self.index.1 = false;
+                }
+                self.index.1 = !self.index.1;
             }
         });
     }
