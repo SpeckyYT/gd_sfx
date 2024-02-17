@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::mem::size_of_val;
 use std::path::MAIN_SEPARATOR;
 use std::process::Command;
 use std::sync::Arc;
@@ -8,7 +9,9 @@ use eframe::epaint::mutex::Mutex;
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, MusicLibrary, SfxFileEntry, SfxLibrary};
+use memory_stats::memory_stats;
 use once_cell::sync::Lazy;
+use pretty_bytes::converter::convert as pretty_bytes;
 
 use crate::backend::konami::KonamiString;
 use crate::images;
@@ -61,7 +64,7 @@ fn render_sound_info(ui: &mut Ui, id: EntryId, bytes: BytesSize, duration: Durat
     ui.heading(t!("sound.info.id", id = id));
 
     if bytes > 0 {
-        ui.heading(t!("sound.info.size", size = pretty_bytes::converter::convert(bytes as f64)));
+        ui.heading(t!("sound.info.size", size = pretty_bytes(bytes as f64)));
     }
 
     let duration = duration.as_secs_f32();
@@ -299,9 +302,13 @@ fn debug_display(ctx: &Context, app_state: &mut AppState, sfx_library: &SfxLibra
                         t!("debug.build_kind.release")
                     }
                 ));
-                ui.label(t!("debug.memory.app_state", bytes = std::mem::size_of_val(app_state)));
-                ui.label(t!("debug.memory.sfx_library", bytes = std::mem::size_of_val(sfx_library)));
-                ui.label(t!("debug.memory.music_library", bytes = std::mem::size_of_val(music_library)));
+                if let Some(memory_stats) = memory_stats() {
+                    ui.label(t!("debug.memory.physical", bytes = pretty_bytes(memory_stats.physical_mem as f64)));
+                    ui.label(t!("debug.memory.virtual", bytes = pretty_bytes(memory_stats.virtual_mem as f64)));
+                }
+                ui.label(t!("debug.memory.app_state", bytes = pretty_bytes(size_of_val(app_state) as f64)));
+                ui.label(t!("debug.memory.sfx_library", bytes = pretty_bytes(size_of_val(sfx_library) as f64)));
+                ui.label(t!("debug.memory.music_library", bytes = pretty_bytes(size_of_val(music_library) as f64)));
                 ui.label(t!("debug.average_frame_time", ms = format!("{:.2}", average * 1000.0)));
                 ui.label(t!("debug.average_fps", fps = format!("{:.2}", 1.0 / average)));
             });
