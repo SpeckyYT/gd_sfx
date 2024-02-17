@@ -1,6 +1,7 @@
 use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
+use eframe::egui;
 use educe::Educe;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
@@ -16,12 +17,14 @@ use itertools::{Either, Itertools};
 
 use crate::{tabs::Tab, localized_enum};
 
+use self::konami::Konami;
 use self::search::MusicFilters;
 
 pub mod favorites;
 pub mod settings;
 pub mod search;
 pub mod tools;
+pub mod konami;
 
 #[derive(Educe)]
 #[educe(Default)]
@@ -58,6 +61,8 @@ pub struct AppState {
 
     downloaded_music: Arc<Mutex<HashSet<EntryId>>>,
     music_cache: Arc<Mutex<HashMap<EntryId, Vec<u8>>>>,
+
+    pub konami: Konami,
 }
 
 impl AppState {
@@ -234,4 +239,8 @@ localized_enum! {
         Sfx = "sfx",
         Music = "music",
     }
+}
+
+pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
+    app_state.konami.update(ctx);
 }

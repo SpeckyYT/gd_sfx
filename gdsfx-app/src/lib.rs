@@ -36,6 +36,8 @@ impl eframe::App for GdSfx {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         use layout::*;
         
+        backend::update(ctx, &mut self.app_state);
+
         tabs_panel::render(ctx, &mut self.app_state);
         left_window::render(ctx, &mut self.app_state, &self.sfx_library, &self.music_library);
         right_window::render(ctx, &mut self.app_state);

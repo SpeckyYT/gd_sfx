@@ -9,6 +9,10 @@
     "tab.stats": "Stats",
     "tab.credits": "Credits",
 
+    "debug.mode": "Debug mode",
+    "debug.average_frame_time": "Average time between frames: %{ms} ms",
+    "debug.average_fps": "Average FPS: %{fps} fps",
+
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Category: %{id}",
     "sound.info.size": "Size: %{size}",

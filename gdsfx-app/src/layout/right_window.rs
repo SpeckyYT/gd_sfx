@@ -1,11 +1,16 @@
+use std::collections::VecDeque;
 use std::path::MAIN_SEPARATOR;
 use std::process::Command;
+use std::sync::Arc;
 use std::time::Duration;
 
+use eframe::epaint::mutex::Mutex;
 use eframe::{egui::*, epaint::Color32};
 use gdsfx_audio::AudioSettings;
 use gdsfx_library::{BytesSize, EntryId, FileEntry, MusicFileEntry, SfxFileEntry};
+use once_cell::sync::Lazy;
 
+use crate::backend::konami::KonamiString;
 use crate::images;
 use crate::backend::{AppState, LibraryPage};
 
@@ -19,6 +24,7 @@ pub fn render(ctx: &Context, app_state: &mut AppState) {
             LibraryPage::Music => render_music_window(ui, app_state),
         }
     });
+    debug_display(ctx, app_state);
 }
 
 fn render_sfx_window(ui: &mut Ui, app_state: &mut AppState) {
@@ -232,5 +238,63 @@ fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
     let default_audio_settings = AudioSettings::default();
     if ui.add_enabled(*audio_settings != default_audio_settings, reset_button).clicked() {
         *audio_settings = default_audio_settings;
+    }
+}
+
+const AVERAGE_SIZE: usize = 20;
+
+static FPS_HISTORY: Lazy<Arc<Mutex<Option<VecDeque<(f64,f64)>>>>> = Lazy::new(|| {
+    Arc::new(Mutex::new(None))
+});
+
+fn enable_fps_history() {
+    let mut history = FPS_HISTORY.lock();
+    if let None = *history {
+        *history = Some(VecDeque::new())
+    }
+}
+
+const DEBUG_KONAMI: KonamiString = {
+    use Key::*;
+    KonamiString::new(
+        &[
+            ArrowUp, ArrowUp,
+            ArrowDown, ArrowDown,
+            ArrowLeft, ArrowRight,
+            ArrowLeft, ArrowRight,
+            B, A,
+        ],
+        &enable_fps_history,
+    )
+};
+
+fn debug_display(ctx: &Context, app_state: &mut AppState) {
+    app_state.konami.push(DEBUG_KONAMI);
+
+    if let Some(ref mut history) = *FPS_HISTORY.lock() {
+        TopBottomPanel::bottom("debug_panel")
+            .show(ctx, |ui| {
+                ui.heading(t!("debug.mode"));
+
+                let current_time = ui.input(|i| i.time);
+                let (last_time, _) = *history.iter().last().unwrap_or(&(0.0, 0.0));
+                
+                // this is so bad
+                history.push_back((current_time, current_time - last_time));
+                while history.len() > AVERAGE_SIZE {
+                    history.pop_front();
+                }
+
+                let average_size = AVERAGE_SIZE.min(history.len());
+
+                let average = history.iter()
+                    .rev()
+                    .take(average_size)
+                    .map(|(_, i)| i)
+                    .sum::<f64>() / average_size as f64;
+
+                ui.label(format!("{}", t!("debug.average_frame_time", ms = format!("{:.2}", average * 1000.0))));
+                ui.label(format!("{}", t!("debug.average_fps", fps = format!("{:.2}", 1.0 / average))));
+            });
     }
 }
