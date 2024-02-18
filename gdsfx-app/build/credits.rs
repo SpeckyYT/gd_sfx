@@ -1,21 +1,35 @@
 use ahash::HashMap;
 use gdsfx_files::paths;
-use quote::quote;
+use quote::{format_ident, quote};
 
-type Credits = HashMap<String, String>;
-
-const OUTPUT_FILE: &str = "credits.rs";
+const CREDITS_OUTPUT_FILE: &str = "credits.rs";
+const THEME_OUTPUT_FILE: &str = "theme_credits.rs";
 
 pub fn build() {
-    gdsfx_build::cargo_rerun_if_changed(paths::build::CREDITS_FILE);
+    generate_file(
+        paths::build::CREDITS_FILE,
+        CREDITS_OUTPUT_FILE,
+        "get_link",
+    );
+    generate_file(
+        paths::build::THEME_CREDITS,
+        THEME_OUTPUT_FILE,
+        "get_theme_credit",
+    );
+}
 
-    let credits_json: Credits = gdsfx_files::read_json_file(paths::build::CREDITS_FILE).unwrap();
+fn generate_file(input_file: &str, output_file: &str, function_name: &str) {
+    gdsfx_build::cargo_rerun_if_changed(input_file);
 
-    let names = credits_json.keys();
-    let links = credits_json.values();
+    let json: HashMap<String, String> = gdsfx_files::read_json_file(input_file).unwrap();
+
+    let names = json.keys();
+    let links = json.values();
+
+    let fn_name = format_ident!("{}", function_name);
 
     let tokens = quote! {
-        fn get_link(name: &str) -> Option<&str> {
+        fn #fn_name (name: &str) -> Option<&str> {
             match name {
                 #(#names => Some(#links),)*
                 _ => None
@@ -23,5 +37,5 @@ pub fn build() {
         }
     };
 
-    gdsfx_build::write_output_rust(OUTPUT_FILE, tokens);
+    gdsfx_build::write_output_rust(output_file, tokens);
 }

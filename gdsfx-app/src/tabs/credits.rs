@@ -9,6 +9,7 @@ use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
 // ```
 // see gdsfx-app/build/credits.rs
 gdsfx_build::get_output!(include!("credits.rs"));
+gdsfx_build::get_output!(include!("theme_credits.rs"));
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
 
@@ -55,6 +56,8 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.add_space(10.0);
 
+    theme_credit(ui, app_state);
+
     ui.heading(t!("credits.this_project"));
 
     ui.add_space(5.0);
@@ -91,4 +94,22 @@ fn add_optional_link(ui: &mut Ui, name: &str) {
     } else {
         ui.label(name);
     }
+}
+
+fn theme_credit(ui: &mut Ui, app_state: &mut AppState) {
+    if let Some(theme_credit) = get_theme_credit(app_state.settings.theme.localization_key()) {
+        ui.heading("Theme Credit");
+
+        ui.add_space(10.0);
+
+        ui.label(format!("{:?}", app_state.settings.theme));
+
+        add_optional_link(ui, theme_credit);
+
+        ui.add_space(10.0);
+
+        ui.separator();
+
+        ui.add_space(10.0);
+    };
 }

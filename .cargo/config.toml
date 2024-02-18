@@ -8,5 +8,6 @@ GDSFX_LOCALE_SCHEMA_TARGET_FILE = { value = ".vscode/schemas/locale_schema.json"
 GDSFX_LOCALE_SCHEMA_SOURCE_FILE = { value = "locales/en_US.json", relative = true }
 GDSFX_LOCALES_DIR = { value = "locales", relative = true }
 GDSFX_CREDITS_FILE = { value = "credits.json", relative = true }
+GDSFX_THEME_CREDITS_FILE = { value = "theme_credits.json", relative = true }
 
 # see gdsfx-files/src/paths/runtime.rs for runtime paths

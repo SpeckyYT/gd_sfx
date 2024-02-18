@@ -1,0 +1,8 @@
+{
+    "dark": "egui",
+    "light": "egui",
+    "latte": "catppuccin/egui",
+    "frappe": "catppuccin/egui",
+    "macchiato": "catppuccin/egui",
+    "mocha": "catppuccin/egui"
+}
