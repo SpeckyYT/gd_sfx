@@ -91,6 +91,9 @@
     "settings.cannot_modify.tool_running": "This setting cannot be modified while a tool is running.",
     "settings.reset": "Reset settings",
     "settings.reset.instruction": "Triple click to confirm",
+    "settings.theme": "Theme",
+    "settings.theme.dark": "Dark",
+    "settings.theme.light": "Light",
 
     "stats.library.sfx": "SFX Library",
     "stats.library.music": "Music Library",

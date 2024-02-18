@@ -27,7 +27,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 strum = { workspace = true }
 
-eframe = "0.26.2"
+eframe = { version = "0.26.2", features = ["serde"] }
 egui-modal = "0.3.4"
 egui_extras = { version = "0.26.2", features = ["image","svg"] }
 memory-stats = "1.1.0"

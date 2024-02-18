@@ -28,6 +28,9 @@ pub struct PersistentSettings {
     #[educe(Default = String::from("en_US"))]
     pub locale: String,
 
+    #[educe(Default = ColorTheme::Dark)]
+    pub theme: ColorTheme,
+
     #[serde(skip)]
     #[educe(Clone(method(ignore_option)), PartialEq(ignore))]
     last_state: Option<Box<PersistentSettings>>,
@@ -48,6 +51,15 @@ localized_enum! {
         #[default]
         Hover = "hover",
         Click = "click",
+    }
+}
+
+localized_enum! {
+    #[derive(Serialize, Deserialize, Debug, Default, Clone, Copy, PartialEq, EnumIter)]
+    pub enum ColorTheme = "settings.theme" {
+        #[default]
+        Dark = "dark",
+        Light = "light",
     }
 }
 

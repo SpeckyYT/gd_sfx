@@ -17,6 +17,9 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState) {
     set_locale(ui, app_state);
 
     ui.add_space(10.0);
+    set_enum_setting(ui, &mut app_state.settings.theme);
+
+    ui.add_space(10.0);
 
     select_gd_folder(ui, app_state);
 

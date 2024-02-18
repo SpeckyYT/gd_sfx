@@ -65,8 +65,6 @@ impl GdSfx {
 
         let options = NativeOptions {
             viewport,
-            follow_system_theme: false,
-            default_theme: Theme::Dark,
             hardware_acceleration: HardwareAcceleration::Preferred,
 
             ..Default::default()

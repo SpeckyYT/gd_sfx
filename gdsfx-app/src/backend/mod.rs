@@ -1,7 +1,7 @@
 use std::{thread, sync::Arc, path::Path, fs};
 use ahash::{HashMap, HashSet};
 
-use eframe::egui;
+use eframe::egui::{self, Visuals};
 use educe::Educe;
 use favorites::Favorites;
 use gdsfx_audio::AudioSettings;
@@ -20,6 +20,7 @@ use crate::{tabs::Tab, localized_enum};
 
 use self::konami::Konami;
 use self::search::MusicFilters;
+use self::settings::ColorTheme;
 
 pub mod favorites;
 pub mod settings;
@@ -244,6 +245,10 @@ localized_enum! {
 
 pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
     app_state.konami.update(ctx);
+    ctx.set_visuals(match app_state.settings.theme {
+        ColorTheme::Dark => Visuals::dark(),
+        ColorTheme::Light => Visuals::light(),
+    });
 }
 
 pub fn request_optional_repaint(ctx: &egui::Context, app_state: &mut AppState) {
