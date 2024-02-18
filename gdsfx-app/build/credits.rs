@@ -6,6 +6,7 @@ const CREDITS_OUTPUT_FILE: &str = "credits.rs";
 const THEME_OUTPUT_FILE: &str = "theme_credits.rs";
 
 pub fn build() {
+    println!("{CREDITS_OUTPUT_FILE}");
     generate_file(
         paths::build::CREDITS_FILE,
         CREDITS_OUTPUT_FILE,
