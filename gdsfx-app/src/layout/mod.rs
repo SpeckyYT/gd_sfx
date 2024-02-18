@@ -9,6 +9,7 @@ use crate::{backend::{AppState, settings::*, search::*, LibraryPage}, i18n::Loca
 pub mod tabs_panel;
 pub mod left_window;
 pub mod right_window;
+pub mod debug_window;
 
 pub const MIN_LIBRARY_WIDTH: f32 = 200.0;
 pub const DEFAULT_LIBRARY_WIDTH: f32 = 300.0;

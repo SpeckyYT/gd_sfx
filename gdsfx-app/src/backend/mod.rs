@@ -15,6 +15,7 @@ use tools::ToolProgress;
 use strum::EnumIter;
 use itertools::{Either, Itertools};
 
+use crate::layout;
 use crate::{tabs::Tab, localized_enum};
 
 use self::konami::Konami;
@@ -243,4 +244,13 @@ localized_enum! {
 
 pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
     app_state.konami.update(ctx);
+}
+
+pub fn request_optional_repaint(ctx: &egui::Context, app_state: &mut AppState) {
+    if 
+        app_state.tool_progress.lock().is_some()
+        || layout::debug_window::DEBUG_MODE.lock().is_some()
+    {
+        ctx.request_repaint();
+    }
 }
