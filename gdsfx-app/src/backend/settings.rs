@@ -60,6 +60,10 @@ localized_enum! {
         #[default]
         Dark = "dark",
         Light = "light",
+        Latte = "latte",
+        Frappe = "frappe",
+        Macchiato = "macchiato",
+        Mocha = "mocha",
     }
 }
 

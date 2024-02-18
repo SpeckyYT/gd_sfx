@@ -10,6 +10,7 @@ mod layout;
 mod tabs;
 mod images;
 mod i18n;
+mod theme;
 
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated

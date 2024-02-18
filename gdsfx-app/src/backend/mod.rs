@@ -245,9 +245,16 @@ localized_enum! {
 
 pub fn update(ctx: &egui::Context, app_state: &mut AppState) {
     app_state.konami.update(ctx);
+
+    use crate::theme::*;
+
     ctx.set_visuals(match app_state.settings.theme {
         ColorTheme::Dark => Visuals::dark(),
         ColorTheme::Light => Visuals::light(),
+        ColorTheme::Latte => LATTE.to_visuals(ctx),
+        ColorTheme::Frappe => FRAPPE.to_visuals(ctx),
+        ColorTheme::Macchiato => MACCHIATO.to_visuals(ctx),
+        ColorTheme::Mocha => MOCHA.to_visuals(ctx),
     });
 }
 

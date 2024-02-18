@@ -94,6 +94,10 @@
     "settings.theme": "Theme",
     "settings.theme.dark": "Dark",
     "settings.theme.light": "Light",
+    "settings.theme.latte": "Latte",
+    "settings.theme.frappe": "Frappe",
+    "settings.theme.macchiato": "Macchiato",
+    "settings.theme.mocha": "Mocha",
 
     "stats.library.sfx": "SFX Library",
     "stats.library.music": "Music Library",
