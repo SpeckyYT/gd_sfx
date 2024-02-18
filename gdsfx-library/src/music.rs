@@ -4,6 +4,7 @@
 // songs = <id>,<name>,<credit id>,<bytes>,<duration>,.{tag id}.{tag id}.
 // tag = <id>,<name>
 
+use std::fmt::Display;
 use std::time::Duration;
 use std::path::Path;
 
@@ -83,9 +84,9 @@ impl MusicLibrary {
     }
 }
 
-impl ToString for Song {
-    fn to_string(&self) -> String {
-        format!(
+impl Display for Song {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&format!(
             "{},{},{},{},{},{}.",
             self.id,
             self.name,
@@ -94,6 +95,6 @@ impl ToString for Song {
             self.duration.as_secs(),
             self.tags.iter()
                 .fold(String::new(), |s, n| format!("{s}.{n}"))
-        )
+        ))
     }
 }

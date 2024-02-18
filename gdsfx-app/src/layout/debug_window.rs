@@ -10,7 +10,8 @@ use pretty_bytes::converter::convert as pretty_bytes;
 use crate::backend::konami::KonamiString;
 use crate::backend::AppState;
 
-const AVERAGE_SIZE: usize = 20;
+const MIN_FPS_HISTORY_SIZE: usize = 20;
+const MAX_FPS_HISTORY_TIME: f64 = 2.0;
 
 #[derive(Default)]
 pub struct DebugMode {
@@ -55,17 +56,18 @@ pub fn debug_display(ctx: &egui::Context, app_state: &mut AppState, sfx_library:
                 
                 // this is so bad
                 history.push_back((current_time, current_time - last_time));
-                while history.len() > AVERAGE_SIZE {
-                    history.pop_front();
+
+                loop {
+                    if current_time - history[0].0 > MAX_FPS_HISTORY_TIME && history.len() > MIN_FPS_HISTORY_SIZE {
+                        history.pop_front();
+                    } else {
+                        break
+                    }
                 }
 
-                let average_size = AVERAGE_SIZE.min(history.len());
-
                 let average = history.iter()
-                    .rev()
-                    .take(average_size)
                     .map(|(_, i)| i)
-                    .sum::<f64>() / average_size as f64;
+                    .sum::<f64>() / history.len() as f64;
 
                 ui.label(t!(
                     "debug.build_kind",
@@ -84,6 +86,7 @@ pub fn debug_display(ctx: &egui::Context, app_state: &mut AppState, sfx_library:
                 ui.label(t!("debug.memory.music_library", bytes = pretty_bytes(size_of_val(music_library) as f64)));
                 ui.label(t!("debug.average_frame_time", ms = format!("{:.2}", average * 1000.0)));
                 ui.label(t!("debug.average_fps", fps = format!("{:.2}", 1.0 / average)));
+                ui.label(t!("debug.frame_time_size", size = history.len()));
             });
     }
 }

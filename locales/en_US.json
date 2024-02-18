@@ -20,6 +20,7 @@
     "debug.memory.music_library": "SfxLibrary size: %{bytes}",
     "debug.average_frame_time": "Average time between frames: %{ms} ms",
     "debug.average_fps": "Average FPS: %{fps} fps",
+    "debug.frame_time_size": "Frame time size: %{size}",
 
     "sound.info.id": "ID: %{id}",
     "sound.info.category.id": "Category: %{id}",

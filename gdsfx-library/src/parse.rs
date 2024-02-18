@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::str::FromStr;
 use ahash::{HashMap, HashMapExt};
 use anyhow::{anyhow, Context};
@@ -79,8 +80,8 @@ impl FromStr for SfxLibraryEntry {
     }
 }
 
-impl ToString for SfxLibraryEntry {
-    fn to_string(&self) -> String {
+impl Display for SfxLibraryEntry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let kind = match self.kind {
             sfx::EntryKind::Sound { .. } => sfx::EntryKind::SOUND_KEY,
             sfx::EntryKind::Category => sfx::EntryKind::CATEGORY_KEY,
@@ -98,9 +99,10 @@ impl ToString for SfxLibraryEntry {
             self.parent_id.to_string(),
             bytes.to_string(),
             (duration.as_millis() / 10).to_string(),
-        ];
+        ]
+        .join(",");
         
-        parts.join(",")
+        f.write_str(&parts)
     }
 }
 

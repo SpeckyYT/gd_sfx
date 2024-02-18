@@ -4,7 +4,7 @@ use eframe::egui;
 use egui::Key;
 
 type Keys = &'static [Key];
-type Callback = &'static dyn Fn() -> ();
+type Callback = &'static dyn Fn();
 
 #[derive(Debug, Default)]
 pub struct Konami {
@@ -62,7 +62,7 @@ impl KonamiString {
                     self.index.0 += 1;
                     if self.index.0 >= self.keys.len() {
                         self.index.0 = 0;
-                        (&self.callback)();
+                        (self.callback)();
                     }
                     self.index.1 = false;
                 }
