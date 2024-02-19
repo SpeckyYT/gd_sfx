@@ -1,0 +1,3 @@
+[submodule "themes/doki-master-theme"]
+	path = themes/doki-master-theme
+	url = https://github.com/doki-theme/doki-master-theme

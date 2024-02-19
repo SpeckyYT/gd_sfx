@@ -46,3 +46,4 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 
 image = { version = "0.24.8", default_features = false, features = ["png"] }
+walkdir = "2.4.0"

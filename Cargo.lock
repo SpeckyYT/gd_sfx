@@ -1613,6 +1613,7 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
+ "walkdir",
 ]
 
 [[package]]

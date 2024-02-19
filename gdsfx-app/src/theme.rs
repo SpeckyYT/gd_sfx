@@ -2,9 +2,11 @@
 // https://github.com/catppuccin/egui
 
 use eframe::{egui::{style::{Selection, WidgetVisuals, Widgets}, Context, Visuals}, epaint::{Color32, Shadow, Stroke}};
+use gdsfx_build::get_output;
 
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Theme {
+    pub author: &'static str,
     pub rosewater: Color32,
     pub flamingo: Color32,
     pub pink: Color32,
@@ -96,6 +98,7 @@ impl Theme {
 }
 
 pub const LATTE: Theme = Theme {
+    author: "catppuccin/egui",
     rosewater: Color32::from_rgb(220, 138, 120),
     flamingo: Color32::from_rgb(221, 120, 120),
     pink: Color32::from_rgb(234, 118, 203),
@@ -125,6 +128,7 @@ pub const LATTE: Theme = Theme {
 };
 
 pub const FRAPPE: Theme = Theme {
+    author: "catppuccin/egui",
     rosewater: Color32::from_rgb(242, 213, 207),
     flamingo: Color32::from_rgb(238, 190, 190),
     pink: Color32::from_rgb(244, 184, 228),
@@ -154,6 +158,7 @@ pub const FRAPPE: Theme = Theme {
 };
 
 pub const MACCHIATO: Theme = Theme {
+    author: "catppuccin/egui",
     rosewater: Color32::from_rgb(244, 219, 214),
     flamingo: Color32::from_rgb(240, 198, 198),
     pink: Color32::from_rgb(245, 189, 230),
@@ -183,6 +188,7 @@ pub const MACCHIATO: Theme = Theme {
 };
 
 pub const MOCHA: Theme = Theme {
+    author: "catppuccin/egui",
     rosewater: Color32::from_rgb(245, 224, 220),
     flamingo: Color32::from_rgb(242, 205, 205),
     pink: Color32::from_rgb(245, 194, 231),
@@ -210,3 +216,5 @@ pub const MOCHA: Theme = Theme {
     mantle: Color32::from_rgb(24, 24, 37),
     crust: Color32::from_rgb(17, 17, 27),
 };
+
+get_output!(include!("doki_themes.rs"));
