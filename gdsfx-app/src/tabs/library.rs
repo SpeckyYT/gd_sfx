@@ -107,6 +107,12 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
                     credit_id: UNLISTED_ID,
                     duration: Duration::ZERO,
                     tags: Vec::new(),
+                    unk1: String::new(),
+                    unk2: String::new(),
+                    url: String::new(),
+                    unk3: String::new(),
+                    unk4: String::new(),
+                    unk5: String::new(),
                 })
                 .collect();
             songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
@@ -172,7 +178,7 @@ fn music_listed_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
     ui.horizontal(|ui| {
         ui.set_enabled(!available_songs.is_empty());
 
-        ComboBox::from_id_source("music_tags_dropdown")
+        ComboBox::from_id_salt("music_tags_dropdown")
             .selected_text("Tags")
             .show_ui(ui, |ui| {
                 for tag in available_tags {
@@ -186,7 +192,7 @@ fn music_listed_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
                 }
             });
 
-        ComboBox::from_id_source("music_artists_dropdown")
+        ComboBox::from_id_salt("music_artists_dropdown")
             .selected_text("Artists")
             .show_ui(ui, |ui| {
                 for artist in available_artists {

@@ -30,6 +30,12 @@ pub struct Song {
     pub bytes: BytesSize,
     pub duration: Duration,
     pub tags: Vec<TagId>,
+    pub unk1: String,
+    pub unk2: String,
+    pub url: String,
+    pub unk3: String,
+    pub unk4: String,
+    pub unk5: String,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -74,7 +80,7 @@ impl MusicLibrary {
     }
 
     fn should_try_update(library: Option<&MusicLibrary>) -> bool {
-        const MUSIC_VERSION_ENDPOINT: &str = "musiclibrary_02_version.txt";
+        const MUSIC_VERSION_ENDPOINT: &str = "musiclibrary_version_02.txt";
 
         let Some(library) = library else { return true };
 
@@ -88,14 +94,20 @@ impl MusicLibrary {
 impl Display for Song {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str(&format!(
-            "{},{},{},{},{},{}.",
+            "{},{},{},{},{},{}.,{},{},{},{},{},{}",
             self.id,
             self.name,
             self.credit_id,
             self.bytes,
             self.duration.as_secs(),
             self.tags.iter()
-                .fold(String::new(), |s, n| format!("{s}.{n}"))
+                .fold(String::new(), |s, n| format!("{s}.{n}")),
+            self.unk1,
+            self.unk2,
+            self.url,
+            self.unk3,
+            self.unk4,
+            self.unk5,
         ))
     }
 }
