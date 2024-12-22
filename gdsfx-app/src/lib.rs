@@ -67,11 +67,16 @@ impl GdSfx {
         let options = NativeOptions {
             viewport,
             hardware_acceleration: HardwareAcceleration::Preferred,
+            vsync: false,
 
             ..Default::default()
         };
         
-        eframe::run_native(paths::runtime::APP_NAME, options, Box::new(Self::load))
+        eframe::run_native(
+            paths::runtime::APP_NAME,
+            options,
+            Box::new(|cc| Ok(Self::load(cc)))
+        )
     }
 
     fn load(ctx: &eframe::CreationContext) -> Box<dyn eframe::App> {

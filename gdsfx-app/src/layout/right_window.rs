@@ -223,10 +223,10 @@ fn render_audio_settings(ui: &mut Ui, app_state: &mut AppState) {
     ui.add(Slider::new(&mut audio_settings.pitch, -12..=12).text(t!("sound.pitch")));
     ui.add(Slider::new(&mut audio_settings.volume, 0.0..=2.0).text(t!("sound.volume")));
     ui.checkbox(&mut audio_settings.looping, t!("sound.loop"));
-    ui.add(Slider::new(&mut audio_settings.start, 0..=1000).text(t!("sound.start")).clamp_to_range(false)); // TODO limit slider to sound length in ms
-    ui.add(Slider::new(&mut audio_settings.end, 0..=1000).text(t!("sound.end")).clamp_to_range(false)); // TODO limit slider to sound length in ms
-    ui.add(Slider::new(&mut audio_settings.fade_in, 0..=1000).text(t!("sound.fade_in")).clamp_to_range(false));
-    ui.add(Slider::new(&mut audio_settings.fade_out, 0..=1000).text(t!("sound.fade_out")).clamp_to_range(false));
+    ui.add(Slider::new(&mut audio_settings.start, 0..=1000).text(t!("sound.start")).clamping(SliderClamping::Never)); // TODO limit slider to sound length in ms
+    ui.add(Slider::new(&mut audio_settings.end, 0..=1000).text(t!("sound.end")).clamping(SliderClamping::Never)); // TODO limit slider to sound length in ms
+    ui.add(Slider::new(&mut audio_settings.fade_in, 0..=1000).text(t!("sound.fade_in")).clamping(SliderClamping::Never));
+    ui.add(Slider::new(&mut audio_settings.fade_out, 0..=1000).text(t!("sound.fade_out")).clamping(SliderClamping::Never));
 
     ui.add_space(10.0);
 

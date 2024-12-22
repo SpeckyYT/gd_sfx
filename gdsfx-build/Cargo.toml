@@ -12,6 +12,6 @@ gdsfx-files = { workspace = true }
 anyhow = { workspace = true }
 
 build_script = "0.2.0"
-prettyplease = "0.2.16"
-proc-macro2 = "1.0.78"
-syn = "2.0.48"
+prettyplease = "0.2.25"
+proc-macro2 = "1.0.92"
+syn = "2.0.91"

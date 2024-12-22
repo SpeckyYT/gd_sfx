@@ -17,7 +17,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
         };
     }
 
-    ui.heading(t!(&format!("stats.library.{}", app_state.library_page.localization_key())));
+    ui.heading(t!(format!("stats.library.{}", app_state.library_page.localization_key())));
 
     ui.add_space(10.0);
 
@@ -38,7 +38,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.add_space(20.0);
 
-    ui.heading(t!(&format!("stats.files.{}", app_state.library_page.localization_key())));
+    ui.heading(t!(format!("stats.files.{}", app_state.library_page.localization_key())));
     
     ui.add_space(10.0);
 

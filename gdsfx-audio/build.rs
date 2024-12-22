@@ -14,7 +14,7 @@ fn main() {
     for file in gdsfx_files::read_dir(INCLUDE_DIR).unwrap() {
         let source = file.path();
         let destination = Path::new(target_dir).join(file.file_name());
-        fs::copy(&source, &destination).unwrap();
+        let _ = fs::copy(&source, &destination);
 
         gdsfx_build::cargo_rerun_if_changed(source);
         gdsfx_build::cargo_rerun_if_changed(destination);

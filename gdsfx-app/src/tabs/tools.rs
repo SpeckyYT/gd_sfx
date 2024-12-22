@@ -74,8 +74,8 @@ fn download_range_select_modal(ctx: &Context, app_state: &mut AppState) -> Modal
 
         modal.frame(ui, |ui| {
             let (min_id_range, max_id_range, range) = match app_state.library_page {
-                LibraryPage::Sfx => (0, 100000, &mut app_state.download_id_range_sfx),
-                LibraryPage::Music => (10000000, 10010000, &mut app_state.download_id_range_music),
+                LibraryPage::Sfx => (0, 200000, &mut app_state.download_id_range_sfx),
+                LibraryPage::Music => (10000000, 10100000, &mut app_state.download_id_range_music),
             };
 
             let from_slider = Slider::new(&mut range.0, min_id_range..=max_id_range)

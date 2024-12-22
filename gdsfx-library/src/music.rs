@@ -41,6 +41,7 @@ pub struct Tag {
 impl MusicLibrary {
     pub fn load(gd_folder: impl AsRef<Path>) -> Result<Self> {
         const MUSIC_LIBRARY_FILE: &str = "musiclibrary.dat";
+        const MUSIC_LIBRARY_REQUEST: &str = "musiclibrary_02.dat";
 
         let file = gd_folder.as_ref().join(MUSIC_LIBRARY_FILE);
 
@@ -51,7 +52,7 @@ impl MusicLibrary {
             return local_library
         }
 
-        requests::request_music_file(MUSIC_LIBRARY_FILE)
+        requests::request_music_file(MUSIC_LIBRARY_REQUEST)
             .and_then(|response| {
                 let bytes = response.bytes()?.to_vec();
                 let _ = gdsfx_files::write_file(&file, &bytes);
@@ -73,7 +74,7 @@ impl MusicLibrary {
     }
 
     fn should_try_update(library: Option<&MusicLibrary>) -> bool {
-        const MUSIC_VERSION_ENDPOINT: &str = "musiclibrary_version.txt";
+        const MUSIC_VERSION_ENDPOINT: &str = "musiclibrary_02_version.txt";
 
         let Some(library) = library else { return true };
 

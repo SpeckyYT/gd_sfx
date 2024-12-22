@@ -14,4 +14,4 @@ once_cell = { workspace = true }
 reqwest = { workspace = true }
 urlencoding = { workspace = true }
 
-url = "2.5.0"
+url = "2.5.4"
