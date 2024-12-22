@@ -159,22 +159,26 @@ impl FromStr for music::Song {
             .split(',')
             .collect::<Vec<&str>>()
             .try_into()
-            .map(|[id, name, credit_id, bytes, duration, tags, unk1, unk2, url, unk3, unk4, unk5 ]: [&str; 12]| Self {
-                id: id.parse().unwrap_or(0),
-                name: name.to_string(),
-                credit_id: credit_id.parse().unwrap_or(0),
-                bytes: bytes.parse().unwrap_or(0),
-                duration: Duration::from_secs(duration.parse().unwrap_or(0)),
-                tags: tags.split('.').filter_map(|s| s.parse().ok()).collect(),
-                unk1: unk1.to_string(),
-                unk2: unk2.to_string(),
-                url: url.to_string(),
-                unk3: unk3.to_string(),
-                unk4: unk4.to_string(),
-                unk5: unk5.to_string(),
+            .map(|[id, name, credit_id, bytes, duration, tags, ncs, unk2, url, new, unk4, unk5 ]: [&str; 12]| {
+                let song = Self {
+                    id: id.parse().unwrap_or(0),
+                    name: name.to_string(),
+                    credit_id: credit_id.parse().unwrap_or(0),
+                    bytes: bytes.parse().unwrap_or(0),
+                    duration: Duration::from_secs(duration.parse().unwrap_or(0)),
+                    tags: tags.split('.').filter_map(|s| s.parse().ok()).collect(),
+                    ncs: ncs == "1",
+                    unk2: unk2.to_string(),
+                    url: url.to_string(),
+                    new: new == "1",
+                    unk4: unk4.to_string(),
+                    unk5: unk5.to_string(),
+                };
+
+                song
             })
             .ok()
-            .ok_or(anyhow!("Credits must have format \"id,name,url,yt_channel_id\", found {string}"))
+            .ok_or(anyhow!("Songs must have format \"id,name,credit_id,bytes,duration,tags,ncs,unk2,url,new,unk4,unk5\", found {string}"))
     }
 }
 

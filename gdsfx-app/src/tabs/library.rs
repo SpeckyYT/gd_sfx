@@ -107,10 +107,10 @@ fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
                     credit_id: UNLISTED_ID,
                     duration: Duration::ZERO,
                     tags: Vec::new(),
-                    unk1: String::new(),
+                    ncs: false,
                     unk2: String::new(),
                     url: String::new(),
-                    unk3: String::new(),
+                    new: false,
                     unk4: String::new(),
                     unk5: String::new(),
                 })
@@ -176,39 +176,39 @@ fn music_listed_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLi
 
     // TODO specky would you like to add song count and tag count and artist count etc for example Tags (1) → Action [5]
     ui.horizontal(|ui| {
-        ui.set_enabled(!available_songs.is_empty());
-
-        ComboBox::from_id_salt("music_tags_dropdown")
-            .selected_text("Tags")
-            .show_ui(ui, |ui| {
-                for tag in available_tags {
-                    let mut has_tag = app_state.music_filters.tags.contains(&tag.id);
-                    ui.checkbox(&mut has_tag, &tag.name);
-                    if has_tag {
-                        app_state.music_filters.tags.insert(tag.id);
-                    } else {
-                        app_state.music_filters.tags.remove(&tag.id);
+        ui.add_enabled_ui(!available_songs.is_empty(), |ui| {
+            ComboBox::from_id_salt("music_tags_dropdown")
+                .selected_text("Tags")
+                .show_ui(ui, |ui| {
+                    for tag in available_tags {
+                        let mut has_tag = app_state.music_filters.tags.contains(&tag.id);
+                        ui.checkbox(&mut has_tag, &tag.name);
+                        if has_tag {
+                            app_state.music_filters.tags.insert(tag.id);
+                        } else {
+                            app_state.music_filters.tags.remove(&tag.id);
+                        }
                     }
-                }
-            });
+                });
 
-        ComboBox::from_id_salt("music_artists_dropdown")
-            .selected_text("Artists")
-            .show_ui(ui, |ui| {
-                for artist in available_artists {
-                    let mut has_artist = app_state.music_filters.artists.contains(&artist.id);
-                    ui.checkbox(&mut has_artist, &artist.name);
-                    if has_artist {
-                        app_state.music_filters.artists.insert(artist.id);
-                    } else {
-                        app_state.music_filters.artists.remove(&artist.id);
+            ComboBox::from_id_salt("music_artists_dropdown")
+                .selected_text("Artists")
+                .show_ui(ui, |ui| {
+                    for artist in available_artists {
+                        let mut has_artist = app_state.music_filters.artists.contains(&artist.id);
+                        ui.checkbox(&mut has_artist, &artist.name);
+                        if has_artist {
+                            app_state.music_filters.artists.insert(artist.id);
+                        } else {
+                            app_state.music_filters.artists.remove(&artist.id);
+                        }
                     }
-                }
-            });
+                });
 
-        if ui.button("Reset filters").clicked() {
-            app_state.music_filters.tags.clear();
-            app_state.music_filters.artists.clear();
-        }
+            if ui.button("Reset filters").clicked() {
+                app_state.music_filters.tags.clear();
+                app_state.music_filters.artists.clear();
+            }
+        });
     });
 }

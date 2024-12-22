@@ -30,10 +30,10 @@ pub struct Song {
     pub bytes: BytesSize,
     pub duration: Duration,
     pub tags: Vec<TagId>,
-    pub unk1: String,
+    pub ncs: bool,
     pub unk2: String,
     pub url: String,
-    pub unk3: String,
+    pub new: bool,
     pub unk4: String,
     pub unk5: String,
 }
@@ -102,10 +102,10 @@ impl Display for Song {
             self.duration.as_secs(),
             self.tags.iter()
                 .fold(String::new(), |s, n| format!("{s}.{n}")),
-            self.unk1,
+            self.ncs,
             self.unk2,
             self.url,
-            self.unk3,
+            self.new,
             self.unk4,
             self.unk5,
         ))
