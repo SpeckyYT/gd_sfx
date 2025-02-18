@@ -33,7 +33,7 @@ struct LocaleSchema {
 type LocaleFormat = Map<String, Value>;
 
 pub fn build() {
-    gdsfx_build::cargo_rerun_if_changed(paths::build::PROJECT_SETTINGS_FILE);
+    build_script::cargo_rerun_if_changed(paths::build::PROJECT_SETTINGS_FILE);
 
     let schema_settings = find_locale_schema_settings();
 

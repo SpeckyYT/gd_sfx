@@ -14,6 +14,5 @@ include_dir = { workspace = true }
 libfmod = "2.222.6"
 
 [build-dependencies]
-gdsfx-build = { workspace = true }
+build_script = { workspace = true }
 gdsfx-files = { workspace = true }
-quote = { workspace = true }

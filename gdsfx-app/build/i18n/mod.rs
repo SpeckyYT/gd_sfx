@@ -9,11 +9,11 @@ const OUTPUT_FILE: &str = "i18n.rs";
 
 pub fn build() {
     // if a file is added to or removed from the locales directory...
-    gdsfx_build::cargo_rerun_if_changed(paths::build::LOCALES_DIR);
+    build_script::cargo_rerun_if_changed(paths::build::LOCALES_DIR);
     // ...or any file in it is changed
     gdsfx_files::read_dir(paths::build::LOCALES_DIR).unwrap()
         .map(|file| file.path())
-        .for_each(gdsfx_build::cargo_rerun_if_changed);
+        .for_each(build_script::cargo_rerun_if_changed);
 
     let mut tokens = TokenStream::new();
 

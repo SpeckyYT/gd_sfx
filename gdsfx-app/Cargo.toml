@@ -22,7 +22,6 @@ parking_lot = { workspace = true }
 pretty-bytes = { workspace = true }
 pretty-duration = { workspace = true }
 rayon = { workspace = true }
-reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 strum = { workspace = true }
@@ -42,8 +41,9 @@ gdsfx-files = { workspace = true }
 
 ahash = { workspace = true }
 anyhow = { workspace = true }
+build_script = { workspace = true }
 quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
-image = { version = "0.25.5", default_features = false, features = ["png"] }
+image = { version = "0.25.5", default-features = false, features = ["png"] }

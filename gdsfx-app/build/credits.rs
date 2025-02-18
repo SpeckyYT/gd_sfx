@@ -20,7 +20,7 @@ pub fn build() {
 }
 
 fn generate_file(input_file: &str, output_file: &str, function_name: &str) {
-    gdsfx_build::cargo_rerun_if_changed(input_file);
+    build_script::cargo_rerun_if_changed(input_file);
 
     let json: HashMap<String, String> = gdsfx_files::read_json_file(input_file).unwrap();
 

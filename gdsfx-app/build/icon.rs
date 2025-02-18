@@ -1,4 +1,4 @@
-use image::{io::Reader, imageops::FilterType};
+use image::{imageops::FilterType, ImageReader};
 use std::io::Cursor;
 
 const OUTPUT_FILE: &str = "icon.bin";
@@ -9,7 +9,7 @@ pub fn build() {
 }
 
 fn load_image_bytes(bytes: &[u8]) -> Vec<u8> {
-    Reader::new(Cursor::new(bytes))
+    ImageReader::new(Cursor::new(bytes))
         .with_guessed_format().unwrap()
         .decode().unwrap()
         .resize(gdsfx_build::ICON_WIDTH, gdsfx_build::ICON_HEIGHT, FilterType::Triangle)

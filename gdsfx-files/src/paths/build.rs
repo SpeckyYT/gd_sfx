@@ -6,11 +6,11 @@ pub const CARGO_WORKSPACE_ROOT: &str = env!("CARGO_WORKSPACE_ROOT");
 /// https://doc.rust-lang.org/cargo/reference/environment-variables.html#dynamic-library-paths
 pub fn get_dynamic_library_dir() -> Option<&'static str> {
     #[cfg(debug_assertions)]
-    #[cfg(target_os = "windows")]
+    #[cfg(windows)]
     return env!("PATH").split(';').next();
 
     #[cfg(debug_assertions)]
-    #[cfg(target_os = "unix")]
+    #[cfg(unix)]
     return env!("LD_LIBRARY_PATH").split(':').next();
 
     #[cfg(debug_assertions)]
