@@ -33,14 +33,14 @@ struct LocaleSchema {
 type LocaleFormat = Map<String, Value>;
 
 pub fn build() {
-    build_script::cargo_rerun_if_changed(paths::build::PROJECT_SETTINGS_FILE);
+    build_script::cargo_rerun_if_changed(paths::build::PROJECT_SETTINGS);
 
     let schema_settings = find_locale_schema_settings();
 
     let mut template: LocaleSchema = serde_json::from_str(LOCALE_SCHEMA_TEMPLATE)
         .expect("Incorrect JSON in locale schema template");
 
-    let source_locale: LocaleFormat = gdsfx_files::read_json_file(paths::build::LOCALE_SCHEMA_SOURCE_FILE).unwrap();
+    let source_locale: LocaleFormat = gdsfx_files::read_json_file(paths::build::LOCALE_SCHEMA_SOURCE).unwrap();
 
     for key in source_locale.keys() {
         // skip already defined properties
@@ -60,17 +60,17 @@ pub fn build() {
 }
 
 fn find_locale_schema_settings() -> JSONSchemaSettings {
-    let project_settings: ProjectSettings = gdsfx_files::read_json_file(paths::build::PROJECT_SETTINGS_FILE).unwrap();
+    let project_settings: ProjectSettings = gdsfx_files::read_json_file(paths::build::PROJECT_SETTINGS).unwrap();
 
     project_settings.schemas.into_iter()
         .find(|schema| {
             let absolute_path = Path::new(paths::build::CARGO_WORKSPACE_ROOT).join(&schema.url);
-            let target_path = Path::new(paths::build::LOCALE_SCHEMA_TARGET_FILE);
+            let target_path = Path::new(paths::build::LOCALE_SCHEMA_TARGET);
             absolute_path == target_path
         })
         .with_context(|| format!(
             "No JSON schema matching {{\"url\": \"{}\"}} found in {}",
-            paths::build::LOCALE_SCHEMA_TARGET_FILE, paths::build::PROJECT_SETTINGS_FILE,
+            paths::build::LOCALE_SCHEMA_TARGET, paths::build::PROJECT_SETTINGS,
         ))
         .unwrap()
 }
