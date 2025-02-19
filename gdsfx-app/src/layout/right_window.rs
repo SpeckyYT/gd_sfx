@@ -86,8 +86,8 @@ macro_rules! image_button {
             let image: Image<'static> = $source.into();
             let image = image.tint(Color32::GRAY)
                 $( .tint(Color32::from_rgb($r,$g,$b)) )?;
-            let download_button = Button::image(image.fit_to_exact_size($size * 0.75)).min_size($size);
-            $ui.add_enabled($enabled, download_button)
+            let button = Button::image(image.fit_to_exact_size($size * 0.75)).min_size($size);
+            $ui.add_enabled($enabled, button)
         }
     };
 }
@@ -123,7 +123,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             images::PLAY,
             IMAGE_BUTTON_SIZE,
             true,
-        ).clicked() {
+        ).on_hover_text(t!("sound.play")).clicked() {
             app_state.play_sound(file_entry);
         }
 
@@ -132,7 +132,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             images::STOP,
             IMAGE_BUTTON_SIZE,
             app_state.audio_system.read().is_playing(),
-        ).clicked() {
+        ).on_hover_text(t!("sound.stop")).clicked() {
             let _ = app_state.audio_system.write().stop_audio();
         }
     });
@@ -146,7 +146,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
                 images::DOWNLOAD,
                 IMAGE_BUTTON_SIZE,
                 !is_downloaded,
-            ).clicked() {
+            ).on_hover_text(t!("sound.download")).clicked() {
                 app_state.download_sound(file_entry);
             }
 
@@ -155,7 +155,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
                 images::TRASH,
                 IMAGE_BUTTON_SIZE,
                 is_downloaded,
-            ).clicked() {
+            ).on_hover_text(t!("sound.delete")).clicked() {
                 app_state.delete_sound(file_entry);
             }
         });
@@ -174,7 +174,7 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             },
             IMAGE_BUTTON_SIZE,
             true,
-        ).clicked() {
+        ).on_hover_text(t!(format!("sound.favorite.{}", if app_state.favorites.has_favorite(id) { "remove" } else { "add" }))).clicked() {
             app_state.favorites.toggle_favorite(id);
             ui.close_menu();
         }
@@ -183,8 +183,8 @@ fn render_buttons(ui: &mut Ui, app_state: &mut AppState, id: EntryId, file_entry
             ui,
             images::RIGHT_TO_BRACKET,
             IMAGE_BUTTON_SIZE,
-            true,
-        ).clicked() {
+            is_downloaded,
+        ).on_hover_text(t!("sound.open")).clicked() {
             let path = format!(
                 "{}{MAIN_SEPARATOR}{}",
                 &app_state.settings.gd_folder,
