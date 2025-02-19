@@ -28,6 +28,7 @@
     "sound.info.duration": "Duration: %{duration}",
     "sound.delete": "Delete",
     "sound.download": "Download",
+    "sound.open": "Open file location",
     "sound.favorite.add": "Favorite",
     "sound.favorite.remove": "Remove favorite",
     "sound.play": "Play",
