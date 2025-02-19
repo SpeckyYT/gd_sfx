@@ -9,7 +9,6 @@ edition = "2021"
 [dependencies]
 educe = { workspace = true }
 parking_lot = { workspace = true }
-include_dir = { workspace = true }
 
 libfmod = "2.222.6"
 

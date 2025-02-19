@@ -3,22 +3,8 @@
 
 pub const CARGO_WORKSPACE_ROOT: &str = env!("CARGO_WORKSPACE_ROOT");
 
-pub const LIBS_SOURCE_DIR: &str = env!("GDSFX_LIBS_DIR");
-
-/// https://doc.rust-lang.org/cargo/reference/environment-variables.html#dynamic-library-paths
-pub fn get_libs_target_dir() -> Option<&'static str> {
-    #[cfg(windows)]
-    return env!("PATH").split(';').next();
-
-    #[cfg(unix)]
-    return env!("LD_LIBRARY_PATH").split(':').next();
-
-    #[cfg(target_os = "macos")]
-    return env!("DYLD_FALLBACK_LIBRARY_PATH").split(':').next();
-
-    #[allow(unreachable_code)]
-    None
-}
+pub const LIBS_SOURCE_DIR: &str = env!("GDSFX_LIBS_SOURCE_DIR");
+pub const LIBS_TARGET_DIR: &str = env!("GDSFX_LIBS_TARGET_DIR");
 
 pub const PROJECT_SETTINGS: &str = env!("GDSFX_PROJECT_SETTINGS_FILE");
 pub const LOCALE_SCHEMA_TARGET: &str = env!("GDSFX_LOCALE_SCHEMA_TARGET_FILE");

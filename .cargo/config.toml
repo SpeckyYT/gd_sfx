@@ -2,6 +2,9 @@
 # cargo doesn't have this built-in
 CARGO_WORKSPACE_ROOT = { value = "", relative = true }
 
+GDSFX_LIBS_SOURCE_DIR = { value = "libs", relative = true }
+# see gdsfx-files/build.rs for GDSFX_LIBS_TARGET_DIR
+
 # project build settings
 GDSFX_PROJECT_SETTINGS_FILE = { value = ".vscode/settings.json", relative = true }
 GDSFX_LOCALE_SCHEMA_TARGET_FILE = { value = ".vscode/schemas/locale_schema.json", relative = true }
@@ -9,6 +12,5 @@ GDSFX_LOCALE_SCHEMA_SOURCE_FILE = { value = "locales/en_US.json", relative = tru
 GDSFX_LOCALES_DIR = { value = "locales", relative = true }
 GDSFX_CREDITS_FILE = { value = "credits/credits.json", relative = true }
 GDSFX_THEME_CREDITS_FILE = { value = "credits/theme_credits.json", relative = true }
-GDSFX_LIBS_DIR = { value = "libs", relative = true }
 
 # see gdsfx-files/src/paths/runtime.rs for runtime paths

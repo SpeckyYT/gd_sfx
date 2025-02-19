@@ -5,8 +5,7 @@ fn main() {
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let source_dir = Path::new(gdsfx_files::paths::build::LIBS_SOURCE_DIR).join(target_os);
 
-    let target_dir = gdsfx_files::paths::build::get_libs_target_dir()
-        .expect("No dynamic library directory found");
+    let target_dir = gdsfx_files::paths::build::LIBS_TARGET_DIR;
 
     for file in gdsfx_files::read_dir(source_dir).unwrap() {
         let source = file.path();
