@@ -7,12 +7,12 @@ use once_cell::sync::Lazy;
 #[macro_export]
 macro_rules! workspace_path {
     ($path:expr) => {
-        concat!(env!("CARGO_WORKSPACE_ROOT"), "/", $path)
+        concat!(env!("CARGO_WORKSPACE_ROOT"), $path)
     };
 }
 
 pub static PROJECT_DIR: Lazy<ProjectDirs> = Lazy::new(|| {
-    ProjectDirs::from("one", "Specky", "GDSFX")
+    ProjectDirs::from("one", "Specky", crate::consts::APP_NAME)
         .expect("No home directory found")
 });
 

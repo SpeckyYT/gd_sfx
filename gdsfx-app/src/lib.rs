@@ -15,13 +15,11 @@ mod images;
 mod i18n;
 mod theme;
 
-// the build script reruns every time a file in the lang folder is changed
-// and writes the i18n!(...) macro invocation to this file so it is always updated
-gdsfx_build::get_output!(include!("i18n.rs"));
+// build script automatically reruns the i18n! macro every time locales are modified
+gdsfx_files::build_output!(include!("i18n.rs"));
 
-// png icon converted into bytes by build script
-// → see gdsfx-app/build/icon.rs
-const ICON_BYTES: &[u8] = gdsfx_build::get_output!(include_bytes!("icon.bin"));
+// build script converts png icon into bytes
+const ICON_BYTES: &[u8] = gdsfx_files::build_output!(include_bytes!("icon.bin"));
 
 pub struct GdSfx {
     app_state: AppState,
@@ -44,13 +42,11 @@ impl eframe::App for GdSfx {
 }
 
 impl GdSfx {
-    pub const APP_NAME: &'static str = "GDSFX";
-    
-    pub fn run() -> eframe::Result<()> {        
+    pub fn run() -> eframe::Result<()> {
         let icon = IconData {
             rgba: ICON_BYTES.to_vec(),
-            width: gdsfx_build::ICON_WIDTH,
-            height: gdsfx_build::ICON_HEIGHT,
+            width: gdsfx_files::consts::ICON_SIZE,
+            height: gdsfx_files::consts::ICON_SIZE,
         };
 
         let viewport = ViewportBuilder {
@@ -71,7 +67,7 @@ impl GdSfx {
         };
         
         eframe::run_native(
-            Self::APP_NAME,
+            gdsfx_files::consts::APP_NAME,
             options,
             Box::new(|cc| Ok(Self::load(cc)))
         )

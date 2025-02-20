@@ -4,9 +4,9 @@ use itertools::Itertools;
 use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
-const CREDIT_LINKS: fn(&str) -> Option<&str> = gdsfx_build::get_output!(include!("credits/links.rs"));
-const THEME_CREDITS: fn(&str) -> Option<&str> = gdsfx_build::get_output!(include!("credits/themes.rs"));
-const TRANSLATORS: fn(&str) -> &[&str] = gdsfx_build::get_output!(include!("credits/translators.rs"));
+const CREDIT_LINKS: fn(&str) -> Option<&str> = gdsfx_files::build_output!(include!("credits/links.rs"));
+const THEME_CREDITS: fn(&str) -> Option<&str> = gdsfx_files::build_output!(include!("credits/themes.rs"));
+const TRANSLATORS: fn(&str) -> &[&str] = gdsfx_files::build_output!(include!("credits/translators.rs"));
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);

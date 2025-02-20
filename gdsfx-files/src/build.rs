@@ -1,12 +1,10 @@
 use std::env;
 use std::path::Path;
+
 pub use proc_macro2::TokenStream;
 
-pub const ICON_WIDTH: u32 = 256;
-pub const ICON_HEIGHT: u32 = 256;
-
 #[macro_export]
-macro_rules! get_output {
+macro_rules! build_output {
     ( $macro:ident!($file:literal) ) => {
         $macro! { concat!(env!("OUT_DIR"), "/", $file) }
     }
@@ -20,15 +18,15 @@ pub fn write_output_rust(path: impl AsRef<Path>, tokens: TokenStream) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let path = Path::new(&out_dir).join(path);
     gdsfx_files::create_parent_dirs(&path).unwrap();
-    
+
     // write unformatted token stream first...
     gdsfx_files::write_file(&path, tokens.to_string()).unwrap();
-    
+
     // ...so that it can be inspected if parsing the token stream fails...
     let parsed = syn::parse2(tokens)
     .with_context(|| format!("Couldn't parse token stream of {}", path.display()))
     .unwrap();
-    
+
     // ...before finally writing the formatted version to the file
     gdsfx_files::write_file(&path, prettyplease::unparse(&parsed)).unwrap();
     */
@@ -37,6 +35,6 @@ pub fn write_output_rust(path: impl AsRef<Path>, tokens: TokenStream) {
 pub fn write_output_bytes(path: impl AsRef<Path>, bytes: impl AsRef<[u8]>) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let path = Path::new(&out_dir).join(path);
-    gdsfx_files::create_parent_dirs(&path).unwrap();
-    gdsfx_files::write_file(path, bytes).unwrap();
+    crate::create_parent_dirs(&path).unwrap();
+    crate::write_file(path, bytes).unwrap();
 }

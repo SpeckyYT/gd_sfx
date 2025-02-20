@@ -1485,7 +1485,6 @@ dependencies = [
  "egui-modal",
  "egui_extras",
  "gdsfx-audio",
- "gdsfx-build",
  "gdsfx-files",
  "gdsfx-library",
  "image",
@@ -1519,26 +1518,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "gdsfx-build"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "gdsfx-files",
- "prettyplease",
- "proc-macro2",
- "syn",
-]
-
-[[package]]
 name = "gdsfx-files"
 version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
- "build_script",
  "directories",
  "flate2",
  "once_cell",
+ "proc-macro2",
  "serde",
  "serde_json",
 ]
@@ -3105,16 +3093,6 @@ name = "pretty-duration"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8868e7264af614b3634ff0abbe37b178e61000611b8a75221aea40221924aba"
-
-[[package]]
-name = "prettyplease"
-version = "0.2.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64d1ec885c64d0457d564db4ec299b2dae3f9c02808b8ad9c3a089c591b18033"
-dependencies = [
- "proc-macro2",
- "syn",
-]
 
 [[package]]
 name = "proc-macro-crate"

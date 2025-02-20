@@ -4,7 +4,13 @@ use anyhow::{Result, Context};
 use serde::de::DeserializeOwned;
 
 pub mod paths;
+pub mod build;
 pub mod encoding;
+
+pub mod consts {
+    pub const APP_NAME: &str = "GDSFX";
+    pub const ICON_SIZE: u32 = 256;
+}
 
 pub fn read_dir(path: impl AsRef<Path>) -> Result<impl Iterator<Item = DirEntry>> {
     let path = path.as_ref();

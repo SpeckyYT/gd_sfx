@@ -7,7 +7,6 @@ edition = "2021"
 members = [
     "gdsfx-app",
     "gdsfx-audio",
-    "gdsfx-build",
     "gdsfx-files",
     "gdsfx-library",
 ]
@@ -17,7 +16,6 @@ resolver = "2"
 # Workspace crates
 gdsfx-app = { path = "gdsfx-app" }
 gdsfx-audio = { path = "gdsfx-audio" }
-gdsfx-build = { path = "gdsfx-build" }
 gdsfx-files = { path = "gdsfx-files" }
 gdsfx-library = { path = "gdsfx-library" }
 

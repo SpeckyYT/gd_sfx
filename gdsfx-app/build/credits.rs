@@ -1,7 +1,7 @@
 use ahash::HashMap;
 use quote::{quote, ToTokens};
 use serde::Deserialize;
-use gdsfx_build::TokenStream;
+use gdsfx_files::build::TokenStream;
 
 pub fn build() {
     generate_from_json(gdsfx_files::workspace_path!("credits/links.json"), "credits/links.rs");
@@ -17,7 +17,7 @@ fn generate_from_json(input_file: &str, output_file: &str) {
     let names = json.keys();
     let links = json.values().map(|link| quote! { Some(#link) });
 
-    gdsfx_build::write_output_rust(output_file, create_mapping_fn(names, links));
+    gdsfx_files::build::write_output_rust(output_file, create_mapping_fn(names, links));
 }
 
 fn generate_translators(output_file: &str) {
@@ -41,7 +41,7 @@ fn generate_translators(output_file: &str) {
         translators.push(quote!(&[ #(#locale_translators),* ]));
     }
 
-    gdsfx_build::write_output_rust(output_file, create_mapping_fn(locales, translators));
+    gdsfx_files::build::write_output_rust(output_file, create_mapping_fn(locales, translators));
 }
 
 fn create_mapping_fn(keys: impl IntoIterator<Item = impl ToTokens>, values: impl IntoIterator<Item = impl ToTokens>) -> TokenStream {

@@ -9,7 +9,6 @@ build = "build/main.rs"
 
 [dependencies]
 gdsfx-audio = { workspace = true }
-gdsfx-build = { workspace = true }
 gdsfx-files = { workspace = true }
 gdsfx-library = { workspace = true }
 
@@ -36,7 +35,6 @@ rfd = "0.15.1"
 rust-i18n = "3.1.2"
 
 [build-dependencies]
-gdsfx-build = { workspace = true }
 gdsfx-files = { workspace = true }
 
 ahash = { workspace = true }
