@@ -43,8 +43,8 @@ pub fn write_file(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> Result<
 pub fn create_parent_dirs(destination: impl AsRef<Path>) -> Result<()> {
     let destination = destination.as_ref();
 
-    if let Some(path) = destination.parent() {
-        return fs::create_dir_all(path)
+    if let Some(parent) = destination.parent() {
+        return fs::create_dir_all(parent)
             .with_context(|| format!("Couldn't create directories to path {}", destination.display()))
     }
 

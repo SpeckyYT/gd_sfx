@@ -1,6 +1,5 @@
-use eframe::egui::Image;
+use eframe::{egui::Image, epaint::Color32};
 use strum::EnumIter;
-use crate::epaint::Color32;
 
 use crate::{localized_enum, images};
 
@@ -27,31 +26,23 @@ localized_enum! {
 impl Tab {
     pub fn icon(&self) -> Image<'static> {
         macro_rules! images {
-            {$($pat:pat => $image:expr $(=> rgb($r:expr, $g:expr, $b:expr))?),* $(,)?} => {
-                {
-                    let image: Image<'static> = match self {
-                        $(
-                            $pat => $image,
-                        )*
-                    }.into();
-                    let image = match self {
-                        $(
-                            $pat => image.tint(Color32::GRAY)
-                                $( .tint(Color32::from_rgb($r, $g, $b)) )?,
-                        )*
-                    };
-                    image
+            { $($pat:pat => $image:expr $(=> rgb($r:expr, $g:expr, $b:expr))?),* $(,)? } => {
+                match self {
+                    $(
+                        $pat => Image::from($image).tint(Color32::GRAY)
+                            $( .tint(Color32::from_rgb($r, $g, $b)) )?,
+                    )*
                 }
             };
         }
 
-        images!{
-            Self::Library => images::MAGNIFYING_GLASS,
+        images! {
+            Self::Library   => images::MAGNIFYING_GLASS,
             Self::Favorites => images::STAR_SOLID,
-            Self::Tools => images::TOOLS,
-            Self::Settings => images::GEAR,
-            Self::Stats => images::CHART,
-            Self::Credits => images::PEOPLE_GROUP,
+            Self::Tools     => images::TOOLS,
+            Self::Settings  => images::GEAR,
+            Self::Stats     => images::CHART,
+            Self::Credits   => images::PEOPLE_GROUP,
         }
     }
 }

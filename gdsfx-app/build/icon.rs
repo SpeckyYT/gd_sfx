@@ -1,11 +1,10 @@
 use image::{imageops::FilterType, ImageReader};
 use std::io::Cursor;
 
-const OUTPUT_FILE: &str = "icon.bin";
+const ICON: &[u8] = include_bytes!(gdsfx_files::workspace_path!("assets/normal.png"));
 
 pub fn build() {
-    let bytes = load_image_bytes(include_bytes!("../../assets/normal.png"));
-    gdsfx_build::write_output_bytes(OUTPUT_FILE, bytes);
+    gdsfx_build::write_output_bytes("icon.bin", load_image_bytes(ICON));
 }
 
 fn load_image_bytes(bytes: &[u8]) -> Vec<u8> {

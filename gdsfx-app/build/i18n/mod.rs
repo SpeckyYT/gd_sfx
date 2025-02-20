@@ -1,27 +1,22 @@
-use gdsfx_build::TokenStream;
-use gdsfx_files::paths;
+use quote::quote;
 
-mod update;
-mod translators;
 mod locale_schema;
 
-const OUTPUT_FILE: &str = "i18n.rs";
+pub const LOCALES_DIR: &str = gdsfx_files::workspace_path!("locales");
 
 pub fn build() {
-    // if a file is added to or removed from the locales directory...
-    build_script::cargo_rerun_if_changed(paths::build::LOCALES_DIR);
-    // ...or any file in it is changed
-    gdsfx_files::read_dir(paths::build::LOCALES_DIR).unwrap()
+    // files added or removed
+    build_script::cargo_rerun_if_changed(LOCALES_DIR);
+    // files modified
+    gdsfx_files::read_dir(LOCALES_DIR).unwrap()
         .map(|file| file.path())
         .for_each(build_script::cargo_rerun_if_changed);
 
-    let mut tokens = TokenStream::new();
+    gdsfx_build::write_output_rust("i18n.rs", quote! {
+        // if the build script reruns, it forces this proc macro to rerun too
+        rust_i18n::i18n!(#LOCALES_DIR, fallback = "en_US");
+    });
 
-    tokens.extend(update::build());
-    tokens.extend(translators::build());
-
-    gdsfx_build::write_output_rust(OUTPUT_FILE, tokens);
-
-    // also generate new locale schema whenever a locale changes
+    // generate new locale schema whenever locales are changed
     locale_schema::build();
 }

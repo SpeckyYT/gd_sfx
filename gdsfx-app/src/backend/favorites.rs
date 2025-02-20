@@ -2,14 +2,12 @@ use std::path::PathBuf;
 use ahash::HashSet;
 
 use anyhow::Result;
-use gdsfx_files::paths;
 use gdsfx_library::EntryId;
 use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
 
 static FAVORITES_FILE: Lazy<PathBuf> = Lazy::new(|| {
-    paths::runtime::PROJECT_DIRS.config_local_dir()
-        .join("favorites.json")
+    gdsfx_files::paths::PROJECT_DIR.config_local_dir().join("favorites.json")
 });
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -38,7 +36,6 @@ impl Favorites {
     }
 
     pub fn toggle_favorite(&mut self, id: EntryId) {
-        // clippy says i shouldnt use boolean short circuiting :(
         if !self.0.insert(id) {
             self.0.remove(&id);
         }

@@ -3,23 +3,29 @@ use std::{path::PathBuf, env};
 use directories::ProjectDirs;
 use once_cell::sync::Lazy;
 
-pub const APP_NAME: &str = "GDSFX";
+/// environment variable set in `.cargo/config.toml` to determine paths relative to workspace
+#[macro_export]
+macro_rules! workspace_path {
+    ($path:expr) => {
+        concat!(env!("CARGO_WORKSPACE_ROOT"), "/", $path)
+    };
+}
 
-pub static PROJECT_DIRS: Lazy<ProjectDirs> = Lazy::new(|| {
-    ProjectDirs::from("one", "Specky", APP_NAME)
+pub static PROJECT_DIR: Lazy<ProjectDirs> = Lazy::new(|| {
+    ProjectDirs::from("one", "Specky", "GDSFX")
         .expect("No home directory found")
 });
 
 pub static GD_FOLDER: Lazy<Option<PathBuf>> = Lazy::new(|| {
-    if cfg!(target_os = "windows") {
+    #[cfg(target_os = "windows")] {
         return Some(PathBuf::from(&env::var_os("localappdata")?).join("GeometryDash"))
     }
 
-    if cfg!(target_os = "macos") {
+    #[cfg(target_os = "macos")] {
         return Some(PathBuf::from(&env::var_os("HOME")?).join("SfxLibrary/Application Support/GeometryDash"))
     }
 
-    if cfg!(target_os = "linux") {
+    #[cfg(target_os = "linux")] {
         let home_path = PathBuf::from(&env::var_os("HOME")?);
 
         let possible_paths = [
@@ -32,9 +38,10 @@ pub static GD_FOLDER: Lazy<Option<PathBuf>> = Lazy::new(|| {
             .find(|path| path.exists())
     }
 
-    if cfg!(target_os = "android") {
+    #[cfg(target_os = "android")] {
         return Some(PathBuf::from("/data/data/com.robtopx.geometryjump"))
     }
-    
+
+    #[allow(unreachable_code)]
     None
 });

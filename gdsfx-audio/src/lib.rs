@@ -78,6 +78,7 @@ impl AudioSystem {
     }
 
     // TODO: https://github.com/lebedec/libfmod-gen/issues/13
+    // 404 lmao
     pub fn play_audio(audio_system: Arc<RwLock<AudioSystem>>, data: &[u8]) -> Result<()> {
         let mut setup_system = audio_system.write();
 

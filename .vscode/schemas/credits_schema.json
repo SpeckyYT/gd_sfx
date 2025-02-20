@@ -1,8 +1,0 @@
-{
-    "type": "object",
-    "additionalProperties": {
-        "type": "string",
-        "format": "uri",
-        "pattern": "^https?://"
-    }
-}

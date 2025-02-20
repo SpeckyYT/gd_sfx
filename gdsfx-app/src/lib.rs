@@ -1,9 +1,12 @@
 use std::{thread, sync::Arc};
 
 use backend::{AppState, settings::PersistentSettings};
-use eframe::{*, egui::{ViewportBuilder, IconData}};
-use gdsfx_files::paths;
+use eframe::{egui, HardwareAcceleration, NativeOptions};
+use eframe::egui::{IconData, ViewportBuilder};
 use gdsfx_library::{MusicLibrary, SfxLibrary};
+
+#[macro_use]
+extern crate rust_i18n;
 
 mod backend;
 mod layout;
@@ -14,13 +17,6 @@ mod theme;
 
 // the build script reruns every time a file in the lang folder is changed
 // and writes the i18n!(...) macro invocation to this file so it is always updated
-// → see gdsfx-app/build/i18n/update.rs
-//
-// this also generates the following function:
-// ```
-// fn get_translators(locale: &str) -> &[&str] { ... }
-// ```
-// → see gdsfx-app/build/i18n/translators.rs
 gdsfx_build::get_output!(include!("i18n.rs"));
 
 // png icon converted into bytes by build script
@@ -48,7 +44,9 @@ impl eframe::App for GdSfx {
 }
 
 impl GdSfx {
-    pub fn run() -> Result<()> {
+    pub const APP_NAME: &'static str = "GDSFX";
+    
+    pub fn run() -> eframe::Result<()> {        
         let icon = IconData {
             rgba: ICON_BYTES.to_vec(),
             width: gdsfx_build::ICON_WIDTH,
@@ -73,7 +71,7 @@ impl GdSfx {
         };
         
         eframe::run_native(
-            paths::runtime::APP_NAME,
+            Self::APP_NAME,
             options,
             Box::new(|cc| Ok(Self::load(cc)))
         )

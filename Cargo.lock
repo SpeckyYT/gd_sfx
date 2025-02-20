@@ -1469,9 +1469,7 @@ dependencies = [
 name = "gdsfx"
 version = "0.1.0"
 dependencies = [
- "build_script",
  "gdsfx-app",
- "gdsfx-files",
  "winapi",
 ]
 
@@ -1512,6 +1510,7 @@ dependencies = [
 name = "gdsfx-audio"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "build_script",
  "educe",
  "gdsfx-files",

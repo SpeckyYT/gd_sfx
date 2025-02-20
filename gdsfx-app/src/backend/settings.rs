@@ -5,11 +5,10 @@ use once_cell::sync::Lazy;
 use serde::{Serialize, Deserialize};
 use strum::EnumIter;
 
-use crate::{paths, localized_enum};
+use crate::localized_enum;
 
 static SETTINGS_FILE: Lazy<PathBuf> = Lazy::new(|| {
-    paths::runtime::PROJECT_DIRS.config_local_dir()
-        .join("settings.json")
+    gdsfx_files::paths::PROJECT_DIR.config_local_dir().join("settings.json")
 });
 
 #[derive(Educe, Serialize, Deserialize, Debug)]
@@ -68,7 +67,7 @@ localized_enum! {
 }
 
 fn get_gd_folder() -> String {
-    paths::runtime::GD_FOLDER
+    gdsfx_files::paths::GD_FOLDER
         .as_ref()
         .map(|path| path.display().to_string())
         .unwrap_or_default()
