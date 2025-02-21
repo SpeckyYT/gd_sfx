@@ -1,0 +1,11 @@
+[package]
+name = "build"
+description = "Utilities for build scripts."
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+files = { path = "../files" }
+
+build_script = "0.2.0"
+proc-macro2 = "1.0.93"
