@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use eframe::egui::{CollapsingHeader, ComboBox, Ui};
+use eframe::egui::{CollapsingHeader, ComboBox, ScrollArea, Ui};
 use gdsfx_library::music::Song;
 use gdsfx_library::{EntryId, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
@@ -27,38 +27,43 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 fn render_sfx_library(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibrary) {
     let collapse_all = ui.button(t!("library.collapse_all")).clicked();
 
-    let categories: Vec<&SfxLibraryEntry> = library.iter_children(library.get_root()).collect();
-    render_sfx_recursive(ui, app_state, library, categories, collapse_all);
+    ui.add_space(5.0);
+    
+    ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
+        let categories: Vec<&SfxLibraryEntry> = library.iter_children(library.get_root()).collect();
+        
+        render_sfx_recursive(ui, app_state, library, categories, collapse_all);
 
-    let mut unlisted_sounds: Vec<SfxLibraryEntry> = app_state.unlisted_sfx.iter()
-        .map(|&id| SfxLibraryEntry {
-            id,
-            name: id.to_string(),
-            parent_id: UNLISTED_ID,
-            kind: EntryKind::Sound {
-                bytes: 0,
-                duration: Duration::ZERO,
-            },
-        })
-        .filter(|entry| app_state.is_matching_entry(entry, library))
-        .collect();
-
-    let enabled = !unlisted_sounds.is_empty();
-    if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { return }
-
-    ui.separator();
-
-    ui.add_enabled_ui(enabled, |ui| {
-        CollapsingHeader::new(t!("library.unlisted_sfx"))
-            .open((!enabled || collapse_all).then_some(false))
-            .show(ui, |ui| {
-                unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
-                for entry in unlisted_sounds {
-                    layout::add_sfx_button(ui, app_state, library, &entry);
-                }
+        let mut unlisted_sounds: Vec<SfxLibraryEntry> = app_state.unlisted_sfx.iter()
+            .map(|&id| SfxLibraryEntry {
+                id,
+                name: id.to_string(),
+                parent_id: UNLISTED_ID,
+                kind: EntryKind::Sound {
+                    bytes: 0,
+                    duration: Duration::ZERO,
+                },
             })
-            .header_response
-            .on_disabled_hover_text(t!("library.unlisted_sfx.hint", tool = t!("tools.download_from_range")))
+            .filter(|entry| app_state.is_matching_entry(entry, library))
+            .collect();
+
+        let enabled = !unlisted_sounds.is_empty();
+        if !enabled && app_state.settings.search_filter_mode == SearchFilterMode::Hide { return }
+
+        ui.separator();
+
+        ui.add_enabled_ui(enabled, |ui| {
+            CollapsingHeader::new(t!("library.unlisted_sfx"))
+                .open((!enabled || collapse_all).then_some(false))
+                .show(ui, |ui| {
+                    unlisted_sounds.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+                    for entry in unlisted_sounds {
+                        layout::add_sfx_button(ui, app_state, library, &entry);
+                    }
+                })
+                .header_response
+                .on_disabled_hover_text(t!("library.unlisted_sfx.hint", tool = t!("tools.download_from_range")))
+        });
     });
 }
 
@@ -86,42 +91,44 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
 
-    match app_state.music_filters.listed_mode {
-        ListedMode::Listed => {
-            let mut songs: Vec<_> = library.songs.values().collect();
-            songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+    ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
+        match app_state.music_filters.listed_mode {
+            ListedMode::Listed => {
+                let mut songs: Vec<_> = library.songs.values().collect();
+                songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
 
-            for song in &songs {
-                let MusicFilters { tags, artists, .. } = &app_state.music_filters;
-                if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
-                    layout::add_music_button(ui, app_state, song);
+                for song in &songs {
+                    let MusicFilters { tags, artists, .. } = &app_state.music_filters;
+                    if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
+                        layout::add_music_button(ui, app_state, song);
+                    }
+                }
+            },
+            ListedMode::Unlisted => {
+                let mut songs: Vec<_> = app_state.unlisted_music.iter()
+                    .map(|&id| Song {
+                        id,
+                        name: id.to_string(),
+                        bytes: 0,
+                        credit_id: UNLISTED_ID,
+                        duration: Duration::ZERO,
+                        tags: Vec::new(),
+                        ncs: false,
+                        unk2: String::new(),
+                        url: String::new(),
+                        new: false,
+                        unk4: String::new(),
+                        unk5: String::new(),
+                    })
+                    .collect();
+                songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+
+                for song in songs {
+                    layout::add_music_button(ui, app_state, &song);
                 }
             }
-        },
-        ListedMode::Unlisted => {
-            let mut songs: Vec<_> = app_state.unlisted_music.iter()
-                .map(|&id| Song {
-                    id,
-                    name: id.to_string(),
-                    bytes: 0,
-                    credit_id: UNLISTED_ID,
-                    duration: Duration::ZERO,
-                    tags: Vec::new(),
-                    ncs: false,
-                    unk2: String::new(),
-                    url: String::new(),
-                    new: false,
-                    unk4: String::new(),
-                    unk5: String::new(),
-                })
-                .collect();
-            songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
-
-            for song in songs {
-                layout::add_music_button(ui, app_state, &song);
-            }
         }
-    }
+    });
 }
 
 fn music_filters(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
