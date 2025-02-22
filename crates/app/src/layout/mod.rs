@@ -1,5 +1,4 @@
 use eframe::{egui::*, epaint::Vec2};
-use egui_modal::ModalStyle;
 use strum::IntoEnumIterator;
 
 use library::{music::Song, SfxLibrary};
@@ -157,8 +156,8 @@ pub fn add_music_button(ui: &mut Ui, app_state: &mut AppState, song: &Song) {
 }
 
 pub fn add_caution_button(ui: &mut Ui, text: impl Into<WidgetText>) -> Response {
-    let default_modal_style = ModalStyle::default();
-    let widget_text = text.into().color(default_modal_style.caution_button_text_color);
-    let button = Button::new(widget_text).fill(default_modal_style.caution_button_fill);
+    let visuals = ui.visuals();
+    let widget_text = text.into().color(visuals.error_fg_color);
+    let button = Button::new(widget_text).fill(visuals.extreme_bg_color);
     ui.add(button)
 }

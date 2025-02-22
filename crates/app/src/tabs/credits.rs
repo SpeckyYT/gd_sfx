@@ -1,4 +1,4 @@
-use eframe::{egui::{RichText, Ui}, epaint::Color32};
+use eframe::egui::{RichText, Ui};
 use itertools::Itertools;
 
 use library::{MusicLibrary, SfxLibrary};
@@ -6,9 +6,9 @@ use library::{MusicLibrary, SfxLibrary};
 use crate::{backend::{AppState, LibraryPage}, i18n::LocalizedEnum, layout};
 
 const DEVELOPERS: &[&str] = &["Specky", "kr8gz", "tags"];
-const CREDIT_LINKS: fn(&str) -> Option<&str> = build::get_output!(include!("credits/links.rs"));
-const THEME_CREDITS: fn(&str) -> Option<&str> = build::get_output!(include!("credits/themes.rs"));
-const TRANSLATORS: fn(&str) -> &[&str] = build::get_output!(include!("credits/translators.rs"));
+const CREDIT_LINKS: fn(&str) -> Option<&str> = files::get_build_output!(include!("credits/links.rs"));
+const THEME_CREDITS: fn(&str) -> Option<&str> = files::get_build_output!(include!("credits/themes.rs"));
+const TRANSLATORS: fn(&str) -> &[&str] = files::get_build_output!(include!("credits/translators.rs"));
 
 pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, music_library: &MusicLibrary) {
     layout::add_library_page_selection(ui, app_state);
@@ -41,7 +41,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     add_translators(ui);
 
-    ui.label(RichText::new(t!("credits.this_project.disaffiliation")).color(Color32::KHAKI));
+    ui.label(RichText::new(t!("credits.this_project.disaffiliation")).small().color(ui.visuals().warn_fg_color));
 }
 
 fn add_link(ui: &mut Ui, name: &str) {

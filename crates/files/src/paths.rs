@@ -11,9 +11,6 @@ macro_rules! workspace_path {
     };
 }
 
-pub const LIBS_DIR: &str = workspace_path!("libs");
-pub const LOCALES_DIR: &str = workspace_path!("locales");
-
 pub static PROJECT_DIR: LazyLock<ProjectDirs> = LazyLock::new(|| {
     ProjectDirs::from("one", "Specky", crate::consts::APP_NAME)
         .expect("No home directory found")

@@ -2,7 +2,7 @@ use ahash::HashMap;
 use quote::{quote, ToTokens};
 use serde::Deserialize;
 
-use build::TokenStream;
+use files::build::TokenStream;
 
 pub fn build() {
     generate_from_json(files::workspace_path!("credits/links.json"), "credits/links.rs");
@@ -11,14 +11,14 @@ pub fn build() {
 }
 
 fn generate_from_json(input_file: &str, output_file: &str) {
-    build::cargo_rerun_if_changed(input_file);
+    build_script::cargo_rerun_if_changed(input_file);
 
     let json: HashMap<String, String> = files::read_json(input_file).unwrap();
 
     let names = json.keys();
     let links = json.values().map(|link| quote! { Some(#link) });
 
-    build::write_output_rust(output_file, create_mapping_fn(names, links));
+    files::build::write_output_rust(output_file, create_mapping_fn(names, links));
 }
 
 fn generate_translators(output_file: &str) {
@@ -31,7 +31,7 @@ fn generate_translators(output_file: &str) {
     let mut locales = Vec::new();
     let mut translators = Vec::new();
 
-    for file in files::read_dir(files::paths::LOCALES_DIR).unwrap() {
+    for file in files::read_dir(crate::i18n::LOCALES_DIR).unwrap() {
         let path = file.path();
         let Some(locale) = path.file_stem().and_then(|path| path.to_str()) else { continue };
 
@@ -42,7 +42,7 @@ fn generate_translators(output_file: &str) {
         translators.push(quote!(&[ #(#locale_translators),* ]));
     }
 
-    build::write_output_rust(output_file, create_mapping_fn(locales, translators));
+    files::build::write_output_rust(output_file, create_mapping_fn(locales, translators));
 }
 
 fn create_mapping_fn(keys: impl IntoIterator<Item = impl ToTokens>, values: impl IntoIterator<Item = impl ToTokens>) -> TokenStream {

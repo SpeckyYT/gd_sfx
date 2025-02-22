@@ -6,41 +6,42 @@ use eframe::epaint::{Color32, Shadow, Stroke};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Theme {
-    pub rosewater: Color32,
-    pub flamingo: Color32,
-    pub pink: Color32,
-    pub mauve: Color32,
-    pub red: Color32,
-    pub maroon: Color32,
-    pub peach: Color32,
-    pub yellow: Color32,
-    pub green: Color32,
-    pub teal: Color32,
-    pub sky: Color32,
-    pub sapphire: Color32,
-    pub blue: Color32,
-    pub lavender: Color32,
-    pub text: Color32,
-    pub subtext1: Color32,
-    pub subtext0: Color32,
-    pub overlay2: Color32,
-    pub overlay1: Color32,
-    pub overlay0: Color32,
-    pub surface2: Color32,
-    pub surface1: Color32,
-    pub surface0: Color32,
-    pub base: Color32,
-    pub mantle: Color32,
-    pub crust: Color32,
+    is_light: bool,
+
+    rosewater: Color32,
+    flamingo: Color32,
+    pink: Color32,
+    mauve: Color32,
+    red: Color32,
+    maroon: Color32,
+    peach: Color32,
+    yellow: Color32,
+    green: Color32,
+    teal: Color32,
+    sky: Color32,
+    sapphire: Color32,
+    blue: Color32,
+    lavender: Color32,
+    text: Color32,
+    subtext1: Color32,
+    subtext0: Color32,
+    overlay2: Color32,
+    overlay1: Color32,
+    overlay0: Color32,
+    surface2: Color32,
+    surface1: Color32,
+    surface0: Color32,
+    base: Color32,
+    mantle: Color32,
+    crust: Color32,
 }
 
 impl Theme {
     pub fn to_visuals(self, ctx: &Context) -> Visuals {
         let old = ctx.style().visuals.clone();
-        let is_light = matches!(self, LATTE);
 
         Visuals {
-            override_text_color: Some(self.text),
+            override_text_color: None,
             hyperlink_color: self.rosewater,
             faint_bg_color: self.surface0,
             extreme_bg_color: self.crust,
@@ -61,9 +62,9 @@ impl Theme {
                 open: self.make_widget_visual(old.widgets.open, self.surface0),
             },
             selection: Selection {
-                bg_fill: self.blue.linear_multiply(if is_light { 0.4 } else { 0.2 }),
+                bg_fill: self.blue.linear_multiply(if self.is_light { 0.4 } else { 0.2 }),
                 stroke: Stroke {
-                    color: self.overlay1,
+                    color: self.text.linear_multiply(1.3),
                     ..old.selection.stroke
                 },
             },
@@ -75,7 +76,7 @@ impl Theme {
                 color: self.base,
                 ..old.popup_shadow
             },
-            dark_mode: !is_light,
+            dark_mode: !self.is_light,
             ..old
         }
     }
@@ -97,6 +98,8 @@ impl Theme {
 }
 
 pub const LATTE: Theme = Theme {
+    is_light: true,
+
     rosewater: Color32::from_rgb(220, 138, 120),
     flamingo: Color32::from_rgb(221, 120, 120),
     pink: Color32::from_rgb(234, 118, 203),
@@ -126,6 +129,8 @@ pub const LATTE: Theme = Theme {
 };
 
 pub const FRAPPE: Theme = Theme {
+    is_light: false,
+
     rosewater: Color32::from_rgb(242, 213, 207),
     flamingo: Color32::from_rgb(238, 190, 190),
     pink: Color32::from_rgb(244, 184, 228),
@@ -155,6 +160,8 @@ pub const FRAPPE: Theme = Theme {
 };
 
 pub const MACCHIATO: Theme = Theme {
+    is_light: false,
+
     rosewater: Color32::from_rgb(244, 219, 214),
     flamingo: Color32::from_rgb(240, 198, 198),
     pink: Color32::from_rgb(245, 189, 230),
@@ -184,6 +191,8 @@ pub const MACCHIATO: Theme = Theme {
 };
 
 pub const MOCHA: Theme = Theme {
+    is_light: false,
+
     rosewater: Color32::from_rgb(245, 224, 220),
     flamingo: Color32::from_rgb(242, 205, 205),
     pink: Color32::from_rgb(245, 194, 231),

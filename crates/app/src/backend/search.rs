@@ -47,7 +47,7 @@ impl SortingMode {
     }
 }
 
-localized_enum!{
+localized_enum! {
     #[derive(EnumIter, Default, Debug, PartialEq, Eq, Clone, Copy)]
     pub enum ListedMode = "listed_mode" {
         #[default]

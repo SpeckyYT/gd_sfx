@@ -1,10 +1,9 @@
 use std::{env, path::Path};
 
-pub use build_script::*;
 pub use proc_macro2::TokenStream;
 
 #[macro_export]
-macro_rules! get_output {
+macro_rules! get_build_output {
     ( $macro:ident!($file:literal) ) => {
         $macro! { concat!(env!("OUT_DIR"), "/", $file) }
     }
@@ -35,6 +34,6 @@ pub fn write_output_rust(path: impl AsRef<Path>, tokens: TokenStream) {
 pub fn write_output_bytes(path: impl AsRef<Path>, bytes: impl AsRef<[u8]>) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let path = Path::new(&out_dir).join(path);
-    files::create_parent_dirs(&path).unwrap();
-    files::write_file(path, bytes).unwrap();
+    super::create_parent_dirs(&path).unwrap();
+    super::write_file(path, bytes).unwrap();
 }

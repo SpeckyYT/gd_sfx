@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, sync::Arc};
 
-use eframe::egui::{self, TopBottomPanel};
+use eframe::egui;
 use memory_stats::memory_stats;
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;

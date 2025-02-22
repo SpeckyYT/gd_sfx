@@ -12,3 +12,4 @@ serde_json = { workspace = true }
 base64 = "0.22.1"
 directories = "6.0.0"
 flate2 = "1.0.35"
+proc-macro2 = "1.0.93"

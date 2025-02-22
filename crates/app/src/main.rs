@@ -18,10 +18,10 @@ mod theme;
 mod i18n;
 
 // build script automatically reruns the i18n! macro every time locales are modified
-build::get_output!(include!("i18n.rs"));
+files::get_build_output!(include!("i18n.rs"));
 
 // build script converts png icon into bytes
-const ICON_BYTES: &[u8] = build::get_output!(include_bytes!("icon.bin"));
+const ICON_BYTES: &[u8] = files::get_build_output!(include_bytes!("icon.bin"));
 
 pub struct GdSfx {
     app_state: AppState,

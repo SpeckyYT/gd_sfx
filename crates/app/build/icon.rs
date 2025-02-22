@@ -5,7 +5,7 @@ use image::{imageops::FilterType, ImageReader};
 const ICON: &[u8] = include_bytes!(files::workspace_path!("assets/normal.png"));
 
 pub fn build() {
-    build::write_output_bytes("icon.bin", load_image_bytes(ICON));
+    files::build::write_output_bytes("icon.bin", load_image_bytes(ICON));
 }
 
 fn load_image_bytes(bytes: &[u8]) -> Vec<u8> {

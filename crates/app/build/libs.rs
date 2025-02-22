@@ -2,11 +2,13 @@ use std::{env, fs, path::Path};
 
 use anyhow::Context;
 
+pub const LIBS_DIR: &str = files::workspace_path!("libs");
+
 fn get_source_dir() -> impl AsRef<Path> {
     // cfg target flags in buildscript determine actual OS rather than target OS
     // https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts
     let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    Path::new(files::paths::LIBS_DIR).join(target_os)
+    Path::new(LIBS_DIR).join(target_os)
 }
 
 fn get_target_dir() -> Option<&'static str> {
@@ -39,9 +41,9 @@ pub fn build() {
             .with_context(|| format!("Failed to copy {} to {}", source.display(), target.display()))
             .unwrap();
 
-        build::cargo_rerun_if_changed(source);
-        build::cargo_rerun_if_changed(target);
+        build_script::cargo_rerun_if_changed(source);
+        build_script::cargo_rerun_if_changed(target);
     }
 
-    build::cargo_rustc_link_search(target_dir);
+    build_script::cargo_rustc_link_search(target_dir);
 }
