@@ -1,10 +1,13 @@
 use std::time::Duration;
 
+use eframe::egui::mutex::Mutex;
 use eframe::egui::{CollapsingHeader, ComboBox, ScrollArea, Ui};
+use egui_infinite_scroll::InfiniteScroll;
 use gdsfx_library::music::Song;
 use gdsfx_library::{EntryId, MusicLibrary, SfxLibrary};
 use gdsfx_library::sfx::{SfxLibraryEntry, EntryKind};
 use itertools::Itertools;
+use once_cell::sync::Lazy;
 use strum::IntoEnumIterator;
 
 use crate::backend::search::{ListedMode, MusicFilters};
@@ -88,21 +91,37 @@ fn render_sfx_recursive(ui: &mut Ui, app_state: &mut AppState, library: &SfxLibr
     }
 }
 
+static INFINITE_SCROLL_MUSIC: Lazy<Mutex<(Vec<Song>, InfiniteScroll<Song, usize>)>> = Lazy::new(|| Mutex::new((vec![], InfiniteScroll::new())));
+
 fn render_music_library(ui: &mut Ui, app_state: &mut AppState, library: &MusicLibrary) {
     music_filters(ui, app_state, library);
 
     ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
         match app_state.music_filters.listed_mode {
             ListedMode::Listed => {
-                let mut songs: Vec<_> = library.songs.values().collect();
-                songs.sort_by(|&a, &b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+                let mut songs: Vec<Song> = library.songs
+                    .values()
+                    .cloned()
+                    .filter(|song| {
+                        let MusicFilters { tags, artists, .. } = &app_state.music_filters;
+                        tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id))
+                    }).collect();
 
-                for song in &songs {
-                    let MusicFilters { tags, artists, .. } = &app_state.music_filters;
-                    if tags.iter().all(|tag| song.tags.contains(tag)) && (artists.is_empty() || artists.contains(&song.credit_id)) {
-                        layout::add_music_button(ui, app_state, song);
-                    }
+                let songs_count = songs.len();
+                songs.sort_by(|a, b| app_state.search_settings.sorting_mode.compare_entries(a, b));
+
+                let mut infinite_scroll = INFINITE_SCROLL_MUSIC.lock();
+                if infinite_scroll.0 != songs {
+                    infinite_scroll.0 = songs.clone();
+                    infinite_scroll.1 = InfiniteScroll::new().end_loader(move |cursor, callback| {
+                        let start = cursor.unwrap_or(0).min(songs.len());
+                        let end = (start + 100).min(songs.len());
+                        callback(Ok((songs[start..end].iter().cloned().collect(), Some(end))))
+                    });
                 }
+                infinite_scroll.1.ui(ui, songs_count, |ui, _i, song| {
+                    layout::add_music_button(ui, app_state, song);
+                });
             },
             ListedMode::Unlisted => {
                 let mut songs: Vec<_> = app_state.unlisted_music.iter()

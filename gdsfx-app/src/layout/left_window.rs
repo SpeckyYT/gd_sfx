@@ -1,4 +1,4 @@
-use eframe::egui::{Context, SidePanel, ScrollArea};
+use eframe::egui::{Context, SidePanel};
 use gdsfx_library::{MusicLibrary, SfxLibrary};
 
 use crate::{layout, tabs, backend::AppState};

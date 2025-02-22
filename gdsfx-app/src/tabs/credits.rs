@@ -20,7 +20,7 @@ pub fn render(ui: &mut Ui, app_state: &mut AppState, sfx_library: &SfxLibrary, m
 
     ui.add_space(10.0);
 
-    ScrollArea::vertical().show(ui, |ui| {
+    ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
         match app_state.library_page {
             LibraryPage::Sfx => {
                 let credits: Vec<_> = sfx_library.credits()

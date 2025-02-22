@@ -769,6 +769,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "concat-idents"
+version = "1.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f76990911f2267d837d9d0ad060aa63aaad170af40904b29461734c339030d4d"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "concurrent-queue"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1107,6 +1117,38 @@ dependencies = [
  "wasm-bindgen",
  "web-sys",
  "winit",
+]
+
+[[package]]
+name = "egui_inbox"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "009ecee53675c5596174556fd3d7792301db56b9bd244b89b1cda269cfbcc256"
+dependencies = [
+ "egui",
+ "parking_lot",
+]
+
+[[package]]
+name = "egui_infinite_scroll"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df58284739746f40632b919dc052391581db521923c5b015d4a7307020facd4f"
+dependencies = [
+ "egui",
+ "egui_inbox",
+ "egui_virtual_list",
+ "hello_egui_utils",
+]
+
+[[package]]
+name = "egui_virtual_list"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "892bc51cb691c5cf1d1a72b0f84f20674ce7fb482d76ed3266fae926f9390bef"
+dependencies = [
+ "egui",
+ "web-time",
 ]
 
 [[package]]
@@ -1483,6 +1525,7 @@ dependencies = [
  "educe",
  "eframe",
  "egui_extras",
+ "egui_infinite_scroll",
  "gdsfx-audio",
  "gdsfx-build",
  "gdsfx-files",
@@ -1794,6 +1837,17 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+
+[[package]]
+name = "hello_egui_utils"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "231af567fb0427750cfd0758c9e2793f303bfcb9e061ab2db63d388db22414b9"
+dependencies = [
+ "concat-idents",
+ "eframe",
+ "egui",
+]
 
 [[package]]
 name = "hermit-abi"
