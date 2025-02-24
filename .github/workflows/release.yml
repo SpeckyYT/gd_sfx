@@ -14,10 +14,10 @@ jobs:
           - target: x86_64-pc-windows-gnu
             archive: zip
             extra_files:
-              gdsfx-audio/include/windows/fmod_vc.lib
-              gdsfx-audio/include/windows/fmod.dll
-              gdsfx-audio/include/windows/fmodstudio_vc.lib
-              gdsfx-audio/include/windows/fmodstudio.dll
+              libs/windows/fmod_vc.lib
+              libs/windows/fmod.dll
+              libs/windows/fmodstudio_vc.lib
+              libs/windows/fmodstudio.dll
           - target: x86_64-unknown-linux-musl
             archive: tar.gz tar.xz tar.zst
             run:

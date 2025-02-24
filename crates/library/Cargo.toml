@@ -1,0 +1,18 @@
+[package]
+name = "library"
+description = "Interface for GD SFX/music libraries."
+version = "0.0.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+files = { path = "../files" }
+
+ahash = { workspace = true }
+anyhow = { workspace = true }
+once_cell = { workspace = true }
+reqwest = { workspace = true }
+urlencoding = { workspace = true }
+
+url = "2.5.4"

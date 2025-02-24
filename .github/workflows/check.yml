@@ -23,7 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: rust-clippy-check
+      - name: Add target
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Clippy check
         uses: actions-rs/clippy-check@v1.0.7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          args: --target=${{ matrix.target }}

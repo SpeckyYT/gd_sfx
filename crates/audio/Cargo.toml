@@ -1,0 +1,11 @@
+[package]
+name = "audio"
+description = "Audio manipulation and output."
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+educe = { workspace = true }
+parking_lot = { workspace = true }
+
+libfmod = "2.222.6"

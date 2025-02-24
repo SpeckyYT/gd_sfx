@@ -3,10 +3,6 @@
         {
             "fileMatch": ["locales/*.json"],
             "url": ".vscode/schemas/locale_schema.json"
-        },
-        {
-            "fileMatch": ["credits.json"],
-            "url": ".vscode/schemas/credits_schema.json"
         }
     ]
 }

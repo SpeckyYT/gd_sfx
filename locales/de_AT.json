@@ -35,7 +35,7 @@
     "search.sort.id.descending": "ID -",
     "search.sort.size.ascending": "Größe +",
     "search.sort.size.descending": "Größe -",
-    "search.show_downloaded": "Nur heruntergeladene SFX",
+    "search.show_downloaded": "Nur Heruntergeladene",
 
     "library.collapse_all": "Alles einklappen",
     "library.unlisted_sfx": "Nicht gelistet",
