@@ -621,13 +621,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "build_script"
-version = "0.2.0"
+name = "build-rs"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "163ca3c07a6939838dfa322e1e36cd434cc2b625dacb051b8e8b893bbbb8aa62"
-dependencies = [
- "once_cell",
-]
+checksum = "b00b8763668c99f8d9101b8a0dd82106f58265464531a79b2cef0d9a30c17dd2"
 
 [[package]]
 name = "bumpalo"
@@ -1483,7 +1480,7 @@ version = "0.0.0"
 dependencies = [
  "ahash",
  "anyhow",
- "build_script",
+ "build-rs",
  "educe",
  "eframe",
  "egui_extras",
@@ -1507,6 +1504,20 @@ dependencies = [
  "serde_json",
  "strum 0.27.1",
  "winapi",
+]
+
+[[package]]
+name = "gdsfx-app-new"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "build-rs",
+ "gdsfx-build",
+ "gdsfx-files",
+ "gdsfx-shared",
+ "image 0.25.5",
+ "quote",
+ "serde",
 ]
 
 [[package]]
@@ -1541,7 +1552,7 @@ dependencies = [
 name = "gdsfx-i18n"
 version = "0.0.0"
 dependencies = [
- "build_script",
+ "build-rs",
  "gdsfx-build",
  "gdsfx-files",
  "gdsfx-shared",

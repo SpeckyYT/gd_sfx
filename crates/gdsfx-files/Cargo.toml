@@ -1,6 +1,6 @@
 [package]
 name = "gdsfx-files"
-description = "File system utilities and constants."
+description = "File system utilities."
 version = "0.0.0"
 edition = "2021"
 

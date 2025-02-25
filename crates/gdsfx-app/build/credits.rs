@@ -3,6 +3,7 @@ use quote::{quote, ToTokens};
 use serde::Deserialize;
 
 use gdsfx_build::TokenStream;
+use gdsfx_shared::paths::LOCALES_DIR;
 
 pub fn build() {
     generate_from_json(gdsfx_shared::workspace_path!("credits/links.json"), "credits/links.rs");
@@ -11,7 +12,7 @@ pub fn build() {
 }
 
 fn generate_from_json(input_file: &str, output_file: &str) {
-    build_script::cargo_rerun_if_changed(input_file);
+    build::rerun_if_changed(input_file);
 
     let json: HashMap<String, String> = gdsfx_files::read_json(input_file).unwrap();
 
@@ -31,7 +32,7 @@ fn generate_translators(output_file: &str) {
     let mut locales = Vec::new();
     let mut translators = Vec::new();
 
-    for file in gdsfx_files::read_dir(gdsfx_shared::paths::LOCALES_DIR).unwrap() {
+    for file in gdsfx_files::read_dir(LOCALES_DIR).unwrap() {
         let path = file.path();
         let Some(locale) = path.file_stem().and_then(|path| path.to_str()) else { continue };
 

@@ -5,9 +5,7 @@ use anyhow::Context;
 fn get_source_dir() -> impl AsRef<Path> {
     // cfg target flags in buildscript determine actual OS rather than target OS
     // https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-build-scripts
-
-    let target_os = env::var("CARGO_CFG_TARGET_OS").unwrap();
-    Path::new(gdsfx_shared::paths::LIBS_DIR).join(target_os)
+    Path::new(gdsfx_shared::paths::LIBS_DIR).join(build::cargo_cfg_target_os())
 }
 
 fn get_target_dir() -> Option<String> {
@@ -41,9 +39,9 @@ pub fn build() {
             .with_context(|| format!("Failed to copy {} to {}", source.display(), target.display()))
             .unwrap();
 
-        build_script::cargo_rerun_if_changed(source);
-        build_script::cargo_rerun_if_changed(target);
+        build::rerun_if_changed(source);
+        build::rerun_if_changed(target);
     }
 
-    build_script::cargo_rustc_link_search(target_dir);
+    build::rustc_link_search(target_dir);
 }

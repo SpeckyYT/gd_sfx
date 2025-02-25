@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value, Map};
+use serde_json::{json, Map, Value};
 
 const TEMPLATE: &str = include_str!("schema_template.json");
 
@@ -20,7 +20,7 @@ struct LocaleSchema {
 }
 
 pub fn build() {
-    let source_file: Map<String, _> = gdsfx_files::read_json(SOURCE_FILE).unwrap();
+    let source_file: Map<String, Value> = gdsfx_files::read_json(SOURCE_FILE).unwrap();
     let mut template: LocaleSchema = serde_json::from_str(TEMPLATE)
         .expect("Incorrect JSON in locale schema template");
 

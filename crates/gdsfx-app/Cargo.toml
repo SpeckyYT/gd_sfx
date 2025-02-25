@@ -39,7 +39,7 @@ gdsfx-shared = { path = "../gdsfx-shared" }
 
 ahash = { workspace = true }
 anyhow = { workspace = true }
-build_script = { workspace = true }
+build-rs = { workspace = true }
 quote = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
