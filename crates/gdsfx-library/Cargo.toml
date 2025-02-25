@@ -1,0 +1,15 @@
+[package]
+name = "gdsfx-library"
+description = "Interface for GD SFX/music libraries."
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+gdsfx-files = { path = "../gdsfx-files" }
+
+ahash = { workspace = true }
+anyhow = { workspace = true }
+reqwest = { workspace = true }
+urlencoding = { workspace = true }
+
+url = "2.5.4"

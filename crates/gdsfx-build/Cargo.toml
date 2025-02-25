@@ -1,0 +1,10 @@
+[package]
+name = "gdsfx-build"
+description = "Build script utilities."
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+gdsfx-files = { path = "../gdsfx-files" }
+
+proc-macro2 = "1.0.93"

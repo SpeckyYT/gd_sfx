@@ -39,7 +39,7 @@
 
     "library.collapse_all": "Alles einklappen",
     "library.unlisted_sfx": "Nicht gelistet",
-    "library.unlisted_sfx.hint": "Nicht gelistete Soundeffekte können mithilfe des \"%{tool}\"-Tools entdeckt werden",
+    "library.unlisted_sfx.hint": "Nicht gelistete Soundeffekte können mit dem Tool \"%{tool}\" entdeckt werden",
 
     "tools": "Tools",
     "tools.instruction": "Dreifachklick zum Ausführen",

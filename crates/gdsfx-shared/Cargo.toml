@@ -1,0 +1,8 @@
+[package]
+name = "gdsfx-shared"
+description = "Constants shared between crates."
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+directories = "6.0.0"

@@ -1,0 +1,47 @@
+[package]
+name = "gdsfx-app"
+description = "Main application."
+version = "0.0.0"
+edition = "2021"
+build = "build/main.rs"
+
+[dependencies]
+gdsfx-audio = { path = "../gdsfx-audio" }
+gdsfx-build = { path = "../gdsfx-build" }
+gdsfx-files = { path = "../gdsfx-files" }
+gdsfx-library = { path = "../gdsfx-library" }
+gdsfx-shared = { path = "../gdsfx-shared" }
+
+ahash = { workspace = true }
+anyhow = { workspace = true }
+educe = { workspace = true }
+itertools = { workspace = true }
+parking_lot = { workspace = true }
+pretty-bytes = { workspace = true }
+pretty-duration = { workspace = true }
+rayon = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+strum = { workspace = true }
+
+eframe = { version = "0.31.0", features = ["serde"] }
+egui_extras = { version = "0.31.0", features = ["image", "svg"] }
+egui_virtual_list = "0.7.0"
+memory-stats = "1.2.0"
+rfd = "0.15.1"
+rust-i18n = "3.1.3"
+winapi = { version = "0.3.9", features = ["wincon"] }
+
+[build-dependencies]
+gdsfx-build = { path = "../gdsfx-build" }
+gdsfx-files = { path = "../gdsfx-files" }
+gdsfx-shared = { path = "../gdsfx-shared" }
+
+ahash = { workspace = true }
+anyhow = { workspace = true }
+build_script = { workspace = true }
+quote = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+image = { version = "0.25.5", default-features = false, features = ["png"] }

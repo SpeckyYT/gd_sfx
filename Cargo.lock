@@ -196,36 +196,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
 
 [[package]]
-name = "app"
-version = "0.0.0"
-dependencies = [
- "ahash",
- "anyhow",
- "audio",
- "build_script",
- "educe",
- "eframe",
- "egui_extras",
- "files",
- "image 0.25.5",
- "itertools 0.14.0",
- "library",
- "memory-stats",
- "once_cell",
- "parking_lot",
- "pretty-bytes",
- "pretty-duration",
- "quote",
- "rayon",
- "rfd",
- "rust-i18n",
- "serde",
- "serde_json",
- "strum 0.27.1",
- "winapi",
-]
-
-[[package]]
 name = "arboard"
 version = "3.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -529,15 +499,6 @@ dependencies = [
  "hermit-abi",
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "audio"
-version = "0.0.0"
-dependencies = [
- "educe",
- "libfmod",
- "parking_lot",
 ]
 
 [[package]]
@@ -1152,6 +1113,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui_virtual_list"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "892bc51cb691c5cf1d1a72b0f84f20674ce7fb482d76ed3266fae926f9390bef"
+dependencies = [
+ "egui",
+ "web-time",
+]
+
+[[package]]
 name = "either"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1353,19 +1324,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "files"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "directories",
- "flate2",
- "proc-macro2",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "flate2"
 version = "1.0.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1517,6 +1475,99 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "gdsfx-app"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "anyhow",
+ "build_script",
+ "educe",
+ "eframe",
+ "egui_extras",
+ "egui_virtual_list",
+ "gdsfx-audio",
+ "gdsfx-build",
+ "gdsfx-files",
+ "gdsfx-library",
+ "gdsfx-shared",
+ "image 0.25.5",
+ "itertools 0.14.0",
+ "memory-stats",
+ "parking_lot",
+ "pretty-bytes",
+ "pretty-duration",
+ "quote",
+ "rayon",
+ "rfd",
+ "rust-i18n",
+ "serde",
+ "serde_json",
+ "strum 0.27.1",
+ "winapi",
+]
+
+[[package]]
+name = "gdsfx-audio"
+version = "0.0.0"
+dependencies = [
+ "educe",
+ "libfmod",
+ "parking_lot",
+]
+
+[[package]]
+name = "gdsfx-build"
+version = "0.0.0"
+dependencies = [
+ "gdsfx-files",
+ "proc-macro2",
+]
+
+[[package]]
+name = "gdsfx-files"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "flate2",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "gdsfx-i18n"
+version = "0.0.0"
+dependencies = [
+ "build_script",
+ "gdsfx-build",
+ "gdsfx-files",
+ "gdsfx-shared",
+ "phf",
+ "quote",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "gdsfx-library"
+version = "0.0.0"
+dependencies = [
+ "ahash",
+ "anyhow",
+ "gdsfx-files",
+ "reqwest",
+ "url",
+ "urlencoding",
+]
+
+[[package]]
+name = "gdsfx-shared"
+version = "0.0.0"
+dependencies = [
+ "directories",
 ]
 
 [[package]]
@@ -2240,19 +2291,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "library"
-version = "0.0.0"
-dependencies = [
- "ahash",
- "anyhow",
- "files",
- "once_cell",
- "reqwest",
- "url",
- "urlencoding",
-]
-
-[[package]]
 name = "libredox"
 version = "0.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2948,6 +2986,48 @@ name = "percent-encoding"
 version = "2.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3148f5046208a5d56bcfc03053e3ca6334e51da8dfb19b6cdc8b306fae3283e"
+
+[[package]]
+name = "phf"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1fd6780a80ae0c52cc120a26a1a42c1ae51b247a253e4e06113d23d2c2edd078"
+dependencies = [
+ "phf_macros",
+ "phf_shared",
+]
+
+[[package]]
+name = "phf_generator"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c80231409c20246a13fddb31776fb942c38553c51e871f8cbd687a4cfb5843d"
+dependencies = [
+ "phf_shared",
+ "rand",
+]
+
+[[package]]
+name = "phf_macros"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f84ac04429c13a7ff43785d75ad27569f2951ce0ffd30a3321230db2fc727216"
+dependencies = [
+ "phf_generator",
+ "phf_shared",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "phf_shared"
+version = "0.11.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
+dependencies = [
+ "siphasher 1.0.1",
+]
 
 [[package]]
 name = "pico-args"

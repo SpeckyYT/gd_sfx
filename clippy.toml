@@ -1,0 +1,10 @@
+# https://rust-lang.github.io/rust-clippy/master/index.html#disallowed_types
+disallowed-types = [
+    { path = "once_cell::sync::Lazy", reason = "use `std::sync::LazyLock` which does the same", replacement = "std::sync::LazyLock" },
+    { path = "std::collections::HashMap", reason = "use faster `ahash::HashMap`", replacement = "ahash::HashMap" },
+    { path = "std::collections::HashSet", reason = "use faster `ahash::HashSet`", replacement = "ahash::HashSet" },
+    { path = "std::sync::Mutex", reason = "use simpler and faster `parking_lot::Mutex`", replacement = "parking_lot::Mutex" },
+    { path = "std::sync::RwLock", reason = "use simpler and faster `parking_lot::RwLock`", replacement = "parking_lot::RwLock" },
+    { path = "eframe::egui::mutex::Mutex", reason = "use `parking_lot::Mutex` directly which also supports const usage", replacement = "parking_lot::Mutex" },
+    { path = "eframe::egui::mutex::RwLock", reason = "use `parking_lot::RwLock` directly which also supports const usage", replacement = "parking_lot::RwLock" },
+]
